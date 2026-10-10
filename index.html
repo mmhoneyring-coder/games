@@ -76,6 +76,37 @@ h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.04em;line-height:1.2;margin:0
 @media(min-width:700px){.games{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}}
 @media(max-width:380px){.info{padding:15px}.egg-tiles{left:15%}.treasure-card{width:78px;height:116px}.treasure-card span{font-size:36px}.robot-body{transform:translateX(-50%) scale(.84);transform-origin:center top}}
 @media(prefers-reduced-motion:reduce){.game{transition:none}.game:hover{transform:none}}
+
+/* 横型ゲーム一覧：画像を左、情報を右に配置 */
+.games{gap:12px}
+.game{flex-direction:row;align-items:stretch;min-height:165px}
+.preview{width:35%;flex:0 0 35%;aspect-ratio:auto;align-self:stretch;min-height:165px}
+.info{padding:14px 15px 13px;min-width:0}
+.meta{gap:5px;margin-bottom:7px}
+.tag{font-size:10px;padding:3px 7px}
+.game-title{font-size:18px;margin-bottom:6px}
+.game-desc{font-size:12px;line-height:1.6;min-height:0;margin:0 0 9px}
+.game-open{font-size:12px;padding-top:8px}
+.preview--egg{background:#addbf0}
+.preview--treasure{background:#252721}
+.preview--egg img,.preview--treasure img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain}
+.preview--magic .mana-pieces{gap:4px}
+.preview--magic .mana-pieces span{width:20px;height:20px;font-size:9px}
+.preview--monster .monster-cards{transform:scale(.7) rotate(-11deg);transform-origin:left bottom}
+@media(min-width:700px){
+  .games{gap:15px}
+  .game{min-height:182px}
+  .preview{width:38%;flex-basis:38%;min-height:182px}
+}
+@media(max-width:440px){
+  .game{min-height:156px}
+  .preview{width:34%;flex-basis:34%;min-height:156px}
+  .info{padding:11px 11px 10px}
+  .tag{font-size:10px;padding:2px 6px}
+  .game-title{font-size:16px}
+  .game-desc{font-size:11px;line-height:1.5}
+  .game-open{font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -114,7 +145,7 @@ h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.04em;line-height:1.2;margin:0
   </div>
 </a>
 <a class="game" href="./10egg/">
-  <div class="preview preview--egg" aria-hidden="true"><div class="egg-tiles"><span>10</span><span>20</span><span>40</span><span>80</span></div><div class="egg-icon"><i></i></div><div class="egg-stars">✦　✧</div></div>
+  <div class="preview preview--egg" aria-hidden="true"><img src="./10egg/thumbnail.png" alt="" loading="lazy" decoding="async"></div>
   <div class="info">
     <div class="meta"><span class="tag">パズル</span><span class="tag status">重力版 v0.2</span></div>
     <h2 class="game-title">10egg</h2>
@@ -123,7 +154,7 @@ h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.04em;line-height:1.2;margin:0
   </div>
 </a>
 <a class="game" href="./treasure-card/">
-  <div class="preview preview--treasure" aria-hidden="true"><div class="treasure-cards"><div class="treasure-card road"><b>道</b><span>╱ ╲</span></div><div class="treasure-card gold"><b>宝</b><span>◆</span></div><div class="treasure-card foe"><b>敵</b><span>✕</span></div></div><div class="treasure-coins">● ● ●</div></div>
+  <div class="preview preview--treasure" aria-hidden="true"><img src="./treasure-card/thumbnail.jpg" alt="" loading="lazy" decoding="async"></div>
   <div class="info">
     <div class="meta"><span class="tag">デッキ構築</span><span class="tag status">開発版</span></div>
     <h2 class="game-title">トレジャーカード</h2>
