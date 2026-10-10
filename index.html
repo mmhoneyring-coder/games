@@ -3,61 +3,144 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#30262b">
+<meta name="theme-color" content="#f5f4f0">
 <title>ゲーム一覧</title>
 <style>
-:root{color-scheme:dark}
+:root{color-scheme:light;--page:#f5f4f0;--ink:#202a32;--muted:#5a6570;--card:#fff;--border:#e0e4e5;--accent:#286c66}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:#30262b;color:#fff3dc;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
-main{max-width:760px;margin:0 auto;padding:clamp(24px,6vw,50px) 18px 48px}
-h1{font-size:clamp(24px,5vw,32px);line-height:1.3;margin:0 0 8px}
-.intro{font-size:13px;color:#d7c2ac;margin:0 0 28px}
-.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px}
-.game{display:block;background:#4b3a3c;border:1px solid #8a7064;border-radius:14px;padding:20px;text-decoration:none;color:inherit;transition:border-color .15s,background .15s}
-.game:hover,.game:focus-visible{background:#584448;border-color:#e5bd72;outline:none}
-.game-title{font-size:20px;font-weight:800;margin:0 0 9px}
-.game-desc{font-size:13px;color:#d7c2ac;line-height:1.6;margin:0}
-.game-open{display:block;font-size:12px;font-weight:700;color:#e5bd72;margin-top:15px}
-.game-thumb{display:block;width:100%;height:auto;border-radius:9px;margin:0 0 14px;background:#211923}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--page);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+main{max-width:940px;margin:0 auto;padding:clamp(28px,5vw,56px) 18px 70px}
+.eyebrow{font-size:11px;letter-spacing:.14em;font-weight:800;color:#55746d;margin:0 0 8px}
+h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.04em;line-height:1.2;margin:0}
+.intro{margin:12px 0 26px;font-size:14px;line-height:1.65;color:var(--muted)}
+.games{display:grid;grid-template-columns:minmax(0,1fr);gap:17px}
+.game{display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--card);border:1px solid var(--border);border-radius:17px;color:inherit;text-decoration:none;box-shadow:0 3px 14px rgba(35,41,45,.045);transition:transform .17s ease,border-color .17s ease,box-shadow .17s ease}
+.game:hover{transform:translateY(-2px);border-color:#aebbb6;box-shadow:0 8px 25px rgba(35,41,45,.10)}
+.game:focus-visible{outline:3px solid #31796e;outline-offset:3px}
+.preview{position:relative;flex:none;aspect-ratio:16/9;overflow:hidden;isolation:isolate}
+.info{padding:17px 18px 18px;display:flex;flex-direction:column;flex:1}
+.meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.tag{font-size:11px;font-weight:700;line-height:1.4;padding:4px 9px;border-radius:6px;background:#eef2f0;color:#375d57}
+.tag.status{background:#f2f1ed;color:#66645e}
+.game-title{font-size:20px;line-height:1.35;letter-spacing:-.02em;margin:0 0 7px;font-weight:800}
+.game-desc{font-size:13px;line-height:1.6;margin:0 0 18px;color:#5b6570;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.game-open{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #edf0ef;padding-top:12px;margin-top:auto;font-size:13px;font-weight:800;color:#286c66}
+.game-open span{font-size:19px;line-height:1}
+.preview--magic{background:radial-gradient(circle at 50% 46%,#86666c 0,#483d49 42%,#211f32 100%)}
+.magic-orbit{position:absolute;left:50%;top:45%;width:45%;aspect-ratio:1;border:2px solid rgba(255,230,185,.45);border-radius:50%;transform:translate(-50%,-50%) rotate(-20deg);box-shadow:0 0 20px rgba(250,215,146,.12)}
+.orbit-two{width:32%;border-style:dashed;transform:translate(-50%,-50%) rotate(18deg)}
+.magic-core{position:absolute;left:50%;top:43%;transform:translate(-50%,-50%);font-size:clamp(52px,10vw,87px);color:#f4da95;text-shadow:0 0 15px #f0be84,0 0 35px #e9a8a5}
+.mana-pieces{position:absolute;bottom:12%;left:0;right:0;display:flex;justify-content:center;gap:11px}
+.mana-pieces span{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;box-shadow:0 3px 10px #0005;background:#cc7068}
+.mana-pieces span:nth-child(2){background:#578ba9}.mana-pieces span:nth-child(3){background:#7da276}.mana-pieces span:nth-child(4){background:#9d779c}
+.preview--monster{background:radial-gradient(ellipse at 50% 68%,#4e7a6d 0,#263f43 51%,#14272e 100%)}
+.monster-creature{position:absolute;width:33%;height:53%;left:34%;bottom:15%;border-radius:45% 45% 38% 38%;background:linear-gradient(140deg,#b2ddc0,#69a79c);box-shadow:inset -11px -10px 0 #48847a,0 14px 24px #0004;border:3px solid #275e62}
+.monster-creature .horn{position:absolute;width:26%;height:31%;top:-21%;background:#8ac5a4;border:3px solid #275e62;border-radius:80% 10% 70% 10%}
+.monster-creature .horn.left{left:4%;transform:rotate(-28deg)}.monster-creature .horn.right{right:4%;transform:rotate(115deg)}
+.monster-creature .eye{position:absolute;top:39%;width:10%;height:15%;border-radius:50%;background:#122c37}
+.monster-creature .eye.left{left:29%}.monster-creature .eye.right{right:29%}
+.monster-creature .mouth{position:absolute;top:60%;left:44%;width:14%;height:9%;border-bottom:3px solid #2b5758;border-radius:50%}
+.monster-cards{position:absolute;left:12%;bottom:22%;display:flex;gap:5px;transform:rotate(-11deg)}
+.monster-cards span{width:35px;height:51px;padding-top:8px;text-align:center;border:2px solid #8b9ca1;border-radius:5px;background:#25363b;color:#bde9df;font-size:10px;font-weight:800;box-shadow:2px 4px 9px #0005}
+.monster-level{position:absolute;right:9%;top:14%;padding:7px 10px;border-radius:8px;color:#d1e9df;background:#17292bc9;border:1px solid #5a8880;font:800 12px/1 system-ui}
+.monster-level span{display:block;margin-top:6px;width:56px;height:4px;background:linear-gradient(90deg,#b8d49b 80%,#3e5857 80%);border-radius:6px}
+.preview--dice{background:#1a1e27}
+.preview--dice img{display:block;width:100%;height:100%;object-fit:contain}
+.preview--egg{background:radial-gradient(ellipse at 55% 35%,#e9c4da 0%,#ac89b6 55%,#735e95 100%)}
+.egg-tiles{position:absolute;display:grid;grid-template-columns:repeat(2,52px);gap:8px;left:21%;top:18%;transform:rotate(-7deg)}
+.egg-tiles span{height:52px;display:grid;place-items:center;border-radius:13px;font-size:23px;font-weight:900;color:#6c547c;box-shadow:0 5px 0 #aa89b7,0 7px 10px #0002;background:#fff1c6}
+.egg-tiles span:nth-child(2){background:#bdf0d6;color:#487a69}.egg-tiles span:nth-child(3){background:#ffceda;color:#a35a77}.egg-tiles span:nth-child(4){background:#bedcf7;color:#527aa6}
+.egg-icon{position:absolute;left:66%;top:28%;width:72px;height:92px;transform:rotate(13deg);border:4px solid #b99ac7;border-radius:50% 50% 46% 46% / 62% 62% 40% 40%;background:linear-gradient(135deg,#fffef3,#f1d7e2);box-shadow:10px 12px 0 #785ea53a}
+.egg-icon i{position:absolute;left:46%;top:42%;width:7px;height:7px;border-radius:50%;background:#947495;box-shadow:17px 0 #947495}
+.egg-stars{position:absolute;right:8%;top:14%;color:#fff5cf;font-size:26px;letter-spacing:13px}
+.preview--treasure{background:radial-gradient(ellipse at 50% 85%,#61533b,#312e29 65%,#1b2625)}
+.treasure-cards{position:absolute;left:50%;top:15%;transform:translateX(-50%);display:flex;align-items:center}
+.treasure-card{width:91px;height:131px;border-radius:8px;padding:10px;color:#f0e5c5;display:flex;flex-direction:column;align-items:center;gap:16px;border:3px solid #b9a171;background:linear-gradient(#625341,#322e2b);box-shadow:0 9px 12px #0006}
+.treasure-card b{font-size:16px}.treasure-card span{font-size:43px;line-height:1;color:#d7bb78}
+.treasure-card.road{transform:rotate(-16deg) translate(12px,12px)}.treasure-card.gold{z-index:2;transform:translateY(-7px);background:linear-gradient(#8d6b3a,#493924)}.treasure-card.foe{transform:rotate(16deg) translate(-12px,12px);background:linear-gradient(#74453d,#322e2b)}
+.treasure-coins{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);color:#e4c87a;letter-spacing:7px;font-size:20px;text-shadow:0 1px 6px #0009}
+.preview--robot{background:radial-gradient(ellipse at 55% 35%,#35515b 0%,#182c33 65%,#101c23 100%)}
+.robot-scan{position:absolute;inset:0;background-image:linear-gradient(#94d8ee22 1px,transparent 1px),linear-gradient(90deg,#94d8ee22 1px,transparent 1px);background-size:31px 31px;transform:perspective(270px) rotateX(25deg) scale(1.3)}
+.robot-body{position:absolute;left:50%;top:25%;width:79px;height:130px;transform:translateX(-50%);filter:drop-shadow(0 11px 8px #0008)}
+.robot-head{position:absolute;top:10px;width:79px;height:64px;border:5px solid #7698a9;border-radius:13px;background:#1c343e;display:flex;align-items:center;justify-content:center;gap:15px}
+.robot-head i{display:block;width:13px;height:15px;border-radius:4px;background:#74d3e4;box-shadow:0 0 10px #63cee4}
+.robot-antenna{position:absolute;left:34px;top:-12px;height:24px;width:6px;background:#9cb9c5}.robot-antenna:before{content:"";position:absolute;top:-5px;left:-3px;width:12px;height:12px;background:#81d4bd;border-radius:50%}
+.robot-chest{position:absolute;left:16px;top:77px;width:48px;height:35px;background:#546e7b;border:5px solid #97afb7;border-radius:6px;display:grid;place-items:center}
+.robot-chest span{display:block;width:21px;height:8px;background:#8dc3a5;border-radius:3px}
+.robot-legs{position:absolute;top:110px;left:22px;display:flex;gap:18px}.robot-legs i{width:10px;height:21px;border-radius:2px;background:#869fad}
+.robot-signal{position:absolute;color:#a6d8e2;background:#1f4a52bb;border:1px solid #5b9faf;padding:5px 8px;border-radius:7px;font-weight:800}
+.signal-a{top:26%;left:17%}.signal-b{right:17%;bottom:23%;color:#dfc478}
+.robot-energy{position:absolute;right:9%;top:9%;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#cce4e7}
+.robot-energy i{width:69px;height:8px;border:1px solid #78a7a6;border-radius:3px;background:linear-gradient(90deg,#7ad2b8 72%,#30494c 72%)}
+@media(min-width:700px){.games{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}}
+@media(max-width:380px){.info{padding:15px}.egg-tiles{left:15%}.treasure-card{width:78px;height:116px}.treasure-card span{font-size:36px}.robot-body{transform:translateX(-50%) scale(.84);transform-origin:center top}}
+@media(prefers-reduced-motion:reduce){.game{transition:none}.game:hover{transform:none}}
 </style>
 </head>
 <body>
 <main>
-<h1>ゲーム一覧</h1>
-<p class="intro">ゲームを選ぶと、そのままブラウザで遊べます。</p>
-<div class="games">
+  <header>
+    <p class="eyebrow">BROWSER GAMES · 6 TITLES</p>
+    <h1>ゲーム一覧</h1>
+    <p class="intro">気になるゲームを選ぶと、そのままブラウザで遊べます。</p>
+  </header>
+  <section class="games" aria-label="ゲーム一覧">
 <a class="game" href="./kyokudai-magic/">
-<h2 class="game-title">極大魔法</h2>
-<p class="game-desc">共有マナを育てて、自分の極大魔法の完成を目指すカードゲーム。</p>
-<span class="game-open">ゲームを開く →</span>
+  <div class="preview preview--magic" aria-hidden="true"><div class="magic-orbit orbit-one"></div><div class="magic-orbit orbit-two"></div><div class="magic-core">✦</div><div class="mana-pieces"><span>火</span><span>水</span><span>風</span><span>星</span></div></div>
+  <div class="info">
+    <div class="meta"><span class="tag">カード</span><span class="tag status">4人対戦</span></div>
+    <h2 class="game-title">極大魔法</h2>
+    <p class="game-desc">共有マナを育てて、極大魔法の完成を目指す対戦カードゲーム。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
 </a>
 <a class="game" href="./monster-growth/">
-<h2 class="game-title">モンスター育成</h2>
-<p class="game-desc">カードを使うか温存するかを選び、能力を育てながら20階を踏破するデッキ育成ゲーム（デモ版）。</p>
-<span class="game-open">ゲームを開く →</span>
+  <div class="preview preview--monster" aria-hidden="true"><div class="monster-cards"><span>ATK</span><span>DEF</span><span>HP</span></div><div class="monster-creature"><i class="horn left"></i><i class="horn right"></i><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></div><div class="monster-level">LV 20 <span></span></div></div>
+  <div class="info">
+    <div class="meta"><span class="tag">育成</span><span class="tag status">デモ版</span></div>
+    <h2 class="game-title">モンスター育成</h2>
+    <p class="game-desc">カードを使うか残すか。能力を育てながら20階の突破を目指す。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
 </a>
 <a class="game" href="./dice-build/">
-<img class="game-thumb" src="./dice-build/thumbnail.png" alt="サイコロビルドのサムネイル" loading="lazy">
-<h2 class="game-title">サイコロビルド</h2>
-<p class="game-desc">36面のダイスを改造し、呪いと破滅を利用して30階の突破を目指すローグライク（開発版 v0.2）。</p>
-<span class="game-open">ゲームを開く →</span>
+  <div class="preview preview--dice" aria-hidden="true"><img src="./dice-build/thumbnail.png" alt="" loading="lazy" decoding="async"></div>
+  <div class="info">
+    <div class="meta"><span class="tag">ローグライク</span><span class="tag status">開発版 v0.2</span></div>
+    <h2 class="game-title">サイコロビルド</h2>
+    <p class="game-desc">36面のダイスを改造し、呪いと破滅を利用して30階を攻略。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
 </a>
 <a class="game" href="./10egg/">
-<h2 class="game-title">10egg</h2>
-<p class="game-desc">となりの数字を合成し、卵で数字を増やしながら100を目指すパズル（重力版 v0.2）。</p>
-<span class="game-open">ゲームを開く →</span>
+  <div class="preview preview--egg" aria-hidden="true"><div class="egg-tiles"><span>10</span><span>20</span><span>40</span><span>80</span></div><div class="egg-icon"><i></i></div><div class="egg-stars">✦　✧</div></div>
+  <div class="info">
+    <div class="meta"><span class="tag">パズル</span><span class="tag status">重力版 v0.2</span></div>
+    <h2 class="game-title">10egg</h2>
+    <p class="game-desc">となりの数字を合成し、卵を使って100を目指す数字パズル。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
 </a>
 <a class="game" href="./treasure-card/">
-<h2 class="game-title">トレジャーカード</h2>
-<p class="game-desc">3択から道・宝・敵・ショップを選び、探索デッキを育てながら7ステージの最奥を目指すカードゲーム（開発版）。</p>
-<span class="game-open">ゲームを開く →</span>
+  <div class="preview preview--treasure" aria-hidden="true"><div class="treasure-cards"><div class="treasure-card road"><b>道</b><span>╱ ╲</span></div><div class="treasure-card gold"><b>宝</b><span>◆</span></div><div class="treasure-card foe"><b>敵</b><span>✕</span></div></div><div class="treasure-coins">● ● ●</div></div>
+  <div class="info">
+    <div class="meta"><span class="tag">デッキ構築</span><span class="tag status">開発版</span></div>
+    <h2 class="game-title">トレジャーカード</h2>
+    <p class="game-desc">3択で道・宝・敵を選び、デッキを育てながら7ステージを探索。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
 </a>
 <a class="game" href="./exploration-robot/">
-<h2 class="game-title">探索ロボ</h2>
-<p class="game-desc">廃品を探索してパーツを集め、エネルギーを管理しながらロボットを強化する探索ゲーム（試作版）。</p>
-<span class="game-open">ゲームを開く →</span>
+  <div class="preview preview--robot" aria-hidden="true"><div class="robot-scan"></div><div class="robot-signal signal-a">?</div><div class="robot-signal signal-b">★</div><div class="robot-body"><div class="robot-antenna"></div><div class="robot-head"><i></i><i></i></div><div class="robot-chest"><span></span></div><div class="robot-legs"><i></i><i></i></div></div><div class="robot-energy"><span>EN</span><i></i></div></div>
+  <div class="info">
+    <div class="meta"><span class="tag">探索</span><span class="tag status">試作版</span></div>
+    <h2 class="game-title">探索ロボ</h2>
+    <p class="game-desc">廃品を集めて帰還。パーツを交換してロボを強化する探索ゲーム。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
 </a>
-</div>
+  </section>
 </main>
 </body>
 </html>
