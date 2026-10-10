@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>極大魔法</title>
+<style>
+:root{
+  --bg:#342a2f;--panel:#50403f;--panel2:#5c4946;--line:#8a7064;--text:#fff3dc;--muted:#d7c2ac;
+  --accent:#e5bd72;--danger:#cf7d70;--ok:#98ad7e;--shadow:0 12px 30px rgba(44,28,30,.20);
+  --fire:#df8067;--water:#8eafc1;--wind:#9caf86;--rainbow:#c7a1b2;--snow:#d1ded8;--star:#dfbb72;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% -20%,#765b69 0,#4b3a42 38%,#30262b 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;min-height:100vh}
+button{font:inherit}
+.app{max-width:980px;margin:0 auto;padding:8px 10px 18px}
+.topbar{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:8px}
+.title{font-weight:900;font-size:22px;letter-spacing:.04em}
+.btn{border:1px solid var(--line);background:#69544c;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:800}
+.btn:hover{filter:brightness(1.12)}
+.btn.primary{background:#8f7044;border-color:#bf965d;color:#fff4d9}
+.btn.draw{background:#62524c;border-color:#8a7568}
+.btn.discard-confirm{background:#85584f;border-color:#b17668;color:#fff1e6}
+.btn:disabled{opacity:.36;cursor:not-allowed;filter:none}
+.maincol{display:flex;flex-direction:column;gap:9px}
+.panel{background:linear-gradient(180deg,rgba(88,70,70,.97),rgba(72,56,57,.97));border:1px solid #80675e;border-radius:13px;box-shadow:var(--shadow)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-bottom:1px solid #80675e}
+.panel-title{font-size:12px;color:#f0ddc5;font-weight:850;letter-spacing:.04em}
+.panel-body{padding:8px 9px}
+.mana-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.mana{border:1px solid #887066;border-radius:11px;padding:7px 9px;background:#4a3939;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:7px}
+.mana::before{content:"";position:absolute;inset:0;opacity:.16;background:var(--c)}
+.mana-name{font-size:19px;color:#f8ead4;position:relative;line-height:1}.mana-num{font-size:21px;font-weight:900;line-height:1;position:relative}
+/* Discard pile is available on tap without expanding the board. */
+.discard-open{font-size:11px;font-weight:800;color:var(--text);background:#564343;border:1px solid #80675e;border-radius:7px;min-height:27px;padding:4px 9px;cursor:pointer;white-space:nowrap}
+.discard-open:hover{background:#66504b}
+.discard-open:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.discard-detail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.discard-detail-item{padding:12px 8px;text-align:center;border:1px solid #856b61;border-radius:10px;background:#4b3a3c;font-weight:800}
+.discard-detail-item .discard-icon{font-size:22px}
+.discard-detail-item .discard-number{font-size:20px;font-variant-numeric:tabular-nums;margin-left:6px}
+@media(max-width:460px){.discard-open{font-size:10px;padding:3px 7px;min-height:25px}.discard-detail{gap:6px}.discard-detail-item{padding:10px 3px}}
+.players{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.player{border:1px solid #856b61;border-radius:11px;padding:7px 9px;background:#4a3939;min-height:52px}
+.player{cursor:pointer}.player:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.player.active{border-color:var(--accent);box-shadow:0 0 0 1px rgba(221,182,111,.28) inset}
+.player-name{font-weight:850;font-size:13px}.player-meta{font-size:11px;color:var(--muted);margin-top:2px}.last-action{font-size:11px;margin-top:3px;color:#f2e0c9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.focus-panel{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.target-status{display:flex;gap:6px;flex-wrap:wrap}.need{border:1px solid #876e63;background:#493738;border-radius:9px;padding:5px 8px;font-size:12px}.need.met{border-color:#8ca078;background:#46533f}.need strong{font-size:15px}.target-panel.extreme-ready{border-color:#ddb66f;box-shadow:0 0 0 1px rgba(221,182,111,.38) inset,0 0 18px rgba(221,182,111,.26);cursor:pointer;animation:extremePulse 1.2s ease-in-out infinite alternate}.target-panel.extreme-ready .panel-head{border-bottom-color:#9b7d4d}.target-panel.extreme-ready:active{transform:translateY(1px)}@keyframes extremePulse{from{box-shadow:0 0 0 1px rgba(221,182,111,.28) inset,0 0 10px rgba(221,182,111,.16)}to{box-shadow:0 0 0 1px rgba(221,182,111,.48) inset,0 0 22px rgba(221,182,111,.34)}}.mana-tags{display:inline-flex;gap:5px;flex-wrap:wrap;align-items:center}.mana-tag{display:inline-flex;align-items:center;min-height:24px;padding:3px 7px;border-radius:999px;background:#5c4844;border:1px solid #8a7064;color:#f8ead4;font-size:12px;font-weight:850;line-height:1.15;white-space:nowrap}
+.turnbox{padding:7px 10px;display:flex;align-items:center;justify-content:space-between}.turn-main{font-weight:900}.turn-sub{font-size:11px;color:var(--muted)}
+.hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:7px}.card{border:1px solid #8a7064;background:#4b3a3c;border-radius:11px;padding:0;min-height:104px;cursor:pointer;position:relative;overflow:hidden;transition:.12s transform,.12s border-color,.12s background}.card:hover{transform:translateY(-1px)}.card.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(221,182,111,.40) inset}.card.playable{border-color:#849b76}.card.unplayable{opacity:.64}.card .grade{position:absolute;right:8px;top:7px;font-size:11px;color:var(--muted)}.card-name{font-size:16px;font-weight:900;padding:8px 9px;background:#5b4747;border-bottom:1px solid #8a7064}.card.return .card-name{padding-left:48px}.card-part{padding:7px 9px;min-height:35px}.card-cost{background:rgba(139,85,76,.52);border-bottom:1px solid rgba(138,112,100,.90)}.card-gain{background:rgba(105,126,82,.52)}.card-part-label{font-size:10px;font-weight:850;color:#f2ddc4;margin-bottom:3px;letter-spacing:.04em}.expr{font-size:13px;font-weight:800;line-height:1.5}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.reason{font-size:11px;color:#e9b9aa;margin-top:2px}
+.small-note{font-size:10px;color:var(--muted)}
+.overlay{position:fixed;inset:0;background:rgba(38,27,31,.70);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}.overlay.hidden{display:none}.modal{width:min(880px,100%);max-height:92vh;overflow:auto;background:#5a4647;border:1px solid #92766b;border-radius:16px;box-shadow:0 25px 70px rgba(15,8,7,.55)}.modal-head{padding:13px 15px;border-bottom:1px solid #80675e}.modal-title{font-weight:900;font-size:18px}.modal-desc{font-size:11px;color:var(--muted);margin-top:2px}.modal-body{padding:13px 15px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 15px 15px}.mulligan-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.mulligan-cards .card{min-height:100px}.mulligan-cards .card.return{border-color:var(--danger);background:#684342}.badge-return{display:none;position:absolute;left:8px;top:8px;font-size:10px;background:#b67568;color:#fff5e9;padding:2px 6px;border-radius:999px}.card.return .badge-return{display:block}
+.result{font-size:34px;font-weight:900;text-align:center;margin:12px 0}.result-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px}
+.reserve-box{display:none;border:1px solid #876e64;border-radius:9px;background:#493738;padding:6px 7px}.reserve-box.show{display:block}.reserve-title{font-size:11px;color:var(--muted);margin-bottom:4px}.reserve-list{display:flex;gap:5px;flex-wrap:wrap}.reserve-chip{border:1px solid #92766b;border-radius:8px;padding:4px 6px;font-size:11px}.btn.reserve{padding:5px 8px;font-size:11px;background:#725b49;border-color:#9a7c62}.reserve-choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.reserve-choice{padding:18px 10px;font-size:24px;border-radius:12px}
+/* Hand-card level is a display-only preview. Spell level is still set by selected card count. */
+.hand-head-tools{display:flex;align-items:center;gap:9px;min-width:0}
+.mulligan-head-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mulligan-head-row .hand-level-preview{flex-shrink:0}
+.hand-level-preview{display:flex;align-items:center;gap:3px}
+.hand-preview-btn{font-size:11px;font-weight:800;line-height:1.15;color:var(--muted);border:1px solid #8a7064;background:#514040;border-radius:6px;min-width:35px;min-height:26px;padding:4px 5px;cursor:pointer;white-space:nowrap}
+.hand-preview-btn.active{border-color:#e5bd72;background:#806346;color:#fff3dc;box-shadow:inset 0 0 0 1px rgba(229,189,114,.20)}
+.hand-preview-btn:focus-visible{outline:2px solid #ffe5a2;outline-offset:1px}
+.hand-preview-btn:disabled{opacity:.50;cursor:default}
+.hand .card.preview-only.unplayable{opacity:1}
+@media(max-width:700px){.hand-head-tools{gap:5px}.hand-level-preview{gap:2px}.hand-preview-btn{min-width:32px;min-height:23px;font-size:10px;padding:3px 4px}}
+@media(max-width:360px){.hand-preview-btn{min-width:29px;font-size:9px;padding:3px 3px}}
+.mulligan-return{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:19;box-shadow:0 10px 28px rgba(0,0,0,.38);white-space:nowrap}.mulligan-return.hidden{display:none}
+.help-list{display:grid;gap:10px;font-size:13px;line-height:1.55}.help-item{border:1px solid var(--line);background:rgba(255,237,215,.04);border-radius:10px;padding:9px 10px}.help-item strong{color:var(--accent)}
+.history-list{display:grid;gap:7px}.history-entry{padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#4a3939;font-size:13px}.history-round{font-size:11px;color:var(--muted);margin-bottom:3px}#log{display:none}
+@media(max-width:700px){.mana-grid{grid-template-columns:repeat(3,1fr)}.players{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.player{padding:6px;min-width:0}.player-name,.player-meta,.last-action{font-size:10px}.hand{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:460px){.app{padding:5px 7px 14px}.maincol{gap:7px}.panel{border-radius:11px}.panel-head{padding:6px 8px}.panel-body{padding:7px}.hand{gap:6px}.card{min-height:98px;padding:0}.card-name{font-size:15px;padding:7px 8px}.card-part{padding:6px 8px}.mana-num{font-size:21px}}
+
+/* Choice indication: distinguish spells, selected levels, and card exchanges. */
+.hand .card.hand-selected{border-color:#ffe4a2;background:#665043;box-shadow:inset 0 0 0 2px rgba(255,212,117,.65);opacity:1}
+
+/* Compact portrait UI: keep all six hand cards and actions in view. */
+@media(max-width:700px){
+ .app{padding:3px 6px max(5px,env(safe-area-inset-bottom))}
+ .topbar{min-height:31px;margin-bottom:4px}
+ .topbar .btn{padding:5px 10px;font-size:14px}
+ .maincol{gap:4px}
+ .panel{border-radius:9px}
+ .panel-head{padding:3px 7px;min-height:21px}
+ .panel-title{font-size:11px}
+ .panel-body{padding:4px 6px}
+ .players{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+ .player{padding:4px 5px;min-height:43px;border-radius:7px}
+ .player-name{font-size:10px;line-height:1.1}
+ .player-meta,.last-action{font-size:9px;line-height:1.15;margin-top:2px}
+ .focus-panel{gap:3px}
+ .target-status{gap:4px}
+ .need{padding:3px 5px;font-size:11px;border-radius:6px}
+ .need strong{font-size:12px}
+ .mana-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
+ .mana{height:42px;min-width:0;padding:2px;flex-direction:column;gap:0;border-radius:7px}
+ .mana-name{font-size:14px;line-height:1.15}
+ .mana-num{font-size:16px;line-height:1.1}
+ .hand{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+ .hand .card{min-height:100px;border-radius:7px}
+ .hand .card-name{font-size:12px;line-height:1.15;padding:4px 5px}
+ .hand .card-name span{font-size:10px!important}
+ .hand .card-part{padding:3px 4px;min-height:0}
+ .hand .card-part-label{font-size:9px;line-height:1.1;margin-bottom:2px}
+ .hand .mana-tags{gap:2px;flex-wrap:wrap}
+ .hand .mana-tag{min-height:17px;padding:1px 3px;border-radius:5px;font-size:10px;line-height:1.15}
+ .hand .expr{font-size:11px;line-height:1.15}
+ .actions{display:flex;flex-wrap:nowrap;gap:4px;margin-top:5px}
+ .actions .btn{min-height:34px;padding:5px 4px;font-size:11px;white-space:nowrap;border-radius:7px}
+ #castBtn,#drawBtn,#passBtn,#cancelBtn{flex:1;min-width:0}
+ .reason{font-size:10px;min-height:0;margin-top:3px;line-height:1.2}
+}
+@media(max-width:360px){
+ .hand .card-name{font-size:11px;padding:3px 4px}
+ .hand .card-part{padding:2px 3px}
+ .hand .mana-tag{font-size:9px;padding:1px 2px}
+ .actions .btn{font-size:10px}
+}
+@media(max-width:360px) and (max-height:620px){
+ .topbar .btn{padding:3px 7px;font-size:12px}
+ .panel-head{min-height:18px;padding:2px 6px}
+ .player{min-height:36px;padding:3px 4px}
+ .mana{height:36px}
+ .hand .card{min-height:92px}
+ .actions .btn{min-height:30px}
+}
+
+/* Phone play field: use available viewport height for readable six-card rows. */
+@media (max-width:700px) {
+  .app {height:100vh;height:100dvh;min-height:0;display:flex;flex-direction:column;padding:5px 7px max(8px,env(safe-area-inset-bottom));}
+  .topbar {flex:0 0 auto;min-height:39px;margin-bottom:6px;}
+  .turn-main {font-size:16px;}
+  .topbar .btn {min-width:35px;min-height:35px;padding:5px 9px;font-size:16px;}
+  .maincol {flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;}
+  .panel-head {min-height:27px;padding:4px 8px;}
+  .panel-title {font-size:12px;}
+  .panel-body {padding:6px 7px;}
+  .players {gap:5px;}
+  .player {min-height:65px;padding:6px 7px;}
+  .player-name {font-size:12px;line-height:1.22;}
+  .player-meta,.last-action {font-size:10.5px;line-height:1.28;margin-top:3px;}
+  .last-action {white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;}
+  .need {padding:5px 8px;font-size:13px;}
+  .need strong {font-size:14px;}
+  .mana {height:55px;padding:4px 2px;}
+  .mana-name {font-size:19px;}
+  .mana-num {font-size:20px;}
+  .maincol > section:last-child {flex:1;min-height:0;display:flex;flex-direction:column;}
+  .maincol > section:last-child > .panel-head {flex:0 0 auto;}
+  .maincol > section:last-child > .panel-body {flex:1;min-height:0;display:flex;flex-direction:column;padding:7px;}
+  .hand {flex:1;min-height:0;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:6px;}
+  .hand .card {min-height:0;display:flex;flex-direction:column;}
+  .hand .card-name {font-size:14px;line-height:1.18;padding:6px 6px;min-height:28px;}
+  .hand .card-name span {font-size:12px!important;}
+  .hand .card-part {padding:6px 5px;flex:1 1 auto;min-height:0;}
+  .hand .card-part-label {font-size:11px;line-height:1.15;margin-bottom:4px;}
+  .hand .mana-tags {gap:3px;}
+  .hand .mana-tag {font-size:12px;line-height:1.2;min-height:21px;padding:2px 4px;}
+  .hand .expr {font-size:12px;line-height:1.2;}
+  .hand-preview-btn {min-height:28px;min-width:36px;font-size:11px;padding:4px 5px;}
+  .actions {flex:0 0 auto;margin-top:7px;gap:5px;}
+  .actions .btn {min-height:41px;font-size:13px;padding:7px 4px;}
+  .reason {flex:0 0 auto;font-size:11px;margin-top:3px;}
+}
+/* Smaller devices retain the same single-screen layout, with modestly tighter spacing. */
+@media (max-width:700px) and (max-height:690px) {
+  .app {padding-top:3px;padding-bottom:max(4px,env(safe-area-inset-bottom));}
+  .topbar {min-height:34px;margin-bottom:4px;}
+  .maincol {gap:4px;}
+  .panel-head {min-height:23px;padding:3px 7px;}
+  .panel-body {padding:4px 6px;}
+  .player {min-height:54px;padding:4px 5px;}
+  .player-name {font-size:11px;}
+  .player-meta,.last-action {font-size:10px;margin-top:2px;}
+  .mana {height:46px;}
+  .mana-name {font-size:16px;}
+  .mana-num {font-size:17px;}
+  .need {padding:3px 6px;font-size:12px;}
+  .maincol > section:last-child > .panel-body {padding:5px 6px;}
+  .hand {gap:4px;}
+  .hand .card-name {padding:4px 5px;min-height:24px;font-size:13px;}
+  .hand .card-name span {font-size:11px!important;}
+  .hand .card-part {padding:4px 4px;}
+  .hand .card-part-label {font-size:10px;margin-bottom:2px;}
+  .hand .mana-tag {font-size:11px;min-height:19px;padding:2px 3px;}
+  .actions {margin-top:5px;gap:4px;}
+  .actions .btn {min-height:36px;font-size:12px;padding:5px 3px;}
+}
+@media (max-width:700px) and (max-height:760px) {
+  .hand .card-name {padding:4px 5px;min-height:24px;font-size:13px;}
+  .hand .card-name span {font-size:11px!important;}
+  .hand .card-part {padding:4px 4px;}
+  .hand .card-part-label {font-size:10px;margin-bottom:2px;}
+  .hand .mana-tag {font-size:11px;min-height:19px;padding:2px 3px;}
+}
+@media (max-width:700px) and (max-height:610px) {
+  .topbar {min-height:31px;margin-bottom:3px;}
+  .maincol {gap:3px;}
+  .panel-head {min-height:20px;padding:2px 6px;}
+  .panel-body {padding:3px 5px;}
+  .player {min-height:44px;padding:3px 4px;}
+  .player-name {font-size:10px;}
+  .player-meta,.last-action {font-size:9px;line-height:1.1;margin-top:1px;}
+  .need {font-size:10px;padding:2px 4px;}
+  .need strong {font-size:11px;}
+  .target-status {gap:2px;}
+  .mana {height:38px;}
+  .mana-name {font-size:13px;}
+  .mana-num {font-size:14px;}
+  .hand .card-name {min-height:21px;padding:3px 4px;font-size:11px;}
+  .hand .card-name span {font-size:10px!important;}
+  .hand .card-part {padding:2px 3px;}
+  .hand .card-part-label {font-size:9px;margin-bottom:1px;}
+  .hand .mana-tag {font-size:10px;min-height:16px;padding:1px 2px;}
+  .actions .btn {min-height:32px;padding:4px 2px;font-size:11px;}
+}
+@media (max-width:360px) {
+  .hand .card-name {font-size:12px;}
+  .hand .card-name span {font-size:10px!important;}
+  .hand .mana-tag {font-size:10px;min-height:17px;padding:1px 2px;}
+  .hand .card-part-label {font-size:9px;margin-bottom:1px;}
+}
+@media (max-width:360px) and (min-height:611px) and (max-height:700px) {
+  .player {min-height:48px;}
+  .mana {height:41px;}
+  .panel-head {min-height:21px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="turn-main" id="turnMain"></div>
+    <div style="display:flex;gap:7px">
+      <button class="btn" id="helpBtn" title="遊び方">？</button>
+      <button class="btn" id="newGameBtn" title="新しいゲーム">↻</button>
+    </div>
+  </div>
+
+  <div class="maincol">
+    <section class="panel">
+      <div class="panel-head"><div class="panel-title">相手</div></div>
+      <div class="panel-body"><div class="players" id="botPlayers"></div></div>
+    </section>
+
+    <section class="panel target-panel" id="targetSection">
+      <div class="panel-head"><div class="panel-title">極大魔法</div></div>
+      <div class="panel-body focus-panel"><div id="targetPanel"></div></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div class="panel-title">共有マナ</div><button class="discard-open" id="discardBtn" type="button" aria-haspopup="dialog" aria-label="捨て札の内訳を表示">捨て札 0枚</button></div>
+      <div class="panel-body"><div class="mana-grid" id="manaGrid"></div></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div class="panel-title">手札</div><div class="hand-head-tools">
+        <div class="hand-level-preview" role="group" aria-label="カードの消費・生成マナの表示レベル">
+          <button class="hand-preview-btn active" data-preview-level="auto" type="button" aria-pressed="true" title="選択した枚数に合わせて表示">自動</button>
+          <button class="hand-preview-btn" data-preview-level="1" type="button" aria-pressed="false" title="カードのLv1の消費・生成を表示">Lv1</button>
+          <button class="hand-preview-btn" data-preview-level="2" type="button" aria-pressed="false" title="カードのLv2の消費・生成を表示">Lv2</button>
+          <button class="hand-preview-btn" data-preview-level="3" type="button" aria-pressed="false" title="カードのLv3の消費・生成を表示">Lv3</button>
+        </div>
+      </div></div>
+      <div class="panel-body">
+        <div class="hand" id="hand"></div>
+        <div class="actions">
+          <button class="btn primary" id="castBtn" disabled>使用</button>
+          <button class="btn draw" id="drawBtn" disabled>交換</button>
+          <button class="btn" id="passBtn" disabled>スキップ</button>
+          <button class="btn" id="cancelBtn" disabled>キャンセル</button>
+        </div>
+        <div class="reason" id="reason"></div>
+      </div>
+    </section>
+  </div>
+  <div id="log"></div>
+</div>
+<button class="btn primary mulligan-return hidden" id="mulliganReturnBtn">引き直しに戻る</button>
+
+<div class="overlay" id="targetOverlay">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">極大魔法</div><div class="modal-desc">1つ選ぶ</div></div>
+    <div class="modal-body"><div class="mulligan-cards" id="targetChoices"></div></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="mulliganOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="mulligan-head-row">
+        <div class="modal-title">引き直し</div>
+        <div class="hand-level-preview" role="group" aria-label="引き直しカードの消費・生成マナの表示レベル">
+          <button class="hand-preview-btn active" data-preview-level="auto" type="button" aria-pressed="true" title="自動（引き直し中はLv1表示）">自動</button>
+          <button class="hand-preview-btn" data-preview-level="1" type="button" aria-pressed="false" title="Lv1の消費・生成を表示">Lv1</button>
+          <button class="hand-preview-btn" data-preview-level="2" type="button" aria-pressed="false" title="Lv2の消費・生成を表示">Lv2</button>
+          <button class="hand-preview-btn" data-preview-level="3" type="button" aria-pressed="false" title="Lv3の消費・生成を表示">Lv3</button>
+        </div>
+      </div>
+      <div class="modal-desc">戻す札を選ぶ</div>
+    </div>
+    <div class="modal-body"><div class="mulligan-cards" id="mulliganCards"></div><div class="small-note" id="mulliganCount"></div></div>
+    <div class="modal-actions"><button class="btn primary" id="mulliganConfirm">この手札で開始</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="helpOverlay">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><div class="modal-title">遊び方</div><div class="modal-desc">共有マナを育てて、自分の極大魔法を完成させる</div></div>
+    <div class="modal-body">
+      <div class="help-list">
+        <div class="help-item"><strong>勝利</strong><br>自分の手番開始時に、極大魔法に必要な共有マナが残っていれば発動できます。</div>
+        <div class="help-item"><strong>手札</strong>：初期6枚、上限6枚。毎手番開始時に6枚まで補充。最初に1回、好きな枚数を引き直せます。</div>
+        <div class="help-item"><strong>カード枚数</strong>：火・水・風は各6枚、虹・雪・星は各7枚。合計39枚です。</div>
+        <div class="help-item"><strong>選び方</strong>：最初に手札から1～6枚を選び、「使用」か「交換」を押します。同じ札をもう一度押すと選択を解除できます。「キャンセル」ですべて解除します。</div>
+        <div class="help-item"><strong>使用</strong>：同じ属性の札を1～3枚選ぶと、その枚数のLvで魔法を使えます（1枚＝Lv1、2枚＝Lv2、3枚＝Lv3）。必要なマナがない場合は使用できません。</div>
+        <div class="help-item"><strong>カード効果の表示</strong>：手札上部と引き直し画面の「自動／Lv1／Lv2／Lv3」で各カードの消費・生成マナを確認できます。「自動」は通常時は選択枚数に合わせ、引き直し中はLv1を表示します。表示を切り替えても、使用Lvや引き直すカードの選択には影響しません。</div>
+        <div class="help-item"><strong>捨て札</strong>：「捨て札 ○枚」を押すと、今の捨て札にある属性別の枚数を確認できます。山札が尽きたときは、捨て札を山札に戻してシャッフルするため、表示は0枚に戻ります。</div>
+        <div class="help-item"><strong>交換</strong>：好きな属性の札を1～6枚選んで「交換」。選んだ枚数を捨て同数を引き、火・水・風のランダムな1マナを共有マナに加えます。</div>
+        <div class="help-item"><strong>スキップ</strong>：何もせず手番を終了します。マナと手札は変わりません。</div>
+        <div class="help-item"><strong>魔法</strong><br>選んだLvの「消費」のマナを共有マナから使い、「生成」のマナを発生させます。</div>
+      </div>
+    </div>
+    <div class="modal-actions"><button class="btn primary" id="helpCloseBtn">閉じる</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="discardOverlay">
+  <div class="modal" style="max-width:400px" role="dialog" aria-modal="true" aria-labelledby="discardTitle">
+    <div class="modal-head"><div class="modal-title" id="discardTitle">捨て札 0枚</div></div>
+    <div class="modal-body"><div class="discard-detail" id="discardCounts"></div></div>
+    <div class="modal-actions"><button class="btn primary" id="discardCloseBtn">閉じる</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="historyOverlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head"><div class="modal-title" id="historyTitle"></div><div class="modal-desc">使用した魔法・交換で捨てたカードの履歴</div></div>
+    <div class="modal-body"><div class="history-list" id="historyList"></div></div>
+    <div class="modal-actions"><button class="btn primary" id="historyCloseBtn">閉じる</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="resultOverlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-body"><div class="result" id="resultTitle"></div><div class="result-sub" id="resultSub"></div></div>
+    <div class="modal-actions" style="justify-content:center"><button class="btn primary" id="againBtn">↻</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+const ATTRS=['火','水','風','虹','雪','星'];
+const BASICS=['火','水','風'];
+const COMPOSITES=['虹','雪','星'];
+const COLORS={火:'var(--fire)',水:'var(--water)',風:'var(--wind)',虹:'var(--rainbow)',雪:'var(--snow)',星:'var(--star)'};
+const ICONS={火:'🔥',水:'💧',風:'🍃',虹:'🌈',雪:'❄️',星:'⭐'};
+const COMPOSITE_PARTS={虹:['火','水'],雪:['水','風'],星:['風','火']};
+
+const EXTREMES={
+ E01:{type:'基本1種・火',cost:{火:25}},
+ E02:{type:'基本1種・水',cost:{水:25}},
+ E03:{type:'基本1種・風',cost:{風:25}},
+ E04:{type:'複合1種・虹',cost:{虹:9}},
+ E05:{type:'複合1種・雪',cost:{雪:9}},
+ E06:{type:'複合1種・星',cost:{星:9}},
+ E07:{type:'基本＋複合・火＋雪',cost:{火:11,雪:8}},
+ E08:{type:'基本＋複合・水＋星',cost:{水:11,星:8}},
+ E09:{type:'基本＋複合・風＋虹',cost:{風:11,虹:8}},
+ E13:{type:'複合2種・虹＋雪',cost:{虹:5,雪:6}},
+ E14:{type:'複合2種・雪＋星',cost:{雪:5,星:6}},
+ E15:{type:'複合2種・星＋虹',cost:{星:5,虹:6}},
+ E19:{type:'全属性型',cost:{火:5,水:5,風:5,虹:3,雪:3,星:3}},
+ E20:{type:'複合3種同数型',cost:{虹:4,雪:4,星:4}}
+};
+
+const SPELL_LEVELS={
+ 火:{1:{cost:{風:1},gain:{火:2}},2:{cost:{風:3},gain:{火:5,水:1}},3:{cost:{風:5,星:1},gain:{火:11,虹:1}}},
+ 水:{1:{cost:{火:1},gain:{水:2}},2:{cost:{火:3},gain:{水:5,風:1}},3:{cost:{火:5,虹:1},gain:{水:11,雪:1}}},
+ 風:{1:{cost:{水:1},gain:{風:2}},2:{cost:{水:3},gain:{風:5,火:1}},3:{cost:{水:5,雪:1},gain:{風:11,星:1}}},
+ 虹:{1:{cost:{火:1,水:1},gain:{虹:1}},2:{cost:{火:2,水:2,星:1},gain:{虹:3}},3:{cost:{火:4,水:4,星:2},gain:{虹:6}}},
+ 雪:{1:{cost:{水:1,風:1},gain:{雪:1}},2:{cost:{水:2,風:2,虹:1},gain:{雪:3}},3:{cost:{水:4,風:4,虹:2},gain:{雪:6}}},
+ 星:{1:{cost:{風:1,火:1},gain:{星:1}},2:{cost:{風:2,火:2,雪:1},gain:{星:3}},3:{cost:{風:4,火:4,雪:2},gain:{星:6}}}
+};
+
+const CARDS={};
+let physicalId=1;
+for(const attr of ATTRS){
+ for(let i=0;i<(BASICS.includes(attr)?6:7);i++){
+  const id=`M${String(physicalId++).padStart(2,'0')}`;
+  CARDS[id]={id,attr,name:`${attr}魔法`};
+ }
+}
+
+let S=null;
+let mulliganSelected=new Set();
+let handSelected=new Set();
+let handPreviewLevel='auto';
+let stateValueCache=new Map();
+let cardValueCache=new Map();
+
+const $=id=>document.getElementById(id);
+const rand=n=>Math.floor(Math.random()*n);
+
+function clean(obj){const d={};for(const a of ATTRS)d[a]=obj[a]||0;return d;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function buildDeck(){return shuffle(Object.keys(CARDS).slice());}
+function canPay(pool,cost){return ATTRS.every(a=>(pool[a]||0)>=(cost[a]||0));}
+function pay(cost){for(const a of ATTRS)S.pool[a]-=cost[a]||0;}
+function gain(g){for(const a of ATTRS)S.pool[a]+=g[a]||0;}
+function spellSpec(attr,level){const raw=SPELL_LEVELS[attr][level];return {cost:clean(raw.cost),gain:clean(raw.gain)};}
+function maxLevel(p,attr){return Math.min(3,p.hand.filter(id=>CARDS[id].attr===attr).length);}
+function expr(d){return ATTRS.filter(a=>d[a]).map(a=>`${ICONS[a]}${d[a]}`).join(' ')||'—';}
+function exprTags(d){const xs=ATTRS.filter(a=>d[a]);return xs.length?`<span class="mana-tags">${xs.map(a=>`<span class="mana-tag" title="${a}">${ICONS[a]} ${d[a]}</span>`).join('')}</span>`:'—';}
+function targetProgress(pool,target){let have=0,total=0;for(const a of ATTRS){const n=target[a]||0;total+=n;have+=Math.min(pool[a]||0,n);}return total?have/total:1;}
+function targetDeficit(pool,target){let s=0;for(const a of ATTRS)s+=Math.max(0,(target[a]||0)-(pool[a]||0));return s;}
+function weightedMana(d){return d.火+d.水+d.風+2*(d.虹+d.雪+d.星);}
+function simulateSpell(pool,attr,level){const p={...pool},sp=spellSpec(attr,level);for(const a of ATTRS){p[a]-=sp.cost[a]||0;p[a]+=sp.gain[a]||0;}return p;}
+function bestDisplayLevel(p,attr){
+ const max=maxLevel(p,attr);
+ for(let lv=max;lv>=1;lv--)if(canPay(S.pool,spellSpec(attr,lv).cost))return lv;
+ return max;
+}
+function randomBasicMana(){
+ const a=BASICS[rand(BASICS.length)];
+ S.pool[a]++;
+ return a;
+}
+function drawCard(){
+ if(!S.deck.length){
+  if(!S.discard.length)return null;
+  S.deck=S.discard.splice(0);
+  shuffle(S.deck);
+  log('山札を再シャッフルしました。','turn');
+ }
+ return S.deck.pop()||null;
+}
+
+function countsOf(hand){const v={};for(const a of ATTRS)v[a]=0;for(const id of hand)v[CARDS[id].attr]++;return v;}
+function stateValue(p,pool){
+ const key=p.targetId+'|'+ATTRS.map(a=>pool[a]).join(',');
+ if(stateValueCache.has(key))return stateValueCache.get(key);
+ const target=EXTREMES[p.targetId].cost;
+ let score=0;
+ for(const a of ATTRS){
+  const need=target[a]||0,have=pool[a];
+  score+=Math.min(have,need)*(COMPOSITES.includes(a)?14:11);
+  score+=Math.min(Math.max(0,have-need),8)*(BASICS.includes(a)?2:1.6);
+ }
+ for(const comp of COMPOSITES){
+  const gap=Math.max(0,(target[comp]||0)-pool[comp]);
+  if(gap)for(const a of COMPOSITE_PARTS[comp])score+=Math.min(pool[a],Math.max(3,gap*2))*Math.min(gap,9)*.48;
+ }
+ for(const a of BASICS)if(pool[a]>0)score+=Math.min(pool[a],3)*.75;
+ stateValueCache.set(key,score);
+ return score;
+}
+function cardValue(p,attr,have,pool=S.pool){
+ const key=p.targetId+'|'+attr+'|'+have;
+ if(cardValueCache.has(key))return cardValueCache.get(key);
+ const target=EXTREMES[p.targetId].cost,need={};
+ for(const a of ATTRS)need[a]=target[a]||0;
+ for(const comp of COMPOSITES)for(const a of COMPOSITE_PARTS[comp])need[a]+=(target[comp]||0)*.62;
+ for(const a of BASICS){const from={火:'風',水:'火',風:'水'}[a];need[from]+=(target[a]||0)*.42;}
+ let v=Math.min(12,need[attr]*.60)+1;
+ if(have===2)v+=3;if(have>=3)v+=4;
+ cardValueCache.set(key,v);
+ return v;
+}
+function handValue(p,counts,pool){
+ let score=0;
+ for(const a of ATTRS)for(let k=1;k<=counts[a];k++)score+=cardValue(p,a,k,pool);
+ return score;
+}
+function followupValue(p,pool,counts){
+ const before=stateValue(p,pool);let best=0;
+ for(const a of ATTRS)for(let lv=1;lv<=Math.min(3,counts[a]);lv++){
+  const sp=spellSpec(a,lv);if(!canPay(pool,sp.cost))continue;
+  const after=simulateSpell(pool,a,lv);let val=stateValue(p,after)-before;
+  if(canPay(after,EXTREMES[p.targetId].cost))val+=500;
+  best=Math.max(best,val);
+ }
+ return best;
+}
+// Lv2/3をまとめて使う場合と、同枚数を低Lvに分割する場合を比較。
+// 後の手番の価値は割り引き、僅差の選択のみを補正する。
+function splitCastAdvantage(p,attr,level,pool,after){
+ if(level===1)return 0;
+ const sequences=level===2?[[1,1]]:[[1,1,1],[1,2],[2,1]];
+ const before=stateValue(p,pool);
+ let bestSplit=-Infinity;
+ for(const sequence of sequences){
+  const current={...pool};let previous=before,value=0,possible=true;
+  for(let t=0;t<sequence.length;t++){
+   const sp=spellSpec(attr,sequence[t]);
+   if(!canPay(current,sp.cost)){possible=false;break;}
+   for(const a of ATTRS){current[a]-=sp.cost[a];current[a]+=sp.gain[a];}
+   const now=stateValue(p,current);
+   value+=Math.pow(.68,t)*(now-previous);
+   previous=now;
+  }
+  if(possible)bestSplit=Math.max(bestSplit,value);
+ }
+ if(!Number.isFinite(bestSplit))return 0;
+ const immediate=stateValue(p,after)-before;
+ return Math.max(-.75,Math.min(.75,(immediate-bestSplit)*.025));
+}
+function bestBotSpell(p){
+ const counts=countsOf(p.hand),baseline=stateValue(p,S.pool),oldHand=handValue(p,counts,S.pool),target=EXTREMES[p.targetId].cost;
+ let best=null;
+ for(const a of ATTRS)for(let lv=1;lv<=Math.min(3,counts[a]);lv++){
+  const sp=spellSpec(a,lv);if(!canPay(S.pool,sp.cost))continue;
+  const after=simulateSpell(S.pool,a,lv);let score;
+  if(canPay(after,target))score=1000000+lv;
+  else{
+   const remaining={...counts};remaining[a]-=lv;
+   const immediate=stateValue(p,after)-baseline;
+   const follow=followupValue(p,after,remaining);
+   const lost=oldHand-handValue(p,remaining,after);
+   // 使用したカードは次手番に補充されるため、温存損失を過大評価しない。
+   score=immediate+Math.max(0,follow)*.42-Math.max(0,lost)*.11+.35;
+   score+=(weightedMana(sp.gain)-weightedMana(sp.cost))*.3;
+   score+=splitCastAdvantage(p,a,lv,S.pool,after);
+  }
+  if(!best||score>best.score||(score===best.score&&lv>best.level))best={attr:a,level:lv,score};
+ }
+ return best;
+}
+function botExchangeIndices(p){
+ const counts=countsOf(p.hand);let baseline=handValue(p,counts,S.pool);
+ const best=bestBotSpell(p),protect={};
+ if(best&&best.score>2)protect[best.attr]=best.level;
+ const choices=[];
+ for(let n=0;n<Math.min(6,p.hand.length);n++){
+  let candidate=null;
+  for(let i=0;i<p.hand.length;i++){
+   const a=CARDS[p.hand[i]].attr;
+   if(choices.includes(i)||counts[a]<=(protect[a]||0))continue;
+   const next={...counts};next[a]--;
+   const value=handValue(p,next,S.pool),loss=baseline-value;
+   if(!candidate||loss<candidate.loss)candidate={i,loss,next,value};
+  }
+  if(!candidate||candidate.loss>(ATTRS.some(a=>S.pool[a])?8:14))break;
+  choices.push(candidate.i);Object.assign(counts,candidate.next);baseline=candidate.value;
+ }
+ if(!choices.length&&p.hand.length&&(ATTRS.reduce((sum,a)=>sum+S.pool[a],0)<2||!best||best.score<=0)){
+  const c=countsOf(p.hand);
+  const idx=p.hand.map((id,i)=>({i,val:cardValue(p,CARDS[id].attr,c[CARDS[id].attr])})).sort((a,b)=>a.val-b.val)[0].i;
+  choices.push(idx);
+ }
+ return choices.sort((a,b)=>a-b);
+}
+function botMulligan(p){
+ const counts=countsOf(p.hand);
+ const pairs=p.hand.map((id,i)=>({i,val:cardValue(p,CARDS[id].attr,counts[CARDS[id].attr])})).sort((a,b)=>a.val-b.val);
+ const top=pairs.length?pairs[pairs.length-1].val:0;
+ const ret=pairs.filter(x=>x.val<top-5).slice(0,3).map(x=>x.i);
+ if(!ret.length)return;
+ const originals=ret.map(i=>p.hand[i]);
+ const incoming=originals.map(()=>drawCard()).filter(Boolean);
+ p.hand=p.hand.filter((_,i)=>!ret.includes(i)).concat(incoming);
+ S.deck.push(...originals);shuffle(S.deck);
+}
+
+function log(text,cls=''){
+ const d=document.createElement('div');
+ if(cls)d.className=cls;
+ d.textContent=text;
+ $('log').appendChild(d);
+ $('log').scrollTop=$('log').scrollHeight;
+}
+
+function newGame(){
+ S={
+  pool:clean({}),deck:buildDeck(),discard:[],players:[],turnSeat:0,turnNo:1,
+  phase:'mulligan',winner:null,targetOffers:[],extremeReady:false
+ };
+ for(let i=0;i<4;i++)S.players.push({
+  seat:i,name:i===0?'あなた':`見習い魔女${String.fromCharCode(65+i-1)}`,
+  targetId:null,hand:[],last:'',lastDiscard:'',history:[],uses:clean({})
+ });
+ const ids=shuffle(Object.keys(EXTREMES).slice());
+ S.targetOffers=[ids.slice(0,3),ids.slice(3,6),ids.slice(6,9),ids.slice(9,12)];
+ mulliganSelected.clear();
+ handPreviewLevel='auto';
+ $('log').innerHTML='';
+ log('提示された3つから極大魔法を選択してください。','turn');
+ $('resultOverlay').classList.add('hidden');
+ $('discardOverlay').classList.add('hidden');
+ $('historyOverlay').classList.add('hidden');
+ $('mulliganOverlay').classList.add('hidden');
+ $('mulliganReturnBtn').classList.add('hidden');
+ $('targetOverlay').classList.remove('hidden');
+ renderTargetChoices();
+ render();
+}
+
+function renderTargetChoices(){
+ const box=$('targetChoices');
+ box.innerHTML='';
+ for(const id of S.targetOffers[0]){
+  const e=EXTREMES[id],el=document.createElement('div');
+  el.className='card';
+  el.style.minHeight='88px';
+  el.innerHTML=`<div class="expr" style="font-size:17px;margin:18px 10px">${exprTags(clean(e.cost))}</div>`;
+  el.onclick=()=>chooseTarget(id);
+  box.appendChild(el);
+ }
+}
+
+function chooseTarget(id){
+ S.players[0].targetId=id;
+ for(let i=1;i<4;i++)S.players[i].targetId=S.targetOffers[i][rand(3)];
+ for(const p of S.players)for(let k=0;k<6;k++){const c=drawCard();if(c)p.hand.push(c);}
+ for(let i=1;i<4;i++)botMulligan(S.players[i]);
+ $('targetOverlay').classList.add('hidden');
+ $('mulliganReturnBtn').classList.add('hidden');
+ $('mulliganOverlay').classList.remove('hidden');
+ log(`あなたの極大魔法：${id}（${EXTREMES[id].type}）`,'human');
+ renderMulligan();
+ render();
+}
+
+function peekMulligan(){
+ if(S.phase!=='mulligan'||!S.players[0].targetId)return;
+ $('mulliganOverlay').classList.add('hidden');
+ $('mulliganReturnBtn').classList.remove('hidden');
+}
+function returnToMulligan(){
+ $('mulliganReturnBtn').classList.add('hidden');
+ if(S.phase==='mulligan'&&S.players[0].targetId)$('mulliganOverlay').classList.remove('hidden');
+}
+function renderMulligan(){
+ const p=S.players[0];
+ $('mulliganCards').innerHTML='';
+ p.hand.forEach((id,i)=>{
+  const c=CARDS[id],el=cardElement(c,false,null,handPreviewLevel==='auto'?1:Number(handPreviewLevel));
+  if(mulliganSelected.has(i))el.classList.add('return');
+  const b=document.createElement('div');
+  b.className='badge-return';b.textContent='戻す';el.appendChild(b);
+  el.onclick=()=>{
+   if(mulliganSelected.has(i))mulliganSelected.delete(i);else mulliganSelected.add(i);
+   renderMulligan();
+  };
+  $('mulliganCards').appendChild(el);
+ });
+ $('mulliganCount').textContent=`選択中：${mulliganSelected.size}枚`;
+ $('mulliganConfirm').textContent=mulliganSelected.size?`${mulliganSelected.size}枚交換`:'開始';
+}
+function confirmMulligan(){
+ const p=S.players[0],idx=[...mulliganSelected].sort((a,b)=>a-b);
+ const returned=idx.map(i=>p.hand[i]);
+ const keep=p.hand.filter((_,i)=>!mulliganSelected.has(i));
+ const repl=[];
+ for(let i=0;i<returned.length;i++){const c=drawCard();if(c)repl.push(c);}
+ p.hand=keep.concat(repl);
+ S.deck.push(...returned);shuffle(S.deck);
+ $('mulliganOverlay').classList.add('hidden');
+ $('mulliganReturnBtn').classList.add('hidden');
+ S.phase='playing';
+ log(returned.length?`あなた：${returned.length}枚をマリガンしました。`:'あなた：マリガンなしで開始。','human');
+ render();
+ startTurn();
+}
+
+function currentPlayer(){return S.players[S.turnSeat];}
+function roundNo(){return Math.floor((S.turnNo-1)/4)+1;}
+
+function startTurn(){
+ if(S.phase==='gameover')return;
+ S.extremeReady=false;handSelected.clear();
+ const p=currentPlayer();
+ log(`R${roundNo()} / ${p.name} の手番`,'turn');
+ // 極大魔法の判定は補充前。補充は通常行動には含まれない。
+ const ready=canPay(S.pool,clean(EXTREMES[p.targetId].cost));
+ if(p.seat===0){S.phase='human';if(ready)S.extremeReady=true;}
+ else S.phase='bot';
+ if(!ready){
+  while(p.hand.length<6){const id=drawCard();if(!id)break;p.hand.push(id);}
+ }
+ render();
+ if(p.seat!==0){
+  if(ready){setTimeout(()=>win(p,'手番開始時に極大魔法'),220);return;}
+  setTimeout(()=>botAct(p),520);
+ }
+}
+function castCardIndices(p,attr,lv,preferredIndex=null){
+ const indices=[];
+ if(preferredIndex!==null&&preferredIndex>=0&&preferredIndex<p.hand.length&&CARDS[p.hand[preferredIndex]].attr===attr)indices.push(preferredIndex);
+ for(let i=0;i<p.hand.length&&indices.length<lv;i++)if(i!==preferredIndex&&CARDS[p.hand[i]].attr===attr)indices.push(i);
+ return indices;
+}
+function consumeSpell(p,attr,lv,preferredIndex=null,exactIndices=null){
+ const indices=exactIndices===null?castCardIndices(p,attr,lv,preferredIndex):exactIndices;
+ if(indices.length!==lv||new Set(indices).size!==lv)return false;
+ if(indices.some(i=>i<0||i>=p.hand.length||CARDS[p.hand[i]].attr!==attr))return false;
+ const selected=indices.map(i=>p.hand[i]);
+ for(const i of indices.slice().sort((a,b)=>b-a))p.hand.splice(i,1);
+ S.discard.push(...selected);
+ const sp=spellSpec(attr,lv);pay(sp.cost);gain(sp.gain);p.uses[attr]++;
+ return true;
+}
+function botAct(p){
+ if(S.phase!=='bot')return;
+ const choice=bestBotSpell(p);
+ if(choice&&choice.score>1){
+  consumeSpell(p,choice.attr,choice.level);
+  p.last=`${choice.attr}魔法 Lv${choice.level}`;
+  p.history.push({round:roundNo(),text:`${choice.attr}魔法 Lv${choice.level}を使用`});
+  log(`${p.name}：${choice.attr}魔法 Lv${choice.level}（${expr(spellSpec(choice.attr,choice.level).cost)} → ${expr(spellSpec(choice.attr,choice.level).gain)}）`,'bot');
+ }else{
+  const idx=botExchangeIndices(p);
+  if(idx.length)exchangeCards(p,idx,true);
+  else doPass(p,true);
+ }
+ render();setTimeout(advanceTurn,900);
+}
+function exchangeCards(p,indices,isBot){
+ if(indices.length<1||indices.length>6||new Set(indices).size!==indices.length)return false;
+ if(indices.some(i=>i<0||i>=p.hand.length))return false;
+ const old=indices.map(i=>p.hand[i]);
+ for(const i of indices.slice().sort((a,b)=>b-a))p.hand.splice(i,1);
+ S.discard.push(...old);
+ const incoming=[];
+ for(let i=0;i<old.length;i++){const id=drawCard();if(id){p.hand.push(id);incoming.push(id);}}
+ const mana=randomBasicMana();
+ p.lastDiscard=old.map(id=>CARDS[id].attr).join('・');
+ p.last=`${old.length}枚交換　${ICONS[mana]}1`;
+ p.history.push({round:roundNo(),text:`${old.map(id=>CARDS[id].attr).join('・')}を交換、${mana}＋1`});
+ log(`${p.name}：${old.length}枚交換 → ${incoming.map(id=>CARDS[id].attr).join('・')||'なし'} / ${mana}＋1`,isBot?'bot':'human');
+ return true;
+}
+function doPass(p,isBot){
+ p.last='パス';p.history.push({round:roundNo(),text:'パス'});
+ log(`${p.name}：パス`,isBot?'bot':'human');
+}
+function chosenSpell(p){
+ const indices=[...handSelected].sort((a,b)=>a-b);
+ if(indices.length<1||indices.length>3)return null;
+ const attr=CARDS[p.hand[indices[0]]]?.attr;
+ if(!attr||indices.some(i=>CARDS[p.hand[i]]?.attr!==attr))return null;
+ return {attr,level:indices.length,indices};
+}
+function humanCast(){
+ if(S.phase!=='human')return;
+ const p=S.players[0],choice=chosenSpell(p);
+ if(!choice||!canPay(S.pool,spellSpec(choice.attr,choice.level).cost))return;
+ if(!consumeSpell(p,choice.attr,choice.level,null,choice.indices))return;
+ p.last=`${choice.attr}魔法 Lv${choice.level}`;
+ p.history.push({round:roundNo(),text:`${choice.attr}魔法 Lv${choice.level}を使用`});
+ log(`あなた：${choice.attr}魔法 Lv${choice.level}（${expr(spellSpec(choice.attr,choice.level).cost)} → ${expr(spellSpec(choice.attr,choice.level).gain)}）`,'human');
+ handSelected.clear();advanceTurn();
+}
+function humanDraw(){
+ if(S.phase!=='human'||!handSelected.size)return;
+ if(exchangeCards(S.players[0],[...handSelected],false)){
+  handSelected.clear();advanceTurn();
+ }
+}
+function humanPass(){
+ if(S.phase!=='human')return;
+ doPass(S.players[0],false);handSelected.clear();advanceTurn();
+}
+function humanCancel(){
+ if(S.phase!=='human'||!handSelected.size)return;
+ handSelected.clear();render();
+}
+function advanceTurn(){
+ if(S.phase==='gameover')return;
+ S.turnSeat=(S.turnSeat+1)%4;S.turnNo++;S.phase='playing';
+ S.extremeReady=false;handSelected.clear();
+ render();
+ setTimeout(startTurn,260);
+}
+
+function humanExtreme(){
+ const p=S.players[0];
+ if(S.phase!=='human'||S.turnSeat!==0||!S.extremeReady)return;
+ if(!canPay(S.pool,clean(EXTREMES[p.targetId].cost)))return;
+ win(p,'極大魔法を発動');
+}
+function win(p,reason){
+ if(S.phase==='gameover')return;
+ S.phase='gameover';S.extremeReady=false;S.winner=p.seat;p.last='極大魔法';
+ log(`${p.name}：極大魔法`,'win');render();
+ $('resultTitle').textContent=p.seat===0?'勝利':'敗北';
+ $('resultTitle').style.color=p.seat===0?'var(--ok)':'var(--danger)';
+ $('resultSub').textContent=`${p.name}　${expr(clean(EXTREMES[p.targetId].cost))}`;
+ $('resultOverlay').classList.remove('hidden');
+}
+
+function cardElement(c,forHand=true,index=null,displayLevel=1){
+ const el=document.createElement('div');el.className='card';
+ const p=S?.players?.[0];
+ let level=displayLevel;
+ if(forHand&&p){
+  const anyPlayable=Array.from({length:maxLevel(p,c.attr)},(_,i)=>i+1).some(lv=>canPay(S.pool,spellSpec(c.attr,lv).cost));
+  el.classList.add(anyPlayable?'playable':'unplayable');
+  if(handSelected.has(index))el.classList.add('selected');
+ }
+ const sp=spellSpec(c.attr,level);
+ el.innerHTML=`<div class="card-name" style="color:${COLORS[c.attr]}">${c.attr}魔法 <span style="float:right;color:var(--text);font-size:12px">Lv${level}</span></div><div class="card-part card-cost"><div class="card-part-label">消費</div><div class="expr">${exprTags(sp.cost)}</div></div><div class="card-part card-gain"><div class="card-part-label">生成</div><div class="expr">${exprTags(sp.gain)}</div></div>`;
+ return el;
+}
+
+function render(){if(!S)return;renderMana();renderDiscard();renderBots();renderTarget();renderHand();renderTurn();}
+function renderMana(){
+ $('manaGrid').innerHTML='';
+ for(const a of ATTRS){
+  const d=document.createElement('div');d.className='mana';d.style.setProperty('--c',COLORS[a]);
+  d.innerHTML=`<div class="mana-name" title="${a}">${ICONS[a]}</div><div class="mana-num">${S.pool[a]}</div>`;
+  $('manaGrid').appendChild(d);
+ }
+}
+function renderDiscard(){
+ const counts=countsOf(S.discard);
+ $('discardBtn').textContent=`捨て札 ${S.discard.length}枚`;
+ $('discardTitle').textContent=`捨て札 ${S.discard.length}枚`;
+ $('discardCounts').innerHTML=ATTRS.map(a=>`<div class="discard-detail-item" title="${a}：${counts[a]}枚" aria-label="${a} ${counts[a]}枚"><span class="discard-icon" aria-hidden="true">${ICONS[a]}</span><span class="discard-number">${counts[a]}</span></div>`).join('');
+}
+function renderBots(){
+ $('botPlayers').innerHTML='';
+ for(let i=1;i<4;i++){
+  const p=S.players[i],d=document.createElement('div');
+  d.className='player'+(S.turnSeat===i&&S.phase!=='mulligan'?' active':'');
+  d.tabIndex=0;d.setAttribute('role','button');d.setAttribute('aria-label',`${p.name}の行動履歴`);
+  d.onclick=()=>showHistory(i);d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showHistory(i);}};
+  const discard=p.lastDiscard?`　捨 ${p.lastDiscard}`:'';
+  d.innerHTML=`<div class="player-name">${p.name}</div><div class="player-meta">${p.hand.length}枚${discard}</div><div class="last-action">${p.last}</div>`;
+  $('botPlayers').appendChild(d);
+ }
+}
+function showHistory(seat){
+ const p=S.players[seat];
+ $('historyTitle').textContent=`${p.name}の行動履歴`;
+ const box=$('historyList');box.replaceChildren();
+ if(!p.history.length){box.textContent='まだ記録がありません。';}
+ for(const item of p.history){
+  const d=document.createElement('div');d.className='history-entry';
+  const r=document.createElement('div');r.className='history-round';r.textContent=`R${item.round}`;
+  const t=document.createElement('div');t.textContent=item.text;
+  d.append(r,t);box.appendChild(d);
+ }
+ $('historyOverlay').classList.remove('hidden');
+}
+function closeHistory(){$('historyOverlay').classList.add('hidden');}
+
+function renderTarget(){
+ const p=S.players[0],section=$('targetSection');
+ if(!p.targetId){$('targetPanel').innerHTML='';section.classList.remove('extreme-ready');section.onclick=null;return;}
+ const e=EXTREMES[p.targetId];
+ let html='<div class="target-status">';
+ for(const a of ATTRS){
+  const n=e.cost[a]||0;if(!n)continue;
+  const have=S.pool[a]||0;
+  html+=`<div class="need ${have>=n?'met':''}"><span style="color:${COLORS[a]}" title="${a}">${ICONS[a]}</span> <strong>${have}</strong> / ${n}</div>`;
+ }
+ html+='</div>';
+ $('targetPanel').innerHTML=html;
+ const ready=S.phase==='human'&&S.turnSeat===0&&S.extremeReady;
+ section.classList.toggle('extreme-ready',ready);
+ section.onclick=ready?humanExtreme:null;
+}
+function renderHand(){
+ const p=S.players[0];
+ $('hand').innerHTML='';
+ const choice=chosenSpell(p);
+ p.hand.forEach((id,i)=>{
+  const c=CARDS[id];
+  const selected=handSelected.has(i);
+  const display=handPreviewLevel==='auto'?(selected&&choice?choice.level:1):Number(handPreviewLevel);
+  const el=cardElement(c,true,i,display);
+  if(handPreviewLevel!=='auto')el.classList.add('preview-only');
+  if(selected){
+   el.classList.add('hand-selected');
+   el.setAttribute('aria-label',`${c.attr}魔法：選択中`);
+  }
+  el.onclick=()=>{
+   if(S.phase!=='human')return;
+   if(handSelected.has(i))handSelected.delete(i);
+   else if(handSelected.size<6)handSelected.add(i);
+   render();
+  };
+  $('hand').appendChild(el);
+ });
+ document.querySelectorAll('[data-preview-level]').forEach(b=>{
+  const active=b.dataset.previewLevel===handPreviewLevel;
+  b.classList.toggle('active',active);
+  b.setAttribute('aria-pressed',String(active));
+ });
+ const isHuman=S.phase==='human';
+ const n=handSelected.size;
+ const sp=choice?spellSpec(choice.attr,choice.level):null;
+ $('castBtn').textContent='使用';
+ $('drawBtn').textContent='交換';
+ $('passBtn').textContent='スキップ';
+ $('cancelBtn').textContent='キャンセル';
+ $('castBtn').disabled=!isHuman||!choice||!canPay(S.pool,sp.cost);
+ $('drawBtn').disabled=!isHuman||!n;
+ $('passBtn').disabled=!isHuman;
+ $('cancelBtn').disabled=!isHuman||!n;
+ let reason='';
+ if(isHuman&&n&&!choice)reason=n>3?'使用は同属性3枚まで':'使用は同じ属性を選択';
+ else if(isHuman&&choice&&!canPay(S.pool,sp.cost)){
+  const miss=ATTRS.filter(a=>(sp.cost[a]||0)>S.pool[a]).map(a=>`${ICONS[a]}${(sp.cost[a]||0)-S.pool[a]}`);
+  reason=`Lv${choice.level} マナ不足：${miss.join('、')}`;
+ }
+ $('reason').textContent=reason;
+ $('reason').style.display=reason?'block':'none';
+}
+
+function renderTurn(){
+ const p=currentPlayer();
+ if(S.phase==='mulligan'){$('turnMain').textContent=S.players[0].targetId?'引き直し':'極大魔法選択';return;}
+ if(S.phase==='gameover'){$('turnMain').textContent='終了';return;}
+ $('turnMain').textContent=`R${roundNo()}　${p.seat===0?'あなたの手番':`${p.name}の手番`}`;
+}
+
+$('discardBtn').onclick=()=>{$('discardOverlay').classList.remove('hidden');$('discardCloseBtn').focus();};
+function closeDiscard(){$('discardOverlay').classList.add('hidden');$('discardBtn').focus();}
+$('discardCloseBtn').onclick=closeDiscard;
+$('discardOverlay').onclick=e=>{if(e.target.id==='discardOverlay')closeDiscard();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('discardOverlay').classList.contains('hidden'))closeDiscard();});
+$('newGameBtn').onclick=newGame;
+$('historyCloseBtn').onclick=closeHistory;
+$('historyOverlay').onclick=e=>{if(e.target.id==='historyOverlay')closeHistory();};
+$('helpBtn').onclick=()=>{$('helpOverlay').classList.remove('hidden');};
+$('helpCloseBtn').onclick=()=>{$('helpOverlay').classList.add('hidden');};
+$('helpOverlay').onclick=e=>{if(e.target.id==='helpOverlay')$('helpOverlay').classList.add('hidden');};
+$('againBtn').onclick=newGame;
+$('mulliganConfirm').onclick=confirmMulligan;
+$('mulliganReturnBtn').onclick=returnToMulligan;
+$('mulliganOverlay').onclick=e=>{if(e.target.id==='mulliganOverlay')peekMulligan();};
+$('castBtn').onclick=humanCast;
+$('drawBtn').onclick=humanDraw;
+$('passBtn').onclick=humanPass;
+$('cancelBtn').onclick=humanCancel;
+document.querySelectorAll('[data-preview-level]').forEach(b=>{
+ b.onclick=()=>{handPreviewLevel=b.dataset.previewLevel;renderHand();if(S?.phase==='mulligan'&&S.players[0].targetId)renderMulligan();};
+});
+
+newGame();
+})();
+</script>
+</body>
+</html>
