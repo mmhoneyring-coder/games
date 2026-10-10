@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>10egg v0.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+<style>
+:root{
+ --ink:#5b4655;--ink-soft:#816b78;--cream:#fffaf1;--pink:#ff9fbd;--pink2:#ffd4e2;
+ --yellow:#ffd96f;--mint:#9fe3c5;--sky:#9fd8f7;--lav:#cdb8f5;--line:#efdcc9;
+}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;color:var(--ink);overscroll-behavior:none}
+#app{touch-action:none;overscroll-behavior:none}
+body{display:flex;justify-content:center;background:
+ radial-gradient(circle at 12% 12%,#fff7b9 0 5%,transparent 5.4%),
+ radial-gradient(circle at 88% 18%,#ffdce9 0 7%,transparent 7.4%),
+ radial-gradient(circle at 18% 82%,#d8f5ea 0 8%,transparent 8.4%),
+ linear-gradient(180deg,#fff7fb 0%,#fff9e8 55%,#f2fbff 100%);}
+#app{width:min(100vw,560px);padding:12px 12px 18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:2px 2px 10px}
+.logoWrap{display:flex;align-items:center;gap:8px;min-width:0}
+.logoEgg{width:34px;height:42px;flex:none;border-radius:52% 48% 46% 54% / 61% 61% 39% 39%;background:
+ radial-gradient(circle at 35% 36%,#ffbed1 0 6%,transparent 7%),
+ radial-gradient(circle at 66% 58%,#9fd8f7 0 6%,transparent 7%),
+ radial-gradient(circle at 48% 73%,#ffd96f 0 5%,transparent 6%),
+ #fffdf6;border:3px solid #ffb6cf;box-shadow:0 0 0 4px #fff,0 4px 0 #eaaac0,0 7px 14px #d58ca744;transform:rotate(-7deg)}
+h1{font-family:"Mochiy Pop One","M PLUS Rounded 1c",sans-serif;font-size:27px;line-height:1;margin:0;color:#ff6f9f;letter-spacing:.5px;text-shadow:0 2px 0 #fff,0 4px 0 #ffd2df}
+.sub{font-size:11px;color:#8a7180;margin-top:5px;font-weight:800;white-space:nowrap}
+.headerBtns{display:flex;gap:6px;flex:none}
+button{font-family:"M PLUS Rounded 1c",sans-serif;border:2px solid #fff;background:#fffdfb;color:#705463;border-radius:999px;padding:8px 11px;font-weight:900;box-shadow:0 3px 0 #e8cad6,0 5px 10px #d9b5c233;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #e8cad6}
+#mode{background:#e8f7ff;color:#4d86a5;box-shadow:0 3px 0 #b8ddec,0 5px 10px #b8ddec33}
+#quitGame{background:#fff0f5;color:#b66182}
+#guideBtn{width:38px;padding:8px 0;background:#fff6c9;color:#9a7725;font-size:17px}
+#status{min-height:28px;text-align:center;font-size:13px;font-weight:900;color:#b05d7d;padding-top:2px}
+#board{position:relative;margin:clamp(72px,11svh,105px) auto 0;width:100%;aspect-ratio:1/1;background:#fff9df;border:4px solid #fff;border-radius:24px;overflow:hidden;touch-action:none;box-shadow:0 5px 0 #efcfb4,0 12px 28px #ca9c7c33,inset 0 0 0 2px #f6dfb9}
+.cell{position:absolute;border:1px dashed #ead8b7;background:linear-gradient(135deg,#fffdf5aa,#fff5d8aa)}
+.tile{position:absolute;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff 0%,#fffaf7 100%);border:3px solid #fff;border-radius:18px;font-size:clamp(24px,7.4vw,38px);font-weight:900;color:#5d4b59;box-shadow:0 3px 0 #e7c9d3,0 5px 10px #b58c9b33,inset 0 0 0 2px #f4dfe7;user-select:none;-webkit-user-select:none;touch-action:none;transition:left .16s,top .16s,transform .12s,opacity .35s;letter-spacing:-1px}
+.tile.triple{font-size:clamp(19px,5.8vw,30px);letter-spacing:-1.5px}
+.tile::before,.tile.even::after{position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;line-height:1;border:2px solid #fff;box-shadow:0 1px 3px #0001;letter-spacing:0;box-sizing:border-box}
+.tile.ability1::before{content:"✕";background:#ffd0df;color:#a84c70;font-size:10px}
+.tile.ability3::before{content:"↔";background:#ccecff;color:#397b9d;font-size:9px}
+.tile.ability5::before{content:"2";background:#fff0a9;color:#9b7422;font-size:10px}
+.tile.ability7::before{content:"＋";background:#ccefdc;color:#3e8a68;font-size:10px}
+.tile.ability9::before{content:"−1";background:#e2d5fb;color:#7457a5;font-size:8px}
+.tile.even::after{content:"½";font-size:10px;color:#b86683;background:#ffe6ef}
+.tile.selected{transform:scale(.92) rotate(-2deg);outline:4px solid #ffca63;z-index:5}
+.tile.result{background:linear-gradient(180deg,#fff6a9,#ffe27a);color:#8f671b;box-shadow:0 3px 0 #e7bd42,0 7px 15px #d9a91f44,inset 0 0 0 2px #fff6c8;z-index:8;animation:resultPop .35s ease-out}
+.tile.fade{opacity:0;transform:scale(.68) rotate(4deg)}
+.tile.born{animation:bornPop .38s cubic-bezier(.2,1.3,.35,1)}
+@keyframes resultPop{0%{transform:scale(.65)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes bornPop{0%{transform:scale(.35) rotate(-8deg);opacity:.3}70%{transform:scale(1.12) rotate(2deg)}100%{transform:scale(1);opacity:1}}
+.egg-pop{position:absolute;z-index:16;border-radius:52% 48% 46% 54% / 62% 62% 38% 38%;background:
+ radial-gradient(circle at 30% 34%,#ffabc7 0 7%,transparent 8%),
+ radial-gradient(circle at 68% 55%,#8fd5f6 0 7%,transparent 8%),
+ radial-gradient(circle at 45% 74%,#ffd25f 0 6%,transparent 7%),
+ #fffdf5;border:3px solid #fff;box-shadow:0 3px 0 #e9c8d4,0 7px 15px #bc8fa044;animation:eggBounce .28s ease-out}
+.egg-pop::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px #f6dce4}
+.egg-pop.hatching{animation:eggHatch .2s ease-in forwards}
+.egg-pop.hatching::before{content:"✦";position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font-size:24px;color:#ffb13b;text-shadow:0 0 6px #fff;z-index:2}
+@keyframes eggBounce{0%{transform:translateY(-20px) scale(.7);opacity:0}70%{transform:translateY(2px) scale(1.06)}100%{transform:none;opacity:1}}
+@keyframes eggHatch{0%{transform:scale(1)}100%{transform:scale(1.3);opacity:0}}
+#help{display:none}
+#overlay{position:absolute;inset:0;background:#fff6fbcc;backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:20;text-align:center;padding:18px}
+#overlay.show{display:flex}
+#overlay .clearBox{position:relative;width:min(90%,330px);font-size:42px;font-weight:900;background:#fff;border:4px solid #fff;border-radius:28px;padding:22px 18px 20px;color:#ff6f9f;box-shadow:0 6px 0 #f1bfd0,0 16px 35px #b98da055,inset 0 0 0 3px #fff1a8;font-family:"Mochiy Pop One","M PLUS Rounded 1c",sans-serif}
+#overlay .clearBox::before{content:"✦ たまご せいちょう！ ✦";display:block;font-family:"M PLUS Rounded 1c",sans-serif;font-size:12px;color:#e0a232;margin-bottom:8px}
+#overlay small{display:block;font-family:"M PLUS Rounded 1c",sans-serif;font-size:14px;margin-top:8px;color:#8b6878;font-weight:900}
+#overlay .clearBtns{display:flex;gap:10px;justify-content:center;margin-top:16px}
+#overlay .clearBtns button{font-size:14px;padding:10px 16px}
+#continue{background:#d8f5e6;color:#3e8b68;box-shadow:0 3px 0 #addbc6}
+#quit{background:#fff0f5;color:#b35d7d}
+#startOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:30;background:#fffaf1cc;backdrop-filter:blur(2px);text-align:center;padding:18px}
+#startOverlay.hide{display:none}
+#startCard{width:min(78%,300px);background:#ffffffee;border:4px solid #fff;border-radius:30px;padding:26px 18px 22px;box-shadow:0 7px 0 #f0c6d5,0 18px 40px #b98da033,inset 0 0 0 3px #fff2a8}
+#startEgg{width:92px;height:116px;margin:0 auto 12px;border-radius:52% 48% 46% 54% / 62% 62% 38% 38%;background:radial-gradient(circle at 30% 34%,#ffabc7 0 7%,transparent 8%),radial-gradient(circle at 68% 55%,#8fd5f6 0 7%,transparent 8%),radial-gradient(circle at 45% 74%,#ffd25f 0 6%,transparent 7%),#fffdf5;border:5px solid #fff;box-shadow:0 5px 0 #e9c8d4,0 12px 24px #bc8fa033;transform:rotate(-4deg)}
+#startTitle{font-family:"Mochiy Pop One","M PLUS Rounded 1c",sans-serif;font-size:30px;color:#ff6f9f;text-shadow:0 2px 0 #fff,0 4px 0 #ffd2df;margin-bottom:6px}
+#startText{font-size:26px;line-height:1.35;font-weight:900;color:#ff6f9f;margin-bottom:20px;font-family:"Mochiy Pop One","M PLUS Rounded 1c",sans-serif;text-shadow:0 2px 0 #fff}
+#startModeSwitch{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:210px;margin:0 auto 18px;padding:4px;background:#f3eaf0;border-radius:999px;box-shadow:inset 0 2px 5px #ad889933}
+.modeChoice{padding:9px 8px;border-radius:999px;font-size:15px;font-weight:900;color:#a68a98;transition:.15s;cursor:pointer;user-select:none;-webkit-user-select:none}
+.modeChoice.active{background:#fff6c9;color:#8e6a18;box-shadow:0 2px 0 #e1c566,0 4px 9px #b99c4a22}
+#startBtn{font-size:20px;padding:12px 30px;background:#ffe17d;color:#8b681d;box-shadow:0 4px 0 #e5bd45,0 7px 14px #d3aa3933}
+
+#guideOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:60;background:#6f566344;backdrop-filter:blur(4px);padding:18px}
+#guideOverlay.show{display:flex}
+#guideCard{width:min(92vw,380px);background:#fffdfb;border:4px solid #fff;border-radius:28px;padding:18px 16px 16px;box-shadow:0 7px 0 #efc7d5,0 18px 44px #70506044,inset 0 0 0 3px #fff1a8}
+#guideTitle{font-family:"Mochiy Pop One","M PLUS Rounded 1c",sans-serif;text-align:center;color:#ff6f9f;font-size:21px;margin:0 0 10px}
+.basicHelp{background:#fff0f5;border-radius:16px;padding:9px 10px;margin:0 0 8px;font-size:13px;font-weight:900;line-height:1.5;color:#9a5b73;text-align:center}
+.modeHelp{background:#fff7d8;border-radius:16px;padding:9px 10px;margin:0 0 10px;font-size:12px;font-weight:900;line-height:1.6;color:#765f69}
+.guideRow{display:grid;grid-template-columns:50px 1fr;align-items:center;gap:10px;padding:8px 6px;border-bottom:2px dashed #f1dfd3;font-size:14px;font-weight:900;line-height:1.45}
+.guideRow:last-of-type{border-bottom:0}
+.guideNum{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#fff;border:3px solid #fff;box-shadow:0 2px 0 #e6c9d3,inset 0 0 0 2px #f3dfe7;font-size:22px;font-weight:900;color:#5d4b59}
+#guideClose{display:block;margin:14px auto 0;background:#e8f7ff;color:#4d86a5;min-width:110px}
+
+#endOverlay{position:absolute;inset:0;background:#fff6fbdd;backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:40;text-align:center;padding:18px}
+#endOverlay.show{display:flex}
+#endBox{width:min(86%,310px);background:#fff;border:4px solid #fff;border-radius:28px;padding:22px 18px 20px;box-shadow:0 6px 0 #f1bfd0,0 16px 35px #b98da055,inset 0 0 0 3px #fff1a8}
+#endLabel{font-size:15px;font-weight:900;color:#8b6878;margin-bottom:4px}
+#endMax{font-family:"Mochiy Pop One","M PLUS Rounded 1c",sans-serif;font-size:54px;line-height:1.05;color:#ff6f9f;text-shadow:0 2px 0 #fff,0 4px 0 #ffd2df;margin:4px 0 18px}
+#endBtns{display:flex;gap:10px;justify-content:center}
+#retry{background:#fff0b8;color:#8a6920}
+#toTitle{background:#e8f7ff;color:#4d86a5}
+
+@media(max-width:390px){#app{padding:9px}.sub{font-size:10px}h1{font-size:24px}.logoEgg{width:30px;height:37px}.tile{border-radius:15px}.tile::before,.tile.even::after{right:-2px;bottom:-2px;width:17px;height:17px}.headerBtns button{padding:7px 9px;font-size:12px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="logoWrap"><span class="logoEgg" aria-hidden="true"></span><div><h1>10egg</h1></div></div><div class="headerBtns"><button id="mode">ふつう</button><button id="quitGame">やめる</button><button id="guideBtn" aria-label="せつめい">？</button></div></header>
+<div id="status"></div>
+<div id="board"><div id="startOverlay"><div id="startCard"><div id="startText">10を つくろう！</div><div id="startModeSwitch" role="radiogroup" aria-label="あそびかた"><div class="modeChoice" data-mode="easy">かんたん</div><div class="modeChoice active" data-mode="normal">ふつう</div></div><button id="startBtn">はじめる</button></div></div><div id="overlay"><div class="clearBox"><div id="clearNum">100！</div><small>やった！</small><div class="clearBtns"><button id="clearQuit">やめる</button><button id="continue">つづける</button></div></div></div><div id="endOverlay"><div id="endBox"><div id="endLabel">いちばん おおきい すうじ</div><div id="endMax">0</div><div id="endBtns"><button id="retry">もういちど</button><button id="toTitle">タイトルへ</button></div></div></div></div>
+<div id="help"></div>
+<div id="guideOverlay" aria-hidden="true"><div id="guideCard"><div id="guideTitle">すうじの ちから</div>
+<div class="basicHelp">となりの すうじを あわせて 10・20・30…を つくろう</div>
+<div class="modeHelp"><div>かんたん：どのすうじも となり8マスへ うごかせる</div><div>ふつう：さいごが3だけ となり8マスへ うごかせる</div></div>
+<div class="guideRow normalOnly"><div class="guideNum">1</div><div>さいごが1 → 2かいタップで きえる</div></div>
+<div class="guideRow normalOnly"><div class="guideNum">3</div><div>さいごが3 → となりへ うごける</div></div>
+<div class="guideRow"><div class="guideNum">5</div><div>さいごが5どうし → たまごが2こ</div></div>
+<div class="guideRow"><div class="guideNum">7</div><div>さいごが7 → 2かいタップで じぶんが −1、1〜9を 1こ うむ</div></div>
+<div class="guideRow"><div class="guideNum">9</div><div>さいごが9 → 2かいタップで まわり8マスと じぶんが −1</div></div>
+<div class="guideRow"><div class="guideNum">2</div><div>ぐうすう → 2かいタップで はんぶん</div></div>
+<button id="guideClose">とじる</button></div></div>
+</div>
+<script>
+const COLS=6,ROWS=6,board=document.getElementById('board'),status=document.getElementById('status'),overlay=document.getElementById('overlay'),startOverlay=document.getElementById('startOverlay'),endOverlay=document.getElementById('endOverlay'),endMax=document.getElementById('endMax'),help=document.getElementById('help'),modeBtn=document.getElementById('mode'),clearNum=document.getElementById('clearNum'),guideOverlay=document.getElementById('guideOverlay');
+let grid=[],tiles=new Map(),uid=0,locked=true,mode='normal',endless=false,pendingClear=null,started=false,maxSeen=0,lastTapId=null,lastTapAt=0;
+let cw,ch;
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function resize(){
+ cw=board.clientWidth/COLS; ch=board.clientHeight/ROWS;
+ document.querySelectorAll('.cell').forEach((e,i)=>{let r=Math.floor(i/COLS),c=i%COLS;e.style.cssText=`left:${c*cw}px;top:${r*ch}px;width:${cw}px;height:${ch}px`});
+ tiles.forEach(t=>place(t));
+}
+function place(t){t.el.style.left=(t.c*cw+4)+'px';t.el.style.top=(t.r*ch+4)+'px';t.el.style.width=(cw-8)+'px';t.el.style.height=(ch-8)+'px'}
+function mk(n,r,c,cls=''){
+ n=Number(n);
+ if(!Number.isFinite(n)) throw new Error('Invalid tile number');
+ if(n>maxSeen)maxSeen=n;
+ const el=document.createElement('div');el.className='tile '+(n%2===0?'even ':'')+(Math.abs(n)>=100?'triple ':'')+cls;el.textContent=String(n);
+ board.appendChild(el);
+ let digit=Math.abs(n)%10;
+ let t={id:++uid,n,r,c,el,ability1:(digit===1),ability3:(digit===3),ability5:(digit===5),ability7:(digit===7),ability9:(digit===9)};
+ if(t.ability3&&mode!=='easy')el.classList.add('ability3');
+ if(t.ability1&&mode!=='easy')el.classList.add('ability1');
+ if(t.ability5)el.classList.add('ability5');
+ if(t.ability7)el.classList.add('ability7');
+ if(t.ability9)el.classList.add('ability9');
+ tiles.set(t.id,t);grid[r][c]=t;place(t);bind(t);return t;
+}
+function del(t){if(grid[t.r]?.[t.c]===t)grid[t.r][t.c]=null;tiles.delete(t.id);t.el.remove()}
+function adjacent(a,b){const dr=Math.abs(a.r-b.r),dc=Math.abs(a.c-b.c);return Math.max(dr,dc)===1}
+function bind(t){
+ let sx,sy,drag=false,baseLeft=0,baseTop=0;
+ t.el.addEventListener('pointerdown',e=>{
+   if(locked)return;
+   sx=e.clientX;sy=e.clientY;drag=false;
+   baseLeft=t.c*cw+4;baseTop=t.r*ch+4;
+   t.el.setPointerCapture(e.pointerId);
+   t.el.classList.add('selected');
+   t.el.style.transition='none';
+   t.el.style.zIndex='12';
+ });
+ t.el.addEventListener('pointermove',e=>{
+   if(locked||sx===undefined)return;
+   const dx=e.clientX-sx,dy=e.clientY-sy;
+   if(Math.hypot(dx,dy)>8)drag=true;
+   if(drag){
+     t.el.style.left=(baseLeft+dx)+'px';
+     t.el.style.top=(baseTop+dy)+'px';
+   }
+ });
+ t.el.addEventListener('pointerup',e=>{
+   if(locked)return;
+   t.el.classList.remove('selected');
+   t.el.style.transition='';
+   t.el.style.zIndex='';
+   const wasDrag=drag;
+   sx=sy=undefined;
+   if(wasDrag){lastTapId=null;lastTapAt=0;}
+   if(!wasDrag){
+     place(t);
+     const now=performance.now();
+     const isDouble=(lastTapId===t.id && now-lastTapAt<=340);
+     lastTapId=t.id;lastTapAt=now;
+     if(isDouble){
+       lastTapId=null;lastTapAt=0;
+       if(mode!=='easy'&&t.ability1){useAbility1(t);return}
+       if(t.ability7){useAbility7(t);return}
+       if(t.ability9){useAbility9(t);return}
+       if(t.n%2===0){split(t);return}
+     }
+     return;
+   }
+   const rect=board.getBoundingClientRect();
+   const c=Math.floor((e.clientX-rect.left)/cw),r=Math.floor((e.clientY-rect.top)/ch);
+   if(r<0||r>=ROWS||c<0||c>=COLS){place(t);return}
+   const target=grid[r][c];
+   const isNear8=Math.max(Math.abs(t.r-r),Math.abs(t.c-c))===1;
+   const isNear4=Math.abs(t.r-r)+Math.abs(t.c-c)===1;
+   if(target&&target!==t&&isNear8){
+     if((t.n+target.n)%10===0&&(mode!=='hard'||isNear4)) combine(t,target);
+     else if(mode==='easy') swap(t,target);
+     else if(t.ability3&&(mode==='normal'||(mode==='hard'&&isNear4))) swap(t,target);
+     else place(t);
+   }else if(!target&&isNear8){
+     if(mode==='easy'){move(t,r,c);gravity()}
+     else if(mode==='normal'&&t.ability3){move(t,r,c);gravity()}
+     else place(t);
+   }else{
+     place(t);
+   }
+ });
+ t.el.addEventListener('pointercancel',()=>{
+   t.el.classList.remove('selected');t.el.style.transition='';t.el.style.zIndex='';place(t);sx=sy=undefined;
+ });
+}
+function move(t,r,c){grid[t.r][t.c]=null;t.r=r;t.c=c;grid[r][c]=t;place(t)}
+function swap(a,b){let ar=a.r,ac=a.c,br=b.r,bc=b.c;grid[ar][ac]=b;grid[br][bc]=a;a.r=br;a.c=bc;b.r=ar;b.c=ac;place(a);place(b)}
+function gravity(applyPlace=true){
+ for(let c=0;c<COLS;c++){
+   let wr=ROWS-1;
+   for(let r=ROWS-1;r>=0;r--)if(grid[r][c]){
+     let t=grid[r][c];
+     if(r!==wr){
+       grid[r][c]=null;t.r=wr;grid[wr][c]=t;
+       if(applyPlace)place(t);
+     }
+     wr--;
+   }
+ }
+}
+function freeCells(){let a=[];for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(!grid[r][c])a.push([r,c]);return a}
+function refreshTile(t){
+ t.el.textContent=String(t.n);
+ t.el.classList.toggle('even',t.n%2===0);
+ t.el.classList.toggle('triple',Math.abs(t.n)>=100);
+ const digit=Math.abs(t.n)%10;
+ t.ability1=(digit===1);t.ability3=(digit===3);t.ability5=(digit===5);t.ability7=(digit===7);t.ability9=(digit===9);
+ t.el.classList.toggle('ability3',t.ability3&&mode!=='easy');
+ t.el.classList.toggle('ability1',t.ability1&&mode!=='easy');
+ t.el.classList.toggle('ability5',t.ability5);
+ t.el.classList.toggle('ability7',t.ability7);
+ t.el.classList.toggle('ability9',t.ability9);
+}
+async function useAbility1(t){
+ if(locked||!t.ability1)return;
+ locked=true;del(t);gravity();await sleep(180);locked=false;
+}
+async function useAbility7(t){
+ if(locked||!t.ability7)return;
+ locked=true;
+ t.n-=1;refreshTile(t);
+ await sleep(120);
+ const ok=await dropNew(Math.floor(Math.random()*9)+1);
+ if(!ok)msg('たまごを だせなかったよ');
+ locked=false;
+}
+async function useAbility9(t){
+ if(locked||!t.ability9)return;
+ locked=true;
+ const dirs=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+ const neighbors=[];
+ for(const [dr,dc] of dirs){
+   const r=t.r+dr,c=t.c+dc;
+   if(r>=0&&r<ROWS&&c>=0&&c<COLS&&grid[r][c])neighbors.push(grid[r][c]);
+ }
+ for(const q of neighbors){
+   q.n-=1;
+   if(q.n<=0)del(q);else refreshTile(q);
+ }
+ t.n-=1;refreshTile(t);
+ gravity();await sleep(180);locked=false;
+}
+async function split(t){
+ if(locked||t.n%2)return;
+ let free=freeCells();if(!free.length){msg('あきマスが ないよ');return}
+ locked=true;
+ let n=t.n/2,r=t.r,c=t.c;
+ del(t);
+ mk(n,r,c);
+ await sleep(120);
+ await dropNew(n);
+ locked=false;
+}
+async function resolveResult(res,sum,spawnCount){
+ await sleep(400);
+ res.el.classList.add('fade');
+ await sleep(200);
+ const generation=Math.floor(sum/10)*10;
+ const births=[];
+ const caps=Array(COLS).fill(0);
+ for(let c=0;c<COLS;c++){
+   let count=0;
+   for(let r=0;r<ROWS;r++)if(grid[r][c]&&grid[r][c]!==res)count++;
+   caps[c]=ROWS-count;
+ }
+ const firstRound=[];
+ for(let c=0;c<COLS;c++)if(caps[c]>0)firstRound.push(c);
+ for(let i=0;i<spawnCount;i++){
+   let candidates=firstRound.filter(c=>caps[c]>0);
+   if(!candidates.length){candidates=[];for(let c=0;c<COLS;c++)if(caps[c]>0)candidates.push(c)}
+   if(!candidates.length)break;
+   const c=candidates[Math.floor(Math.random()*candidates.length)];
+   caps[c]--;
+   const j=firstRound.indexOf(c);if(j>=0)firstRound.splice(j,1);
+   const child=generation+Math.floor(Math.random()*9)+1;
+   const egg=document.createElement('div');egg.className='egg-pop';
+   egg.style.left=(c*cw+cw*.22)+'px';egg.style.top=(ch*.10)+'px';egg.style.width=(cw*.56)+'px';egg.style.height=(ch*.70)+'px';board.appendChild(egg);
+   births.push({child,c,egg});
+ }
+ await sleep(100);
+ births.forEach(b=>b.egg.classList.add('hatching'));
+ await sleep(100);
+ births.forEach(b=>b.egg.remove());
+ del(res);
+ // 既存の数字と、この合成で生まれる数字を同じ落下タイミングにそろえる。
+ gravity(false);
+ for(const b of births){
+   let c=b.c;
+   if(grid[0][c]){
+     const availableCols=[];
+     for(let cc=0;cc<COLS;cc++)if(!grid[0][cc])availableCols.push(cc);
+     if(!availableCols.length)break;
+     c=availableCols[Math.floor(Math.random()*availableCols.length)];
+   }
+   mk(b.child,0,c,'born');
+   gravity(false);
+ }
+ // DOM上では全タイルの移動を同じフレームで開始する。
+ void board.offsetWidth;
+ tiles.forEach(t=>place(t));
+ await sleep(200);
+ locked=false;
+}
+
+async function combine(a,b){
+ if(locked)return;
+ const sum=Number(a.n)+Number(b.n);
+ if(!Number.isFinite(sum))return;
+ const doubleSpawn=(Math.abs(a.n)%10===5&&Math.abs(b.n)%10===5);
+ const spawnCount=doubleSpawn?2:1;
+ locked=true;
+ let r=b.r,c=b.c;
+ del(a);del(b);
+ let res=mk(sum,r,c,'result');
+ if(sum>=100&&!endless){
+   pendingClear={res,sum,spawnCount};
+   clearNum.textContent=sum+'！';
+   overlay.classList.add('show');
+   return;
+ }
+ await resolveResult(res,sum,spawnCount);
+}
+async function continueEndless(){
+ if(!pendingClear)return;
+ const p=pendingClear;pendingClear=null;endless=true;overlay.classList.remove('show');
+ await resolveResult(p.res,p.sum,p.spawnCount);
+}
+function showEndScreen(){
+ if(!started)return;
+ locked=true;pendingClear=null;overlay.classList.remove('show');
+ endMax.textContent=String(maxSeen);endOverlay.classList.add('show');
+}
+function restartGame(){
+ endOverlay.classList.remove('show');startOverlay.classList.add('hide');started=true;init();
+}
+function goTitle(){
+ endOverlay.classList.remove('show');overlay.classList.remove('show');guideOverlay.classList.remove('show');
+ pendingClear=null;endless=false;started=false;locked=true;status.textContent='';
+ tiles.forEach(t=>t.el.remove());tiles.clear();grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+ startOverlay.classList.remove('hide');
+}
+async function dropNew(n,forcedCol=null,mergeBirth=false){
+ n=Number(n);
+ if(!Number.isFinite(n)){msg('うまく うまれなかったよ');locked=false;return false}
+ let availableCols=[];
+ for(let c=0;c<COLS;c++)if(!grid[0][c])availableCols.push(c);
+ let c=forcedCol;
+ if(c===null){
+   if(!availableCols.length){msg('マスが いっぱいだよ');return false}
+   c=availableCols[Math.floor(Math.random()*availableCols.length)];
+ }
+ const r=0;
+ const egg=document.createElement('div');egg.className='egg-pop';
+ egg.style.left=(c*cw+cw*.22)+'px';egg.style.top=(ch*.10)+'px';egg.style.width=(cw*.56)+'px';egg.style.height=(ch*.70)+'px';board.appendChild(egg);
+ await sleep(mergeBirth?250:120);egg.classList.add('hatching');await sleep(mergeBirth?180:90);egg.remove();
+ if(grid[0][c]){
+   availableCols=[];
+   for(let cc=0;cc<COLS;cc++)if(!grid[0][cc])availableCols.push(cc);
+   if(!availableCols.length){msg('マスが いっぱいだよ');return false}
+   c=availableCols[Math.floor(Math.random()*availableCols.length)];
+ }
+ let t=mk(n,r,c,'born');await sleep(mergeBirth?200:60);gravity();await sleep(120);return true;
+}
+function msg(s){status.textContent=s;setTimeout(()=>{if(status.textContent===s)status.textContent=''},1200)}
+function updateModeUI(){
+ modeBtn.textContent=mode==='easy'?'かんたん':mode==='hard'?'むずかしい':'ふつう';
+ const easyChoice=document.querySelector('.modeChoice[data-mode="easy"]');
+ const normalChoice=document.querySelector('.modeChoice[data-mode="normal"]');
+ if(easyChoice)easyChoice.classList.toggle('active',mode==='easy');
+ if(normalChoice){
+   normalChoice.classList.toggle('active',mode!=='easy');
+   normalChoice.textContent=mode==='hard'?'むずかしい':'ふつう';
+ }
+ document.querySelectorAll('.normalOnly').forEach(e=>e.style.display=mode==='easy'?'none':'grid');
+ tiles.forEach(t=>{
+   t.el.classList.toggle('ability1',t.ability1&&mode!=='easy');
+   t.el.classList.toggle('ability3',t.ability3&&mode!=='easy');
+ });
+ help.textContent='';
+}
+function init(){
+ tiles.forEach(t=>t.el.remove());tiles.clear();grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));locked=false;endless=false;pendingClear=null;maxSeen=0;overlay.classList.remove('show');endOverlay.classList.remove('show');
+ for(let r=ROWS-4;r<ROWS;r++)for(let c=0;c<COLS;c++)mk(Math.floor(Math.random()*9)+1,r,c);
+ gravity();
+}
+function startGame(){
+ started=true;startOverlay.classList.add('hide');init();
+}
+for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let e=document.createElement('div');e.className='cell';board.insertBefore(e,overlay)}
+document.querySelectorAll('.modeChoice').forEach(e=>e.onclick=()=>{
+ if(e.dataset.mode==='easy')mode='easy';
+ else if(mode==='normal')mode='hard';
+ else mode='normal';
+ updateModeUI();
+});
+document.getElementById('startBtn').onclick=startGame;document.getElementById('quitGame').onclick=showEndScreen;document.getElementById('continue').onclick=continueEndless;document.getElementById('clearQuit').onclick=showEndScreen;document.getElementById('retry').onclick=restartGame;document.getElementById('toTitle').onclick=goTitle;document.getElementById('guideBtn').onclick=()=>{guideOverlay.classList.add('show');guideOverlay.setAttribute('aria-hidden','false');};document.getElementById('guideClose').onclick=()=>{guideOverlay.classList.remove('show');guideOverlay.setAttribute('aria-hidden','true');};guideOverlay.onclick=e=>{if(e.target===guideOverlay)document.getElementById('guideClose').click();};modeBtn.onclick=()=>{mode=mode==='easy'?'normal':mode==='normal'?'hard':'easy';updateModeUI();};document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});window.addEventListener('resize',resize);grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));resize();updateModeUI();
+</script>
+</body>
+</html>
