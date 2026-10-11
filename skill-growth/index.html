@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101722"><title>技育成｜1周プレイデモ v1</title><style>:root{color-scheme:dark;--bg:#101722;--panel:#192435;--panel2:#202f43;--line:#35465b;--gold:#e2bb72;--ink:#f1f4f8;--muted:#a7b7c8;--accent:#6bbbc1;--danger:#e4817e;--good:#82d3a8}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 70% -10%,#263b54,transparent 45%),var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.5}button,select{font:inherit}button{cursor:pointer;color:inherit}button:disabled{cursor:not-allowed;opacity:.43}button:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:3px}.layout{width:min(1140px,96%);margin:0 auto;padding:20px 0 70px}.top{display:flex;align-items:center;gap:14px;justify-content:space-between;margin-bottom:16px}.brand{font-weight:900;font-size:clamp(22px,3vw,34px);letter-spacing:.08em}.eyebrow{font-size:12px;color:var(--gold);letter-spacing:.13em}.muted{color:var(--muted)}.tiny{font-size:12px}.btn{border:1px solid var(--line);background:#24354c;border-radius:10px;padding:12px 16px;min-height:45px;font-weight:700;transition:filter .12s,border-color .12s}.btn:hover:not(:disabled){filter:brightness(1.13);border-color:var(--accent)}.btn.primary{background:#32717a;border-color:#4d9799;color:white}.btn.gold{background:#79603c;border-color:#b38b51}.btn.danger{color:#ffbaba}.btn.ghost{background:transparent}.btn.small{min-height:37px;padding:8px 11px;font-size:13px}.buttons{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.shell{display:grid;grid-template-columns:260px 1fr;gap:16px}.side,.panel{background:rgba(25,36,53,.95);border:1px solid var(--line);border-radius:16px;padding:18px}.side{align-self:start;position:sticky;top:15px}.side h2{margin:0 0 14px;font-size:15px;color:var(--gold)}.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.statlabel{display:block;font-size:12px;color:var(--muted)}.statval{display:block;font-weight:750;font-size:19px;font-variant-numeric:tabular-nums}.aside-divider{border-top:1px solid var(--line);margin:15px 0}.main{min-width:0}.panel{margin-bottom:15px}.panel h1{font-size:clamp(21px,3vw,28px);margin:2px 0 8px}.panel h2{font-size:18px;margin:4px 0 12px}.panel h3{font-size:15px;margin:0 0 9px}.banner{background:#162e3b;border:1px solid #417b7c;border-radius:12px;padding:13px;margin:14px 0}.notice{border-left:3px solid var(--gold);padding:7px 12px;color:#eed9b3;background:#55442d4d;margin:12px 0}.steps{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 15px}.step{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:5px 10px;color:var(--muted)}.step.active{border-color:var(--gold);color:var(--gold)}.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.tile{border:1px solid var(--line);background:var(--panel2);padding:14px;border-radius:12px;display:flex;flex-direction:column;gap:5px;min-width:0}.tile strong{font-size:16px}.tile p{margin:0;font-size:13px;color:var(--muted)}.tile.selectable{cursor:pointer;text-align:left;width:100%;min-height:96px}.tile.selectable.selected{outline:2px solid var(--gold);background:#353d45}.tile.selectable:disabled{opacity:.5}.badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:50px;border:1px solid var(--line);color:var(--muted);vertical-align:middle}.badge.new{color:#ffe0aa;border-color:#b89451}.bar{height:11px;background:#0f1825;border-radius:99px;overflow:hidden;border:1px solid #43506a}.bar .fill{height:100%;transition:width .3s}.hp{background:linear-gradient(90deg,#b34850,#e88877)}.mp{background:linear-gradient(90deg,#3074a8,#70c6db)}.sta{background:linear-gradient(90deg,#778849,#b2cc74)}.linebar{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin:9px 0 5px}.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.enemy-card{background:#263447;border:1px solid #44536a;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:7px}.enemy-card .name{font-size:17px;font-weight:800}.enemy-meta{color:#afbfce;font-size:12px}.fight{display:grid;grid-template-columns:1fr 1fr;gap:14px}.fighter{background:#233248;padding:15px;border:1px solid var(--line);border-radius:13px}.fighter.enemy{background:#332c38}.log{background:#101a29;border:1px solid var(--line);border-radius:10px;max-height:205px;overflow:auto;padding:9px 12px;font-size:13px;line-height:1.65}.log div+div{border-top:1px solid #24344a}.log time{color:var(--muted);margin-right:7px}.skill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.skill{padding:12px;text-align:left;display:flex;flex-direction:column;gap:3px}.skill small{font-size:12px;color:var(--muted)}.skill .cost{color:#9fd8eb}.skill.new-skill{border-color:#aa854c;background:#4a4036}.split{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:15px 0}.slot{border:1px dashed #657289;border-radius:10px;min-height:65px;padding:10px;text-align:center;display:grid;place-items:center;font-size:13px}.slot.filled{border-style:solid;border-color:var(--gold);background:#3c3834}.slot button{border:none;background:transparent;cursor:pointer;padding:0}.list-compact{display:flex;gap:6px;flex-wrap:wrap}.effect{border:1px solid #d5a95c;padding:14px;border-radius:10px;background:#54452d66;animation:shine .75s alternate infinite}@keyframes shine{from{box-shadow:0 0 0 #d0a14c00}to{box-shadow:0 0 17px #d0a14c80}}.overlay{position:fixed;inset:0;background:#07101de8;z-index:50;display:grid;place-items:center;padding:15px}.modal{max-height:min(90vh,920px);overflow:auto;width:min(650px,100%);border-radius:17px;background:#202d3d;border:1px solid #66758b;box-shadow:0 15px 65px #000a;padding:20px}.modal h2{margin:0 0 10px}.detail{padding:11px 0;border-bottom:1px solid var(--line)}.detail:last-child{border:0}.detail b{display:block;margin-bottom:4px}.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{color:#addbd5;background:#2a4b4e;border-radius:5px;padding:2px 6px;font-size:12px}.foot{margin-top:15px;font-size:12px;color:var(--muted)}.result-num{font-size:31px;font-weight:900;color:var(--gold)}select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}hr{border:0;border-top:1px solid var(--line);margin:14px 0}@media(max-width:760px){.layout{width:min(100%,580px);padding:12px 12px 70px}.shell{grid-template-columns:1fr}.side{position:static}.side .statgrid{grid-template-columns:repeat(3,1fr)}.side h2{display:none}.side .aside-divider{margin:10px 0}.side .statval{font-size:16px}.panel,.side{padding:14px}.three{grid-template-columns:1fr}.fight{grid-template-columns:1fr}.slots{grid-template-columns:repeat(2,1fr)}.top{align-items:start}.top .controls{justify-content:end}.btn{font-size:14px}.tile{padding:12px}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><div id="app"></div><script>const DATA={"skills":{"T001":["攻撃",["攻撃系"],1.0],"T004":["斬撃",["攻撃系","剣技系"],1.06],"T013":["強打",["攻撃系","剣技系"],1.42],"T101":["ため斬り",["攻撃系","剣技系","ため系"],1.65],"T102":["貫通斬り",["攻撃系","剣技系","貫通系"],1.52],"T104":["渾身斬り",["攻撃系","剣技系"],2.05],"T105":["破甲斬り",["攻撃系","剣技系","弱体系"],1.3],"T011":["連撃",["攻撃系","連撃系"],1.24],"T015":["乱打",["攻撃系","連撃系"],1.68],"T017":["乱舞",["攻撃系","連撃系"],1.88],"T014":["必中",["攻撃系","精密系"],1.02],"T037":["狙い直し",["攻撃系","精密系"],1.17],"T040":["二の太刀",["攻撃系","剣技系","精密系"],1.39],"T089":["急所突き",["攻撃系","精密系","貫通系"],1.79],"T006":["速撃",["攻撃系","速度系"],1.14],"T103":["先制斬り",["攻撃系","剣技系","速度系"],1.58],"T002":["防御",["防御系"],0],"T020":["鉄壁",["防御系"],0],"T033":["見切り",["防御系","回避系"],0],"T046":["受け流し",["防御系","回避系"],0],"T032":["切り返し",["攻撃系","反撃系","回避系"],1.4],"T026":["反撃",["攻撃系","反撃系"],1.2],"T012":["背水の一撃",["攻撃系","瀕死系"],1.6],"T016":["決死の一撃",["攻撃系","瀕死系","精密系"],2.1],"T097":["剣技の極意",["剣技系","強化系"],0],"T027":["魔力撃",["攻撃系","魔法系"],1.25],"T028":["火炎",["攻撃系","魔法系","炎系"],1.35],"T005":["火球",["攻撃系","魔法系","炎系"],1.65],"T003":["回復",["魔法系","回復系"],0],"T057":["魔力循環",["魔法系","回復系"],0],"T076":["精神集中",["魔法系","強化系"],0],"T074":["魔力障壁",["魔法系","防御系"],0],"T009":["魔法剣",["攻撃系","剣技系","魔法系","複合系"],1.55],"T024":["火炎斬り",["攻撃系","剣技系","魔法系","炎系","複合系"],1.72],"T055":["連唱",["攻撃系","魔法系","炎系","連撃系"],1.4]},"parents":{"T004":["T001"],"T013":["T001","T004"],"T101":["T004","T013"],"T102":["T004","T013","T014"],"T104":["T013","T101","T097"],"T105":["T102","T004","T013"],"T011":["T001"],"T015":["T011"],"T017":["T011"],"T014":["T001","T004","T006"],"T037":["T014","T001","T004"],"T040":["T004","T014"],"T089":["T014","T006","T037"],"T006":["T001"],"T103":["T004","T006"],"T002":["T001"],"T020":["T002"],"T033":["T002","T006"],"T046":["T002","T033"],"T032":["T026","T002","T033"],"T026":["T002"],"T012":["T001"],"T016":["T012"],"T097":["T040","T004","T011"],"T027":["T001"],"T028":["T027"],"T005":["T028"],"T003":["T027"],"T057":["T027","T028"],"T076":["T027"],"T074":["T027","T003"],"T009":["T027"],"T024":["T009"],"T055":["T005"]},"modes":{"T001":"init","T004":"individual","T013":"tag","T101":"tag","T102":"tag","T104":"any","T105":"tag","T011":"individual","T015":"tag","T017":"tag","T014":"any","T037":"tag","T040":"tag","T089":"tag","T006":"tag","T103":"tag","T002":"individual","T020":"tag","T033":"any","T046":"tag","T032":"tag","T026":"tag","T012":"any","T016":"individual","T097":"any","T027":"individual","T028":"tag","T005":"tag","T003":"tag","T057":"tag","T076":"tag","T074":"tag","T009":"individual","T024":"tag","T055":"tag"},"requiredTags":{"T013":["攻撃系"],"T101":["剣技系"],"T102":["剣技系"],"T105":["剣技系"],"T015":["連撃系","剣技系"],"T017":["連撃系"],"T037":["攻撃系"],"T040":["剣技系"],"T089":["精密系"],"T006":["攻撃系"],"T103":["速度系"],"T020":["防御系"],"T046":["防御系"],"T032":["反撃系"],"T026":["防御系"],"T028":["魔法系"],"T005":["炎系"],"T003":["魔法系"],"T057":["魔法系"],"T076":["魔法系"],"T074":["魔法系"],"T024":["魔法系","剣技系"],"T055":["魔法系"]},"references":{"T001":["attack",1.0],"T004":["attack",1.08],"T013":["attack",1.42],"T101":["attack",2.55],"T102":["attack",1.36],"T104":["attack",2.05],"T105":["attack",1.24],"T011":["mix",0.64],"T015":["mix",0.85],"T017":["mix",0.68],"T014":["attack",1.03],"T037":["attack",1.17],"T040":["attack",1.39],"T089":["mix",1.52],"T006":["speed",1.14],"T103":["mix",1.58],"T002":["defense",0],"T020":["defense",0],"T033":["defense",0],"T046":["defense",0],"T032":["mix",1.4],"T026":["mix_def",1.24],"T012":["attack",1.58],"T016":["attack",2.02],"T097":["attack",0],"T027":["attack_int",1.25],"T028":["int",1.35],"T005":["int",1.65],"T003":["int",0],"T057":["int",0],"T076":["int",0],"T074":["int",0],"T009":["attack_int",1.55],"T024":["attack_int",1.72],"T055":["int",1.27]},"training":{"筋力強化":{"hp":3,"attack":2},"組手":{"attack":1,"defense":2},"フットワーク":{"defense":1,"speed":2},"反応訓練":{"speed":1,"int":2},"魔力制御":{"int":1,"mp":2},"呼吸法":{"mp":1,"hp":3}},"costs":{"T001":0,"T004":0,"T013":3,"T101":6,"T102":7,"T104":12,"T105":7,"T011":3,"T015":7,"T017":12,"T014":3,"T037":4,"T040":5,"T089":10,"T006":2,"T103":7,"T002":0,"T020":7,"T033":3,"T046":3,"T032":5,"T026":5,"T012":7,"T016":14,"T097":10,"T027":5,"T028":6,"T005":9,"T003":8,"T057":0,"T076":6,"T074":8,"T009":7,"T024":10,"T055":12},"magic":["T003","T005","T009","T024","T027","T028","T055","T057","T074","T076"],"magicAttacks":["T005","T009","T024","T027","T028","T055"],"conditions":{"T004":"攻撃で2体撃破","T013":"攻撃42以上＋攻撃系5命中","T101":"同技6使用＋同技3連続命中","T102":"高防御敵2戦で剣技3命中","T104":"ため斬り5使用＋1戦3命中と累計ダメージ","T105":"強化敵2戦で剣技3命中","T011":"攻撃の使用14回（旧6回）","T015":"連撃系/剣技系セット＋連撃3連続命中","T017":"連撃10使用＋乱打習得＋連撃3撃破","T014":"確定命中以外18連続命中（旧5）","T037":"外し→同技命中2回","T040":"剣技外し→別剣技命中2回","T089":"狙い直し/二の太刀習得＋精密技で瀕死敵3撃破","T006":"初手先攻命中3戦連続","T103":"速撃8使用＋初手速撃命中3戦連続","T002":"防御40以上＋被弾2回","T020":"防御8使用＋1戦3連続防御・被弾","T033":"同敵技10回失敗（旧3）","T046":"防御中に敵攻撃失敗2戦","T032":"反撃系セット＋敵失敗後命中2戦","T026":"防御系5使用＋防御後攻撃命中3回","T012":"HP20%以下で2連続攻撃命中","T016":"必中習得＋HP20%以下で背水命中1戦（旧2戦）","T097":"乱舞/渾身/急所を3つ習得＋異なる3技連続命中（旧モデルは2つ＋4行動）","T027":"賢さ36以上＋攻撃3回命中（攻撃セット）","T028":"魔力撃4使用＋魔法3命中（魔法系セット）","T005":"火炎6命中＋同一戦で火炎2連続命中（炎系セット）","T003":"魔力撃2使用＋HP70％以下で被弾・魔法系セット","T057":"累計魔法MP使用40以上＋同一戦MP残20以下で攻撃行動（魔法系セット）","T076":"無MPの攻撃後にMP消費攻撃命中を計2回（魔法系セット）","T074":"敵魔法被弾を異なる2戦闘で経験＋賢さ40（魔法系セット）","T009":"斬撃習得＋攻撃・賢さ36以上＋魔力撃4使用（魔力撃を個別セット）","T024":"魔法剣・火炎習得＋同一戦で斬撃と火炎を両方命中（魔法系・剣技系別技セット）","T055":"火球5使用＋1戦で魔法系攻撃3行動連続命中（魔法系セット）"}};
+'use strict';
+const GKEY='waza_ikusei_html_v1_save';
+const STATS={hp:'HP',mp:'MP',attack:'攻撃',defense:'防御',speed:'素早さ',int:'賢さ'};
+const ENEMY_NAMES={normal:'通常型',shield:'防御型',highdef:'重装型',evasive:'回避型',aggressive:'猛攻型',endurance:'耐久型',caster:'魔法型',boss:'最終ボス'};
+const DESCRIPTIONS={T001:'基本攻撃',T004:'標準の斬撃',T013:'高威力攻撃',T101:'1行動ため、次の行動で高威力攻撃',T102:'敵防御の45%を貫通',T104:'特大の一撃',T105:'攻撃時、敵防御を3ターン弱体化',T011:'2回攻撃・各回命中判定',T015:'2回攻撃・各回命中判定',T017:'3回攻撃・各回命中判定',T014:'確定命中',T037:'命中補正。直前の同技ミスなら確定命中',T040:'命中補正。直前の攻撃ミスなら確定命中',T089:'命中補正・部分防御貫通',T006:'先制しやすい速度技',T103:'行動順で先制する攻撃',T002:'そのターンの被ダメージを48%軽減',T020:'そのターンの被ダメージを0にする',T033:'敵の次の攻撃2回分に回避補正',T046:'防御と回避を併用',T032:'敵の攻撃ミス直後に威力増加',T026:'敵攻撃の命中直後に威力増加',T012:'残HPが少ないほど高威力',T016:'確定命中・低HP時に高威力',T097:'3行動の攻撃強化と次の1発の強化',T027:'攻撃と賢さを参照する魔法攻撃',T028:'炎の魔法。防御を一部貫通',T005:'強い炎魔法。防御を一部貫通',T003:'HPを回復',T057:'MPを回復',T076:'次の魔法攻撃2回を強化',T074:'敵の魔法攻撃2回を軽減',T009:'攻撃と賢さを参照、部分貫通',T024:'攻撃と賢さを参照、敵防御低下',T055:'2発を独立判定する魔法攻撃'};
+const rint=n=>Math.floor(n);
+const rnd=()=>Math.random();
+const choose=a=>a[Math.floor(rnd()*a.length)];
+const cnt=(o,k)=>o[k]||0;
+const inc=(o,k,n=1)=>{o[k]=(o[k]||0)+n;return o[k]};
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const skillName=id=>id==='T000'?'弱い攻撃':DATA.skills[id][0];
+const tags=id=>id==='T000'?[]:DATA.skills[id][1];
+const cost=id=>id==='T000'?0:DATA.costs[id];
+const known=id=>game.known.includes(id);
+const selected=id=>game.equipped.includes(id);
+const ids=()=>Object.keys(DATA.skills);
+const hasTag=(id,tag)=>tags(id).includes(tag);
+const save=()=>{try{localStorage.setItem(GKEY,JSON.stringify(game))}catch(e){}};
+let game;
+function fresh(){
+ const game={day:1,phase:'train',stats:{hp:120,mp:40,attack:30,defense:30,speed:30,int:30},stamina:65,gold:0,gear:0,known:['T001'],discovered:{T001:0},equipped:['T001'],shopBought:false,enemyChoices:[],battle:null,result:null,log:[],modal:'',learnModal:[],wins:0,losses:0,trainCounts:{},records:[],counts:{uses:{},hits:{},kills:{},hitsTag:{},enemyMisses:{},defenseUses:0,defenseHitsQualified:0,attackHitStreak:0,firstStrikeSeq:0,firstRapidSeq:0,sameCount:0,otherCount:0,defenseThenHits:0,criticalKills:0,highdefHits:0,highdefBattles:[],shieldHits:0,shieldBattles:[],evadeDefBattles:[],counterBattles:[],lowhpBattles:[],magicSpent:0,magicUses:0,magicHits:0,enemyMagicBattles:[],weaponMPSpent:0}};
+ return game;
+}
+function load(){try{const s=localStorage.getItem(GKEY); if(s){const a=JSON.parse(s);if(a&&a.counts&&a.stats&&a.known&&a.phase){game=a;return;}}}catch(e){}game=fresh();save();}
+const $=id=>document.getElementById(id);
+function msg(s){game.log.push(s);if(game.log.length>250)game.log.shift();}
+function phSteps(){const p=['shop','train','equip','enemy','battle','result'];const labels={shop:'ショップ',train:'育成',equip:'技セット',enemy:'敵選択',battle:'戦闘',result:'結果',end:'最終結果'};let view=p.filter(x=>x!=='shop'||game.day%5===0).map(x=>`<span class="step ${game.phase===x?'active':''}">${labels[x]}</span>`).join('');return `<div class="steps">${view}</div>`;}
+function bar(label,now,max,type){const amount=clamp(max?100*now/max:0,0,100);return `<div class="linebar"><b>${esc(label)}</b><span>${Math.max(0,now)} / ${max}</span></div><div class="bar"><div class="fill ${type}" style="width:${amount}%"></div></div>`;}
+function header(){const d=game.day>=31?'最終戦':`${game.day} / 30 日`;return `<header class="top"><div><div class="eyebrow">TECHNIQUE DISCOVERY RPG — DEMO</div><div class="brand">技育成</div></div><div class="controls"><button class="btn small ghost" data-a="book">技図鑑 ${game.known.length}/35</button><button class="btn small ghost" data-a="reset">最初から</button></div></header>`}
+function sidebar(){const c=game.counts;return `<aside class="side"><h2>育成状況</h2><div class="split"><strong>${game.day>=31?'31日目・最終戦':`${game.day}日目 / 30日`}</strong><span class="pill">${game.gold} G</span></div>${bar('スタミナ',game.stamina,80,'sta')}<div class="aside-divider"></div><div class="statgrid">${Object.entries(STATS).map(([k,v])=>`<div><span class="statlabel">${v}</span><span class="statval">${game.stats[k]}</span></div>`).join('')}</div><div class="aside-divider"></div><div class="split tiny muted"><span>習得 ${game.known.length} / 35</span><span>勝利 ${game.wins}　敗北 ${game.losses}</span></div><div class="foot">現在の能力値は最大値です。戦闘中のHP・MPは別に管理します。<br>各数値・30日制はランナーv12の試験設定です。</div></aside>`}
+function btn(action,title,klass='',extra=''){return `<button class="btn ${klass}" data-a="${action}" ${extra}>${title}</button>`;}
+function panel(title,body){return `<section class="panel"><h1>${title}</h1>${body}</section>`;}
+function shopView(){const items=[{kind:'gear',name:'トレーニング機材',price:32,desc:'今後の訓練で上がる能力がそれぞれ＋1（重複不可）',disable:!!game.gear},{kind:'stamina',name:'スタミナ回復',price:15,desc:'スタミナを＋30（上限80）'},{kind:'stat',name:'能力強化',price:22,desc:'選択した能力を＋3'}];return panel('ショップ',`<p class="muted">5日ごとに開催。買い物は今回1回までです（試験ルール）。</p><div class="tiles">${items.map(it=>`<div class="tile"><strong>${it.name}</strong><p>${it.desc}</p><span class="badge">${it.price} G</span>${it.kind==='stat'?`<label class="tiny">上げる能力 <select id="shopstat">${Object.entries(STATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>`:''}${btn('buy:'+it.kind,'購入','small primary',(game.gold<it.price||game.shopBought||it.disable)?'disabled':'')}</div>`).join('')}</div><div class="buttons">${btn('shopNext','ショップを出る','gold')}</div>`);}
+function trainView(){return panel(`${game.day}日目：トレーニング`, `<p class="muted">今日の育成を1つ選んでください。その後に技をセットして戦います。</p>${game.stamina<16?'<div class="notice">スタミナ不足です。訓練を選ぶと失敗します。休養すると回復します。</div>':''}<div class="tiles">${Object.entries(DATA.training).map(([name,gains])=>`<button class="tile selectable" data-a="train:${name}"><strong>${name}</strong><span class="muted tiny">${Object.entries(gains).map(([k,v])=>`${STATS[k]} ＋${v+(game.gear?1:0)}`).join('　/　')}</span><p>スタミナ −13</p></button>`).join('')}<button class="tile selectable" data-a="rest"><strong>休養</strong><span class="muted tiny">スタミナ ＋26（上限80）</span><p>休養した日も戦闘します</p></button></div>`);}
+function equipView(){const available=game.known;return panel(`${game.day>=31?'最終戦':'戦闘'}の準備：技セット`,`<p class="muted">習得済みの技から最大4つ。技を押して追加・解除してください。戦闘中の新技は一時的な追加枠です。</p><div class="slots">${Array.from({length:4},(_,i)=>{let id=game.equipped[i];return `<div class="slot ${id?'filled':''}">${id?`<button data-a="slot:${id}" title="解除">${skillName(id)} <span class="tiny muted">×</span></button>`:`<span class="muted">空き枠 ${i+1}</span>`}</div>`}).join('')}</div><div class="tiles">${available.map(id=>`<button class="tile selectable ${selected(id)?'selected':''}" data-a="toggle:${id}" ${!selected(id)&&game.equipped.length===4?'disabled':''}><strong>${skillName(id)} ${selected(id)?'<span class="badge new">セット中</span>':''}</strong><p>${DESCRIPTIONS[id]}</p><span class="tiny">MP ${cost(id)}　${tags(id).join('・')}</span></button>`).join('')}</div><div class="buttons">${btn('equipNext',game.day>=31?'最終ボスに挑む':'敵を選ぶ','primary',game.equipped.length?'':'disabled')}</div>`);}
+function enemiesForDay(){const day=game.day;const level=Math.floor((day-1)/5);const kinds=day>=12?['normal','shield','highdef','evasive','aggressive','endurance','caster']:['normal','shield','highdef','evasive','aggressive','caster'];return Array.from({length:3},()=>{const kind=choose(kinds);const hp=kind==='endurance'?230+level*20:90+level*18+(kind==='shield'?10:0);return {kind,hp,hpmax:hp,defense:24+level*4+(kind==='highdef'?26:0),speed:25+level*4+(kind==='evasive'?12:0),attack:27+level*3+(kind==='aggressive'?9:0),accuracy:kind==='endurance'?.76:kind==='evasive'?.78:.82,shield:0,shieldTurns:0,debuff:0,debuffTurns:0,dodge:0,lastDamage:0};});}
+function enemyInfo(e){return `<div class="enemy-meta">HP ${e.hpmax} / 攻撃 ${e.attack}<br>防御 ${e.defense} / 素早さ ${e.speed}</div>`}
+function enemyView(){return panel(`${game.day}日目：戦闘相手を選択`,`<p class="muted">3体の候補から1体を選びます。相手の特徴は技を発見する機会にも関わります。</p><div class="three">${game.enemyChoices.map((e,i)=>`<div class="enemy-card"><span class="name">${ENEMY_NAMES[e.kind]}</span>${enemyInfo(e)}${btn('enemy:'+i,'この敵と戦う','primary')}</div>`).join('')}</div>`);}
+function useOptions(){const b=game.battle;return [...new Set([...game.equipped,...b.s.new])].filter(id=>b.s.mp>=cost(id));}
+function battleView(){const b=game.battle;const e=b.enemy;let options=useOptions();const forced=b.charge;return panel(`${game.day===31?'最終戦':'戦闘'}：${ENEMY_NAMES[e.kind]}`,`<div class="fight"><div class="fighter enemy"><div class="split"><strong>${ENEMY_NAMES[e.kind]}</strong><span class="badge">ターン ${b.turn} / 24</span></div>${bar('敵HP',Math.max(0,e.hp),e.hpmax,'hp')}<div class="tiny muted">攻撃 ${e.attack}　防御 ${e.defense+(e.shield||0)-(e.debuff||0)}　素早さ ${e.speed}</div>${e.shield?'<span class="pill">防御強化中</span>':''}${e.debuff?'<span class="pill">防御低下中</span>':''}</div><div class="fighter"><div class="split"><strong>プレイヤー</strong><span class="badge">技 ${game.equipped.length}＋${b.s.new.length}</span></div>${bar('HP',Math.max(0,b.php),game.stats.hp,'hp')}${bar('MP',b.s.mp,game.stats.mp,'mp')}${b.s.magicPower?'<span class="pill">魔法強化</span>':''}${b.s.magicBarrier?'<span class="pill">魔法障壁</span>':''}</div></div><h2 style="margin-top:17px">使用する技</h2>${forced?`<div class="notice">ため斬りの発動ターンです。MPの追加消費なしで自動的に攻撃します。</div><div class="buttons">${btn('act:T101','ため斬りを放つ','primary')}</div>`:`<div class="skill-grid">${options.length?options.map(id=>`<button class="btn skill ${b.s.new.includes(id)?'new-skill':''}" data-a="act:${id}"><strong>${skillName(id)} ${b.s.new.includes(id)?'<span class="badge new">NEW</span>':''}</strong><small>${DESCRIPTIONS[id]}</small><span class="cost tiny">消費MP ${cost(id)}</span></button>`).join(''):`<button class="btn skill" data-a="act:T000"><strong>弱い攻撃</strong><small>使える技がないときの救済行動</small><span class="cost tiny">消費MP 0</span></button>`}</div>`}<h2 style="margin-top:20px">戦闘ログ</h2><div class="log" id="battlelog">${b.logs.slice(-20).map(l=>`<div><time>${l.turn}T</time>${esc(l.text)}</div>`).join('')}</div><p class="foot">行動を選ぶと両者が素早さに応じて行動します。逃走・アイテム使用はありません。</p>`);}
+function resultView(){const r=game.result;const won=r.reason==='win';return panel(r.boss?'最終決戦の結果':'戦闘結果',`<div class="result-num">${won?'勝利':r.reason==='death'?'敗北':'時間切れ'}</div><p class="muted">${ENEMY_NAMES[r.enemy.kind]} / ${r.turn}ターン　${r.boss?'最終戦':'通常戦'}</p><div class="tiles"><div class="tile"><strong>獲得したお金</strong><span>${r.goldGain} G</span></div><div class="tile"><strong>今回発見した技</strong><span>${r.learned.length}技</span></div></div>${r.learned.length?`<div class="banner"><strong>新たに発見</strong><p>${r.learned.map(skillName).join('・')}</p></div>`:''}<p>現在の習得技：${game.known.length}/35　所持金：${game.gold} G</p>${!won?'<div class="notice">敗北・時間切れでも育成は続きます。スタミナが9低下しました。</div>':''}<div class="buttons">${btn(r.boss?'finish':'nextDay',r.boss?'最終結果を見る':'翌日へ進む','primary')}</div>`);}
+function endView(){let boss=game.result;return panel('育成完了',`<div class="eyebrow">30 DAYS + FINAL BATTLE</div><div class="result-num">${boss.reason==='win'?'最終ボス撃破！':'最終ボスに敗北'}</div><p>最終戦：${boss.turn}ターン / 通常戦勝利：${game.wins-(boss.reason==='win'?1:0)}回</p><div class="tiles">${Object.entries(STATS).map(([k,v])=>`<div class="tile"><span class="muted tiny">${v}</span><strong>${game.stats[k]}</strong></div>`).join('')}</div><div class="banner">習得技：${game.known.length} / 35<br><span class="tiny muted">${game.known.map(skillName).join('・')}</span></div><div class="buttons">${btn('book','発見した技を見る','gold')}${btn('reset','新しい周回を始める','primary')}</div>`);}
+function bookView(){const knowns=ids().filter(id=>known(id));return `<div class="overlay" role="dialog" aria-modal="true"><div class="modal"><div class="split"><h2>技図鑑 ${knowns.length}/35</h2>${btn('close','閉じる','small')}</div><p class="muted tiny">発見した技のみ名称と習得条件を表示します。条件と個別数値はv12試験設定です。</p>${knowns.map(id=>`<div class="detail"><b>${skillName(id)} <span class="badge">MP ${cost(id)}</span></b><div class="tiny muted">${DESCRIPTIONS[id]}　/　${tags(id).join('・')}</div><div class="tiny">習得条件：${id==='T001'?'初期習得':esc(DATA.conditions[id]||'条件記録なし')}</div></div>`).join('')}<p class="foot">未発見 ${35-knowns.length}技の情報は表示しません。</p></div></div>`;}
+function learnView(){return `<div class="overlay" role="dialog" aria-modal="true"><div class="modal"><div class="effect"><div class="eyebrow">TECHNIQUE DISCOVERED</div><h2>新しい技を発見！</h2>${game.learnModal.map(id=>`<p style="font-size:24px;font-weight:800;margin:9px 0">${skillName(id)}</p><p class="tiny">${DESCRIPTIONS[id]}</p>`).join('')}</div><p class="muted">新技は次の自分の行動から使用できます。戦闘終了後は習得済みに残りますが、次の戦闘ではセットが必要です。</p><div class="buttons">${btn('closeLearn','戦闘に戻る','primary')}</div></div></div>`;}
+function render(){const title=game.phase==='shop'?shopView():game.phase==='train'?trainView():game.phase==='equip'?equipView():game.phase==='enemy'?enemyView():game.phase==='battle'?battleView():game.phase==='result'?resultView():endView();$('app').innerHTML=`<div class="layout">${header()}<div class="shell">${sidebar()}<main class="main">${game.phase==='end'?'':phSteps()}${title}<div class="foot">技育成 HTMLデモ v1 — Pythonランナーv12を基準とした試作。詳細数値・習得条件は未確定です。</div></main></div></div>${game.modal==='book'?bookView():''}${game.learnModal.length?learnView():''}`;save();const log=$('battlelog');if(log)log.scrollTop=log.scrollHeight;}
+function setNextPhase(p){game.phase=p;render();}
+function newDay(){game.day++;game.shopBought=false;game.phase=game.day%5===0?'shop':'train';render();}
+function enemyForBoss(){return {kind:'boss',hp:275,hpmax:275,attack:42,defense:54,speed:52,accuracy:.87,shield:0,shieldTurns:0,debuff:0,debuffTurns:0,dodge:0,lastDamage:0};}
+function startBattle(enemy){game.phase='battle';game.battle={enemy,php:game.stats.hp,turn:1,charge:false,guard:1,evade:0,atkBuff:0,bonus:1,prevEvent:null,logs:[],firstStrike:false,rapidFirst:false,s:{new:[],damage:0,attackHits:0,receivedHits:0,guardReceived:0,guardSeq:0,maxGuardSeq:0,multiSeq:0,lowHpHitSeq:0,differentHitSeq:0,prevAttack:null,previousPlayerWasGuard:false,seenCounter:false,sameSeq:{},sameSeqMax:{},recentHit:null,distinctUsed:[],seenHighdefHit:false,seenShieldHit:false,seenEvadeDef:false,seenLowhpT012:false,latestPlayerGuard:false,playerActions:0,turn:1,mp:game.stats.mp,phpRatio:1,damageTaken:0,spellSeq:0,maxSpellSeq:0,fireSeq:0,maxFireSeq:0,focusCount:0,recentZeroMp:false,zeroMpAttack:false,magicPower:0,magicBarrier:0,hitThisBattle:[],seenEnemyMagic:false}};blog('戦闘開始。');render();}
+function blog(text){let b=game.battle;b.logs.push({turn:b.turn,text});if(b.logs.length>100)b.logs.shift();}
+function eligibility(id){const b=game.battle;const options=[...new Set([...game.equipped,...b.s.new])], mode=DATA.modes[id];if(mode==='any')return true;if(mode==='individual')return (DATA.parents[id]||[]).some(k=>options.includes(k));if(mode==='tag'){
+ if(id==='T024')return options.some(a=>options.some(z=>a!==z&&hasTag(a,'魔法系')&&hasTag(z,'剣技系')));
+ if(id==='T015')return options.some(a=>options.some(z=>a!==z&&hasTag(a,'連撃系')&&hasTag(z,'剣技系')));
+ return (DATA.requiredTags[id]||[]).every(t=>options.some(k=>hasTag(k,t)));
+}return false;}
+function addUnique(list,key){if(!list.includes(key))list.push(key);}
+function maxCount(o){return Math.max(0,...Object.values(o||{}));}
+function checkLearn(){const c=game.counts,b=game.battle,s=b.s,z=game.stats,u=c.uses,hit=c.hits;
+ function satisfied(id){const cond={
+ T004:cnt(c.kills,'T001')>=2,
+ T013:z.attack>=42&&cnt(c.hitsTag,'攻撃系')>=5,
+ T101:['T004','T013'].some(x=>cnt(u,x)>=6&&cnt(s.sameSeqMax,x)>=3),
+ T102:c.highdefBattles.length>=2&&c.highdefHits>=3,
+ T104:cnt(u,'T101')>=5&&s.attackHits>=3&&s.damage>=220,
+ T105:c.shieldBattles.length>=2&&c.shieldHits>=3,
+ T011:cnt(u,'T001')>=14,
+ T015:s.multiSeq>=3,
+ T017:cnt(u,'T011')>=10&&cnt(c.kills,'連撃系')>=3&&known('T015'),
+ T014:c.attackHitStreak>=18,
+ T037:c.sameCount>=2,
+ T040:c.otherCount>=2,
+ T089:c.criticalKills>=2&&known('T037')&&known('T040'),
+ T006:c.firstStrikeSeq>=3,
+ T103:cnt(u,'T006')>=8&&c.firstRapidSeq>=3,
+ T002:z.defense>=40&&c.defenseHitsQualified>=2,
+ T020:cnt(u,'T002')>=8&&s.maxGuardSeq>=3&&s.guardReceived>=1,
+ T033:maxCount(c.enemyMisses)>=10,
+ T046:c.evadeDefBattles.length>=2,
+ T032:c.counterBattles.length>=2,
+ T026:c.defenseUses>=5&&c.defenseThenHits>=3,
+ T012:s.lowHpHitSeq>=2,
+ T016:known('T014')&&c.lowhpBattles.length>=1,
+ T097:['T017','T104','T089'].every(known)&&s.differentHitSeq>=3,
+ T027:z.int>=36&&cnt(hit,'T001')>=3,
+ T028:cnt(u,'T027')>=4&&c.magicHits>=3,
+ T005:cnt(hit,'T028')>=6&&s.maxFireSeq>=2,
+ T003:cnt(u,'T027')>=2&&s.damageTaken>=20&&s.phpRatio<=.70,
+ T057:c.magicSpent>=40&&s.mp<=20&&s.zeroMpAttack,
+ T076:s.focusCount>=2,
+ T074:c.enemyMagicBattles.length>=2&&z.int>=40,
+ T009:known('T004')&&z.int>=36&&z.attack>=36&&cnt(u,'T027')>=4,
+ T024:known('T009')&&known('T028')&&s.hitThisBattle.includes('T004')&&s.hitThisBattle.includes('T028'),
+ T055:cnt(u,'T005')>=5&&s.maxSpellSeq>=3
+ };return !!cond[id];}
+ for(let pass=0;pass<3;pass++){let changed=false;for(const id of ids()){if(known(id)||id==='T001'||!eligibility(id)||!satisfied(id))continue;game.known.push(id);game.discovered[id]=game.day;s.new.push(id);game.learnModal.push(id);blog(`新技「${skillName(id)}」を発見！`);changed=true;}if(!changed)break;}
+}
+function enemyAct(){const b=game.battle,e=b.enemy,s=b.s,c=game.counts;let behavior='attack';
+ if(e.kind==='shield'&&e.shield===0&&e.hp>e.hpmax*.32&&rnd()<.62){e.shield=7;e.shieldTurns=2;behavior='shield';blog('敵は防御を強化した。');return 'guard';}
+ if(e.kind==='highdef'&&e.shield===0&&e.lastDamage>9&&rnd()<.30){e.shield=4;e.shieldTurns=2;blog('敵は身構えた。');return 'guard';}
+ if(e.kind==='evasive'&&e.hp>e.hpmax*.20&&rnd()<.25){e.dodge=1;blog('敵は回避態勢をとった。');return 'guard';}
+ if((e.kind==='caster'||e.kind==='boss')&&rnd()<(e.kind==='caster'?.53:.23))behavior='spell';
+ else if((e.kind==='aggressive'||e.kind==='boss')&&rnd()<(e.kind==='aggressive'?.40:.18))behavior='heavy';
+ let acc=clamp(e.accuracy+Math.min(.12,(e.speed-game.stats.speed)*.0025)-(behavior==='heavy'?.13:0)-(b.evade?.23:0),.40,.94);
+ const hit=rnd()<acc;
+ let evt;if(!hit){inc(c.enemyMisses,e.kind+'_attack');if(s.latestPlayerGuard)s.seenEvadeDef=true;evt='miss';blog(`敵の${behavior==='spell'?'魔法':behavior==='heavy'?'強攻撃':'攻撃'}は外れた。`);}else{
+ let raw=behavior==='spell'?Math.max(1,rint(e.attack*1.05-game.stats.int*.18-game.stats.defense*.07)):
+ Math.max(1,rint(e.attack*(behavior==='heavy'?(e.kind==='boss'?1.16:1.32):.88)-game.stats.defense*.28));
+ if(behavior==='spell'){if(s.magicBarrier)raw=rint(raw*.45);s.seenEnemyMagic=true;}
+ const dmg=Math.max(0,rint(raw*b.guard));b.php-=dmg;s.receivedHits++;s.damageTaken+=dmg;if(game.stats.defense>=40)c.defenseHitsQualified++;if(s.latestPlayerGuard)s.guardReceived++;
+ blog(`敵の${behavior==='spell'?'魔法':behavior==='heavy'?'強攻撃':'攻撃'}：${dmg}ダメージ。`);evt='hit';b.guard=1;
+ }
+ if(b.evade)b.evade--;if(s.magicBarrier)s.magicBarrier--;return evt;
+}
+function playerAct(chosen,first,evt){const b=game.battle,e=b.enemy,s=b.s,c=game.counts,z=game.stats,force=b.charge;
+ if(force)chosen='T101';if(chosen!=='T000'&&!force&&(!useOptions().includes(chosen)))throw Error('使用できない技が選択されました');
+ s.playerActions++;s.phpRatio=b.php/z.hp;
+ const defSkill=['T002','T020','T033','T046'].includes(chosen);s.latestPlayerGuard=defSkill;
+ if(chosen==='T000'){
+  if(rnd()<.72){e.hp-=2;s.damage+=2;blog('弱い攻撃：2ダメージ。');}else blog('弱い攻撃は外れた。');
+  if(s.mp<5)s.zeroMpAttack=true;s.recentZeroMp=true;s.prevAttack=null;s.differentHitSeq=0;s.spellSeq=0;s.fireSeq=0;s.previousPlayerWasGuard=false;checkLearn();return;
+ }
+ const isMagic=DATA.magic.includes(chosen),attack=hasTag(chosen,'攻撃系');
+ if(!force){const spend=cost(chosen);s.mp-=spend;if(isMagic){c.magicSpent+=spend;c.magicUses++;inc(c.uses,chosen);}else{c.weaponMPSpent+=spend;}}
+ if(chosen==='T003'){let healed=Math.min(z.hp-b.php,rint(z.int*.8)+9);b.php+=healed;blog(`${skillName(chosen)}：HPを${healed}回復。`);s.guardSeq=0;s.spellSeq=0;s.fireSeq=0;s.recentZeroMp=false;checkLearn();return;}
+ if(chosen==='T057'){let gain=Math.min(z.mp-s.mp,rint(z.int*.23)+15);s.mp+=gain;blog(`魔力循環：MPを${gain}回復。`);s.guardSeq=0;s.spellSeq=0;s.fireSeq=0;s.recentZeroMp=false;checkLearn();return;}
+ if(chosen==='T076'){s.magicPower=2;s.guardSeq=0;s.spellSeq=0;s.fireSeq=0;s.recentZeroMp=false;blog('精神集中：魔法攻撃2回を強化。');checkLearn();return;}
+ if(chosen==='T074'){s.magicBarrier=2;s.guardSeq=0;s.spellSeq=0;s.fireSeq=0;s.recentZeroMp=false;blog('魔力障壁：敵の魔法攻撃2回を軽減。');checkLearn();return;}
+ if(defSkill){c.defenseUses++;inc(c.uses,chosen);s.guardSeq++;s.maxGuardSeq=Math.max(s.maxGuardSeq,s.guardSeq);s.multiSeq=0;s.differentHitSeq=0;s.recentHit=null;s.prevAttack=null;s.distinctUsed=[];if(chosen==='T002')b.guard=.52;else if(chosen==='T020')b.guard=0;else if(chosen==='T033'){b.evade=Math.max(b.evade,2);b.guard=1;}else{b.guard=.57;b.evade=Math.max(b.evade,2);}blog(`${skillName(chosen)}で身を守る。`);checkLearn();return;}
+ s.guardSeq=0;
+ if(chosen==='T097'){inc(c.uses,chosen);b.atkBuff=3;b.bonus=1.4;c.attackHitStreak=0;s.prevAttack=null;s.multiSeq=0;s.differentHitSeq=0;s.recentHit=null;s.distinctUsed=[];blog('剣技の極意：次の攻撃を強化。');checkLearn();return;}
+ if(chosen==='T101'&&!force){inc(c.uses,chosen);c.attackHitStreak=0;s.prevAttack=null;s.multiSeq=0;s.differentHitSeq=0;s.distinctUsed=[];b.charge=true;blog('ため斬り：力をためた。次の自分の行動で発動。');checkLearn();return;}
+ if(!force&&!isMagic)inc(c.uses,chosen);
+ b.charge=false;
+ const [reference,initialMult]=DATA.references[chosen];let mult=initialMult;
+ let stat=reference==='mix'?(z.attack+z.speed)/2:reference==='mix_def'?(z.attack*.75+z.defense*.25):reference==='speed'?z.speed:reference==='int'?z.int:reference==='attack_int'?(z.attack+z.int)/2:z.attack;
+ if(chosen==='T101')mult=2.55;
+ if(DATA.magicAttacks.includes(chosen)&&s.magicPower){mult*=1.43;s.magicPower--;}
+ if(b.atkBuff){stat*=1.28;b.atkBuff--;}
+ if(b.bonus>1){mult*=b.bonus;b.bonus=1;}
+ if(['T012','T016'].includes(chosen))mult*=1+(1-b.php/z.hp);
+ if(chosen==='T006'&&first)mult*=1.28;
+ if(chosen==='T026'&&evt==='hit')mult*=1.35;
+ if(chosen==='T032'&&evt==='miss')mult*=1.45;
+ let accuracy=.86+(z.speed-e.speed)*.0035-(e.kind==='evasive'?.10:0)-(e.dodge?.17:0);
+ if(game.stamina<8){accuracy-=.06;mult*=.88;}
+ if(['T037','T040','T089'].includes(chosen))accuracy+=.12;
+ let guaranteed=['T014','T016'].includes(chosen)||(['T037','T040'].includes(chosen)&&s.prevAttack&&!s.prevAttack[1]);
+ accuracy=guaranteed?1:clamp(accuracy,.48,.985);
+ const parts=['T011','T015','T055'].includes(chosen)?2:chosen==='T017'?3:1;
+ let defense=e.defense+e.shield-e.debuff;
+ const pierce=chosen==='T102'?.45:chosen==='T089'?.38:['T009','T024'].includes(chosen)?.35:['T028','T005','T055'].includes(chosen)?.22:0;
+ defense*=1-pierce;
+ const base=Math.max(1,rint(stat*mult*.88-defense*.36));let damage=0,landed=0;
+ for(let i=0;i<parts;i++)if(rnd()<accuracy||guaranteed){landed++;damage+=parts>1?Math.max(1,rint(base*.67)):base;}
+ const hit=landed>0;e.dodge=0;
+ if(hit){const beforeHP=e.hp;e.hp-=damage;e.lastDamage=damage;s.damage+=damage;s.attackHits++;
+ if(DATA.magicAttacks.includes(chosen)){c.magicHits++;s.spellSeq++;s.maxSpellSeq=Math.max(s.maxSpellSeq,s.spellSeq);if(chosen==='T028'){s.fireSeq++;s.maxFireSeq=Math.max(s.maxFireSeq,s.fireSeq)}else s.fireSeq=0;if(s.recentZeroMp)s.focusCount++;}else{s.spellSeq=0;s.fireSeq=0;if(chosen==='T001'&&s.mp<=20)s.zeroMpAttack=true;}
+ addUnique(s.hitThisBattle,chosen);inc(c.hits,chosen);for(const tag of tags(chosen))inc(c.hitsTag,tag);
+ if(!guaranteed)c.attackHitStreak++;else c.attackHitStreak=0;
+ if(['T105','T024'].includes(chosen)){e.debuff=5;e.debuffTurns=3;}
+ if(hasTag(chosen,'剣技系')&&e.defense>z.defense){c.highdefHits++;s.seenHighdefHit=true;}
+ if(hasTag(chosen,'剣技系')&&e.shield>0){c.shieldHits++;s.seenShieldHit=true;}
+ if(hasTag(chosen,'精密系')&&e.hp<=0&&beforeHP/e.hpmax<=.30)c.criticalKills++;
+ if(b.php/z.hp<=.2){s.lowHpHitSeq++;if(chosen==='T012')s.seenLowhpT012=true;}else s.lowHpHitSeq=0;
+ if(s.prevAttack&&!s.prevAttack[1]){let prev=s.prevAttack[0];if(prev===chosen)c.sameCount++;else if(hasTag(prev,'剣技系')&&hasTag(chosen,'剣技系'))c.otherCount++;}
+ if(s.previousPlayerWasGuard)c.defenseThenHits++;if(evt==='miss')s.seenCounter=true;
+ if(hasTag(chosen,'連撃系'))s.multiSeq++;else s.multiSeq=0;
+ if(s.distinctUsed.includes(chosen))s.distinctUsed=[];s.distinctUsed.push(chosen);s.differentHitSeq=s.distinctUsed.length;s.recentHit=chosen;
+ if(['T004','T013'].includes(chosen)){inc(s.sameSeq,chosen);s.sameSeqMax[chosen]=Math.max(cnt(s.sameSeqMax,chosen),cnt(s.sameSeq,chosen));}else s.sameSeq={};
+ if(e.hp<=0){inc(c.kills,chosen);for(const tag of tags(chosen))inc(c.kills,tag);}
+ blog(`${skillName(chosen)}：${landed}/${parts}発命中、${damage}ダメージ。`);
+ }else{blog(`${skillName(chosen)}は外れた。`);s.spellSeq=0;s.fireSeq=0;c.attackHitStreak=0;s.multiSeq=0;s.differentHitSeq=0;s.recentHit=null;s.sameSeq={};s.lowHpHitSeq=0;s.distinctUsed=[];}
+ s.prevAttack=[chosen,hit];s.recentZeroMp=!isMagic;s.previousPlayerWasGuard=false;checkLearn();
+}
+function action(id){const b=game.battle,s=b.s,e=b.enemy;const forced=b.charge;
+ if(!forced){if(id==='T000'){if(useOptions().length)return;}else if(!useOptions().includes(id))return;}
+ const first=(game.stats.speed+rnd()*5>=e.speed+rnd()*5)||id==='T103';let evt=b.prevEvent;
+ if(first){const oldUses=cnt(game.counts.uses,'T006');playerAct(id,true,evt);if(b.turn===1&&s.prevAttack&&s.prevAttack[1]){b.firstStrike=hasTag(s.prevAttack[0],'攻撃系');b.rapidFirst=cnt(game.counts.uses,'T006')>oldUses&&s.prevAttack[0]==='T006';}
+ if(e.hp>0){evt=enemyAct();b.prevEvent=evt;}}
+ else{evt=enemyAct();b.prevEvent=evt;if(b.php>0)playerAct(id,false,evt);}
+ s.previousPlayerWasGuard=s.latestPlayerGuard;
+ if(e.shieldTurns){e.shieldTurns--;if(e.shieldTurns===0)e.shield=0;}
+ if(e.debuffTurns){e.debuffTurns--;if(e.debuffTurns===0)e.debuff=0;}
+ checkLearn();
+ if(b.php<=0||e.hp<=0||b.turn>=24){endBattle();return;}
+ b.turn++;s.turn=b.turn;render();
+}
+function endBattle(){const b=game.battle,s=b.s,c=game.counts,e=b.enemy;
+ c.firstStrikeSeq=b.firstStrike?c.firstStrikeSeq+1:0;c.firstRapidSeq=b.rapidFirst?c.firstRapidSeq+1:0;
+ if(s.seenHighdefHit)addUnique(c.highdefBattles,game.day);
+ if(s.seenShieldHit)addUnique(c.shieldBattles,game.day);
+ if(s.seenEvadeDef)addUnique(c.evadeDefBattles,game.day);
+ if(s.seenCounter)addUnique(c.counterBattles,game.day);
+ if(s.seenLowhpT012)addUnique(c.lowhpBattles,game.day);
+ if(s.seenEnemyMagic)addUnique(c.enemyMagicBattles,game.day);
+ checkLearn();const won=e.hp<=0;const reason=won?'win':b.php<=0?'death':'timeout';let gain=0;
+ if(won){game.wins++;if(game.day<=30){gain=11+Math.floor(game.day/7)*2;game.gold+=gain;}}
+ else{game.losses++;game.stamina=Math.max(0,game.stamina-9);}
+ const r={day:game.day,boss:game.day===31,reason,turn:b.turn,enemy:{kind:e.kind},goldGain:gain,learned:[...s.new],playerHP:b.php,playerMP:s.mp};game.result=r;game.records.push(r);game.battle=null;game.phase='result';render();
+}
+function interact(a){if(game.learnModal.length&&a!=='closeLearn')return;
+ if(a==='closeLearn'){game.learnModal=[];render();return;}
+ if(game.modal==='book'&&a!=='close')return;
+ if(a==='book'){game.modal='book';render();return;}
+ if(a==='close'){game.modal='';render();return;}
+ if(a==='reset'){if(confirm('最初から新しい周回を開始しますか？ このデモの保存内容は消去されます。')){game=fresh();render();}return;}
+ if(game.phase==='shop'){
+  if(a==='shopNext'){setNextPhase('train');return;}
+  if(a.startsWith('buy:')&&!game.shopBought){let kind=a.split(':')[1],price=kind==='gear'?32:kind==='stamina'?15:22;if(game.gold<price||(kind==='gear'&&game.gear))return;
+   game.gold-=price;game.shopBought=true;
+   if(kind==='gear')game.gear=1;else if(kind==='stamina')game.stamina=Math.min(80,game.stamina+30);else {let key=$('shopstat').value;if(!STATS[key])key='attack';game.stats[key]+=3;}
+   msg(`${game.day}日目：ショップで${kind==='gear'?'トレーニング機材':kind==='stamina'?'スタミナ回復':'能力強化'}を購入。`);render();return;
+  }
+ }
+ if(game.phase==='train'){
+  if(a==='rest'){game.stamina=Math.min(80,game.stamina+26);msg(`${game.day}日目：休養。`);setNextPhase('equip');return;}
+  if(a.startsWith('train:')){const name=a.slice(6),tr=DATA.training[name];if(!tr)return;
+   if(game.stamina>=16){for(const [k,n] of Object.entries(tr))game.stats[k]+=n+game.gear;game.stamina-=13;inc(game.trainCounts,name);msg(`${game.day}日目：${name}を実施。`);}else msg(`${game.day}日目：${name}はスタミナ不足で失敗。`);
+   setNextPhase('equip');return;
+  }
+ }
+ if(game.phase==='equip'){
+  if(a.startsWith('toggle:')||a.startsWith('slot:')){const id=a.split(':')[1];if(!known(id))return;const index=game.equipped.indexOf(id);if(index>=0)game.equipped.splice(index,1);else if(game.equipped.length<4)game.equipped.push(id);render();return;}
+  if(a==='equipNext'&&game.equipped.length){if(game.day===31)startBattle(enemyForBoss());else{game.enemyChoices=enemiesForDay();setNextPhase('enemy');}return;}
+ }
+ if(game.phase==='enemy'&&a.startsWith('enemy:')){const i=Number(a.split(':')[1]);if(game.enemyChoices[i])startBattle(structuredClone(game.enemyChoices[i]));return;}
+ if(game.phase==='battle'&&a.startsWith('act:')){action(a.slice(4));return;}
+ if(game.phase==='result'){if(a==='finish'&&game.day===31){setNextPhase('end');return;}if(a==='nextDay'&&game.day<=30){newDay();return;}}
+}
+document.addEventListener('click',e=>{const target=e.target.closest('[data-a]');if(target&&!target.disabled)try{interact(target.dataset.a)}catch(error){console.error(error);alert('処理に問題が発生しました。保存済み状態を確認してください。');}});
+load();render();
+</script></body></html>
