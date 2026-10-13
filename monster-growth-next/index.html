@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>モンスター育成｜次期版 プレイデモ v0.5</title>
+<style>
+:root{color-scheme:dark;--bg:#111922;--panel:#1b2733;--panel2:#243341;--border:#3c5360;--txt:#e8edf1;--muted:#a4b3be;--accent:#79c6b1;--orange:#f2bc7d;--blue:#86b9e9;--red:#e59c9b;--purple:#c5abe2;--gold:#edcd80}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1d303c,#0e141c 75%);font-family:system-ui,-apple-system,"Yu Gothic",Meiryo,sans-serif;color:var(--txt);line-height:1.55;font-size:14px}button,select{font:inherit}button{cursor:pointer;border:1px solid #617580;color:var(--txt);background:#304454;border-radius:9px;padding:9px 12px;transition:background .12s,transform .12s}button:hover:not(:disabled){background:#3d596b}button:active:not(:disabled){transform:translateY(1px)}button:disabled{opacity:.38;cursor:not-allowed}button.primary{background:#28695f;border-color:#539b8f;font-weight:750}button.primary:hover{background:#348376}button.warn{border-color:#b16f6c;color:#f2c4c2}button.small{font-size:12px;padding:5px 8px}.wrap{max-width:1280px;margin:auto;padding:18px 16px 36px}.head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:15px}.brand{font-weight:850;letter-spacing:.04em;font-size:21px}.subtitle{font-size:12px;color:var(--muted)}.headActions{display:flex;gap:8px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:15px;min-width:0}.panel h2,.panel h3{margin:0 0 9px;font-size:16px}.muted{color:var(--muted)}.tiny{font-size:12px}.tag{border:1px solid #57717f;color:#bbced8;border-radius:7px;padding:2px 7px;font-size:11px;display:inline-block;margin:2px 3px 2px 0}.tag.orange{border-color:#95734c;color:var(--orange)}.tag.blue{border-color:#587c9a;color:var(--blue)}.tag.red{border-color:#936365;color:var(--red)}.tag.green{border-color:#417b68;color:var(--accent)}.tag.purple{border-color:#7e7093;color:var(--purple)}.grid2{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.85fr);gap:14px}.stack{display:flex;flex-direction:column;gap:13px}.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.overview{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.pill{border:1px solid var(--border);background:#1d2c38;border-radius:9px;padding:6px 11px;white-space:nowrap;font-variant-numeric:tabular-nums}.pill b{color:#f3f7f8}.hero{display:grid;grid-template-columns:1fr 1fr;gap:10px}.meter{width:100%;height:11px;background:#0d151a;border-radius:10px;overflow:hidden;border:1px solid #435563;margin:5px 0}.fill{height:100%;background:var(--accent);transition:width .25s}.fill.hp{background:linear-gradient(90deg,#b95f69,#e5928d)}.fill.mp{background:linear-gradient(90deg,#4e83ba,#8fc7f2)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.stat{padding:8px;background:#15222c;border:1px solid #354956;border-radius:8px;text-align:center}.stat strong{font-size:20px;display:block;color:#eff3f4}.stat span{font-size:11px;color:var(--muted)}.title{font-size:22px;margin:0 0 5px}.lead{color:#cbd9df;margin-top:2px}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px}.card{display:flex;flex-direction:column;gap:7px;text-align:left;min-height:145px;padding:12px;border:1px solid #657784;border-radius:11px;background:linear-gradient(145deg,#30404f,#24313f);width:100%}.card strong{font-size:16px}.card .effect{font-size:12px;color:#d0dbe0;flex:1}.card .points{font-size:12px;border-top:1px solid #50616c;padding-top:7px;color:#e8dcbf}.card.physical{border-top:4px solid #e8ad76}.card.magic{border-top:4px solid #85b7f0}.card.support{border-top:4px solid #8bcdb4}.card.fused{border-top:4px solid #c6a5e5}.card.selected{outline:3px solid #efd083}.card.disabled{opacity:.4}.card:not(:disabled):hover{background:#354d5c}.sectionTitle{margin:16px 0 9px;font-size:16px}.enemyCard{border:1px solid var(--border);border-radius:11px;background:#22323e;padding:14px;display:flex;flex-direction:column;gap:6px;text-align:left;min-height:208px}.enemyCard strong{font-size:19px}.enemyCard:hover{border-color:#a9c0c7}.enemyCard .big{font-size:26px;color:#e5e7e2}.enemyChoices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.enemyChoices.boss{grid-template-columns:1fr}.actions{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.notice{padding:10px 12px;border:1px solid #506d78;border-radius:8px;background:#182c36;color:#d0e5e4;margin:10px 0}.notice.warn{border-color:#90685b;background:#2d2825;color:#e9c7b0}.log{max-height:238px;overflow:auto;background:#13212a;border-radius:8px;border:1px solid #314754;padding:8px}.log div{border-bottom:1px dotted #314450;padding:5px 2px;font-size:12px;color:#bed0da}.log div:first-child{color:#f0f3f3}.label{font-size:11px;color:var(--muted);margin-bottom:2px}.pointsTable{width:100%;border-collapse:collapse;font-size:12px}.pointsTable th,.pointsTable td{padding:8px 5px;border-bottom:1px solid #40515d;text-align:left}.pointsTable th{color:var(--muted)}.pointsTable .num{text-align:right;font-variant-numeric:tabular-nums}.pointsTable button{min-width:60px}.cost{color:#edcdaa}.gain{color:#9cdbc9}.bad{color:#e9a5a5}.good{color:#86d4b8}.passives{display:grid;grid-template-columns:1fr;gap:7px}.passive{border:1px solid #415868;border-radius:9px;padding:10px;background:#1a2c38;display:grid;grid-template-columns:1fr auto;gap:5px}.passive .detail{font-size:12px;color:#afc1ce}.center{text-align:center}.bigNumber{font-size:46px;font-weight:800}.modalBackdrop{position:fixed;inset:0;background:#060b0cdb;display:flex;justify-content:center;align-items:center;z-index:100;padding:12px}.modal{max-width:720px;max-height:90vh;overflow:auto;width:100%;background:#22313d;border:1px solid #72818e;border-radius:14px;padding:19px}.modal h2{margin-top:0}.deckList{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:7px}.deckEntry{display:flex;gap:5px;align-items:center;justify-content:space-between;padding:7px 10px;border:1px solid #435965;border-radius:8px}.deckEntry span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.steps{display:flex;gap:7px;margin:7px 0 16px}.step{height:5px;flex:1;border-radius:10px;background:#3c5260}.step.active{background:#7ec2b0}.footer{font-size:11px;color:#a8b6bc;margin-top:18px}.underline{text-decoration:underline;cursor:pointer}.empty{padding:22px 10px;color:var(--muted);text-align:center;border:1px dashed #586776;border-radius:10px}.spaced{margin:14px 0}.legend strong{color:#e9dfc3}.panelFoot{margin-top:12px}.disclaimer{color:#e8cb9e}.separator{border-top:1px solid #3e5260;margin:14px 0}
+@media(max-width:880px){.grid2{grid-template-columns:1fr}.enemyChoices{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:10px 9px}.panel{padding:12px}.head{margin:3px 4px 13px}.brand{font-size:19px}.card{min-height:155px;padding:10px}}
+@media(max-width:380px){.cards{grid-template-columns:1fr 1fr;gap:6px}.card{font-size:12px;padding:8px}.card strong{font-size:14px}.stats{gap:4px}.stat{padding:4px}}
+
+/* v0.5: action forecast, comparative previews, contextual help */
+.forecastPanel{border:1px solid #7390a0;background:#1c333e;border-radius:12px;padding:12px;margin:12px 0}
+.forecastPanel h3{margin:0 0 5px;font-size:14px;color:#c9e8ee}
+.forecastMetrics{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:7px 0}
+.forecastMetric{background:#142732;border:1px solid #3e5d69;border-radius:8px;padding:7px 10px;min-width:110px}
+.forecastMetric strong{font-size:20px;display:block;font-variant-numeric:tabular-nums;line-height:1.3}
+.forecastMetric span{font-size:11px;color:#b4c7d0}
+.forecastLine{font-size:12px;color:#c5d6de;margin:5px 0 0}
+.forecastChip{font-size:11px;color:#a7dfd5;border:1px solid #43766b;background:#17382f;border-radius:6px;padding:4px 6px}
+.forecastChip.warn{border-color:#86684b;color:#e2c4a1;background:#342c25}
+.guideTip{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;font-size:12px}
+.guideTip p{margin:3px 0 0}.guideBtn{font-size:11px;padding:3px 7px;white-space:nowrap;flex-shrink:0}
+.guideCollapsed{margin:7px 0}.battleLogBtn{width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between}
+.previewBox{border:1px solid #657d84;background:#172b36;padding:11px;border-radius:10px;margin:12px 0}
+.previewBox h3{font-size:14px;margin:0 0 6px}
+.previewPair{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:stretch;margin:8px 0}
+.previewUnit{min-width:0;border-radius:8px;background:#293b48;border:1px solid #466272;padding:8px;font-size:12px;overflow-wrap:anywhere}
+.previewUnit strong{display:block;font-size:13px;margin-bottom:4px}
+.previewResult{border:1px solid #6c9e95;background:#1b3a36;padding:9px;border-radius:8px}
+.previewResult strong{color:#bcebd9}
+.statFuture{font-weight:800;color:#9ee1c7;white-space:nowrap}
+.statCurrent{font-variant-numeric:tabular-nums}
+@media(max-width:580px){.forecastMetric{flex:1;min-width:90px}.previewPair{grid-template-columns:1fr}.previewArrow{text-align:center}.forecastPanel{padding:9px}.pointsTable th,.pointsTable td{padding:6px 3px}.previewUnit{padding:8px}}
+</style></head><body><div class="wrap"><div class="head"><div><div class="brand">モンスター育成 <span class="tiny muted">次期版 v0.5 プレイデモ</span></div><div class="subtitle">20戦・カード使用と成長Pの選択を試す暫定版</div></div><div class="headActions"><button id="helpButton" class="small">遊び方</button><button id="deckButton" class="small">デッキ一覧</button><button id="newButton" class="small warn">最初から</button></div></div><div id="root"></div><div class="footer">数値・施設配置・初期デッキ・敵性能は仮設定です。旧デモ・既存runner・Driveの仕様ファイルは変更していません。進行はこのブラウザに自動保存されます。</div></div><div id="modalRoot"></div><script>
+'use strict';
+const C={
+'斬撃':{kind:'physical',p:[0,4,0],v:.3,desc:'通常攻撃の攻撃力補正＋30%'},'強斬撃':{kind:'physical',p:[0,7,0],v:.6,desc:'通常攻撃の攻撃力補正＋60%'},'必殺斬り':{kind:'physical',p:[0,10,0],v:1.1,desc:'補正＋110%。次ターンのドロー−1'},'貫通撃':{kind:'physical',p:[0,6,0],v:.5,desc:'このターンの通常攻撃は防御50%無視'},'吸収撃':{kind:'physical',p:[0,3,4],v:.2,desc:'通常攻撃の実ダメージ20%をHP回復'},'捨て身撃':{kind:'physical',p:[0,7,2],v:.9,desc:'最大HP5%消費、攻撃補正＋90%'},
+'魔弾':{kind:'magic',p:[4,0,0],v:1.5,mp:3,desc:'魔力×1.5の魔法攻撃／MP3'},'火球':{kind:'magic',p:[7,0,0],v:2.5,mp:6,desc:'魔力×2.5の魔法攻撃／MP6'},'爆炎':{kind:'magic',p:[10,0,0],v:4,mp:10,desc:'魔力×4の魔法攻撃／MP10'},'連鎖雷':{kind:'magic',p:[9,0,0],v:1.5,mp:8,desc:'魔力×1.5を3回。各撃で会心判定／MP8'},'吸魔':{kind:'magic',p:[5,0,0],v:1.5,mp:4,desc:'魔力×1.5の攻撃後、最大MP10%回復／MP4'},
+'鼓舞':{kind:'support',p:[0,5,0],v:.2,desc:'3ターン、通常攻撃補正＋20%'},'猛攻':{kind:'support',p:[0,7,0],v:.7,desc:'次の通常攻撃補正＋70%'},'防壁':{kind:'support',p:[0,0,5],v:.2,desc:'3ターン、物理・魔法の被ダメージ20%軽減'},'鉄壁':{kind:'support',p:[0,0,7],v:.6,desc:'次の被ダメージ1回を60%軽減'},'加速':{kind:'support',p:[0,5,0],v:3,desc:'3ターン、素早さ＋3。行動順は次ターンから'},'魔力蓄積':{kind:'support',p:[6,0,0],v:.5,desc:'次の魔法カード1枚の威力＋50%'},'毒':{kind:'support',p:[3,0,4],v:.05,desc:'敵行動後に現在HP5%の継続ダメージ×5回'},'応急処置':{kind:'support',p:[0,0,4],v:.05,desc:'最大HPの5%回復'},'治癒':{kind:'support',p:[0,0,8],v:.12,desc:'最大HPの12%回復'},'瞑想':{kind:'support',p:[5,0,0],v:.15,desc:'最大MPの15%回復'},'魔力転換':{kind:'support',p:[8,0,2],v:.25,desc:'最大HP10%消費、最大MP25%回復'},'集中':{kind:'support',p:[0,9,0],v:2,desc:'追加で2枚ドロー（手札操作）'},'手札交換':{kind:'support',p:[0,3,0],v:2,desc:'手札を最大2枚選び、同数を引き直す'},'小銭袋':{kind:'support',p:[2,0,0],v:10,desc:'10G獲得。使用後デッキから永久削除'},'宝の地図':{kind:'support',p:[4,0,0],v:25,desc:'25G獲得。使用後デッキから永久削除'}
+};
+const PASS={
+'不屈':{cost:[[10,0,12],[18,0,20],[30,0,32]],tip:['各戦闘1回、致死ダメージをHP1で耐える','HP5%で耐える','HP10%で耐える']},
+'迅速詠唱':{cost:[[10,7,0],[18,12,0],[28,19,0]],tip:['毎戦闘最初の魔法はMP−1','初回魔法MP−2','初回魔法MP−3']},
+'魔法貫通':{cost:[[12,10,0],[21,16,0],[31,25,0]],tip:['敵の魔力防御20%無視','35%無視','50%無視']},
+'魔撃連携':{cost:[[10,10,0],[17,17,0],[25,25,0]],tip:['物理カード後の魔法1枚の威力＋15%','＋25%','＋35%']},
+'反撃':{cost:[[0,12,10],[0,20,17],[0,32,25]],tip:['被弾時20%で通常攻撃相当の反撃','30%','40%']},
+'受け流し':{cost:[[0,9,10],[0,16,17],[0,25,27]],tip:['物理攻撃を15%で半減','25%で半減','35%で半減']},
+'先制':{cost:[[0,10,10],[0,18,18],[0,27,27]],tip:['10%で素早さ無視の先攻','20%で先攻','30%で先攻']},
+'痛覚変換':{cost:[[7,7,7],[13,13,13],[20,20,20]],tip:['敵から受けたHPダメージ10%をMP回復','20%をMP回復','30%をMP回復']}
+};
+const INIT=['斬撃','斬撃','魔弾','鼓舞','防壁','応急処置','瞑想','集中','手札交換'];
+const STATS={hp:{p:2,n:5,c:7,label:'最大HP'},mp:{p:0,n:3,c:6,label:'最大MP'},atk:{p:1,n:1,c:7,label:'攻撃力'},def:{p:2,n:1,c:6,label:'防御力'},spd:{p:1,n:1,c:5,label:'素早さ'},mag:{p:0,n:1,c:8,label:'魔力'}};
+const E_PASS={'物理型':['反撃','受け流し'],'魔法型':['魔法貫通','先制'],'混合型':['先制','受け流し']};
+const SAVEKEY='monster_growth_demo_v04_20261014';
+const $=s=>document.querySelector(s); const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ceil=x=>Math.ceil(x-1e-9); const limit=(x,a,b)=>Math.max(a,Math.min(x,b));
+let S=null;let modal=null;let logVisible=false;const tipClosed=Object.create(null);
+function rand(){let x=S.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;S.rng=x>>>0;return(S.rng>>>0)/4294967296}
+function choose(a){return a[Math.floor(rand()*a.length)]}function shuffle(arr){for(let i=arr.length-1;i>0;i--){let j=Math.floor(rand()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function newItem(name){return{id:S.uid++,parts:[name]}}
+function def(item){let parts=item.parts.map(x=>C[x]);return{p:[0,1,2].map(k=>parts.reduce((a,b)=>a+b.p[k],0)),kinds:[...new Set(parts.map(x=>x.kind))],mp:parts.reduce((a,b)=>a+(b.mp||0),0),isFused:item.parts.length>1}}
+function cardName(item){return item.parts.join('＋')}
+function has(item,name){return item.parts.includes(name)}
+function kind(item){return item.parts.length>1?'fused':C[item.parts[0]].kind}
+function pstr(p){return `<span class="gain">心${p[0]} / 技${p[1]} / 体${p[2]}</span>`}
+function desc(item){return item.parts.map(x=>C[x].desc).join(' ＋ ')}
+function getCost(stat){return STATS[stat].c+S.lvl[stat]}
+function passCost(name){let lv=S.pass[name];if(lv>=3)return null;const raw=PASS[name].cost[lv],disc=S.discounts[name]||0;return raw.map(v=>v?Math.max(1,ceil(v*(100-disc)/100)):0)}
+function canPay(p){return p.every((v,i)=>S.p[i]>=v)}
+function addLog(s){if(!S.battle)return;S.battle.log.unshift(s);if(S.battle.log.length>75)S.battle.log.length=75}
+function save(){try{localStorage.setItem(SAVEKEY,JSON.stringify(S))}catch(e){}}
+function startGame(seed){const r=(Number(seed)||Date.now())>>>0;S={version:4,rng:r||123456789,uid:1,floor:1,screen:'choose',gold:0,p:[0,0,0],lvl:{hp:0,mp:0,atk:0,def:0,spd:0,mag:0},pass:Object.fromEntries(Object.keys(PASS).map(k=>[k,0])),discounts:Object.fromEntries(Object.keys(PASS).map(k=>[k,0])),stats:{hp:80,mp:25,atk:12,def:5,spd:6,mag:9},hp:80,mp:25,deck:[],offers:[],enemy:null,battle:null,rewardIndex:0,rewardOptions:[],bonusStrong:false,shopOptions:[],facilityMode:null,selectedFuse:[],total:{wins:0,used:0,converted:0},notices:[]};INIT.forEach(c=>S.deck.push(newItem(c)));makeEnemyOffers();save();render()}
+function enemyBase(f){const hp=Math.round(28+4.4*f),atk=Math.round(7+.56*f),df=Math.round(2+.47*f),mag=Math.round(4+.4*f),spd=Math.round(4+.26*f);return{hp,atk,def:df,mag,spd}}
+function makeEnemyOffers(){const f=S.floor,b=enemyBase(f);if(f===10||f===20){const kind=f===10?'混合型':'魔法型';S.offers=[{name:f===10?'中間ボス・魔装獣':'最終ボス・星喰い',kind,hp:(38+5.5*f)*2|0,atk:b.atk+2,def:b.def+1,mag:b.mag+2,spd:b.spd+(f===10?1:0),spell:f===10?.5:1,power:1.9,strong:true,boss:true,passive:f===10?'不屈':'先制'}];return}
+S.offers=['物理型','魔法型','混合型'].map((kind,i)=>{let e={...b,kind,strong:rand()<.12,boss:false,passive:choose(E_PASS[kind]),spell:kind==='魔法型'?1:kind==='混合型'?.5:0,power:1.9};if(kind==='物理型'){e.atk+=3;e.hp=Math.round(e.hp*.9)}if(kind==='魔法型'){e.mag+=3;e.def=Math.max(0,e.def-1)}if(kind==='混合型'){e.atk++;e.mag++;e.spd+=2;e.hp=Math.round(e.hp*1.08)}if(e.strong){e.hp=Math.round(e.hp*1.35);e.atk+=2;e.mag+=2;e.def+=2}e.name=['牙獣','術師','斥候'][i]+(e.strong?'・強敵':'');return e})}
+function beginEnemy(index){if(S.screen!=='choose')return;S.enemy=structuredClone(S.offers[index]);S.battle={hp:S.enemy.hp,maxhp:S.enemy.hp,turn:0,phase:'main',hand:[],pile:shuffle(S.deck.map(i=>structuredClone(i))),discard:[],exiled:[],phys:[],normal:false,enemyActed:false,firstMagic:false,link:false,nextPenalty:0,penalty:0,critLast:'',poison:[],buffs:{encourage:0,wall:0,speed:0,iron:0,rampage:0,charge:0},firstStrike:false,enemySturdy:false,exchange:null,exchangeSelected:[],log:[],used:0,converted:0,playerFirst:false};S.screen='battle';addLog(`${S.enemy.name}との戦闘開始。`);startTurn();}
+function battleSpd(){return S.stats.spd+(S.battle.buffs.speed>0?3:0)}
+function critMult(attSpd,defSpd){let rate=Math.max(0,attSpd-defSpd)*.05,n=Math.floor(rate);return 1+.5*(n+(rand()<rate-n?1:0))}
+function evaded(attSpd,defSpd){return rand()<Math.min(.25,Math.max(0,defSpd-attSpd)*.01)}
+function enemyTurn(){let b=S.battle,e=S.enemy;if(!b||S.screen!=='battle'||b.hp<=0)return;
+let isMagic=rand()<e.spell,attSpd=e.spd,defSpd=battleSpd(),damage=0;
+if(evaded(attSpd,defSpd)){addLog(`${isMagic?'敵の魔法':'敵の攻撃'}を回避。`)}else{
+let base=isMagic?Math.max(1,e.mag*e.power-S.stats.mag*(e.passive==='魔法貫通'?.8:1)):Math.max(1,e.atk-S.stats.def);
+let multiplier=critMult(attSpd,defSpd);damage=Math.max(1,ceil(base*multiplier));let crit=multiplier>1;
+if(!isMagic&&S.pass['受け流し']&&rand()<[0,.15,.25,.35][S.pass['受け流し']]){damage=ceil(damage*.5);addLog('受け流しで物理ダメージを半減。')}
+if(b.buffs.wall>0)damage=ceil(damage*.8);if(b.buffs.iron>0){damage=ceil(damage*.4);b.buffs.iron=0;addLog('鉄壁が発動。')}
+const actual=Math.min(S.hp,damage);S.hp=Math.max(0,S.hp-damage);
+addLog(`敵の${isMagic?'魔法':'物理攻撃'}：${damage}ダメージ${crit?'（会心）':''}。`);
+if(actual>0&&S.pass['痛覚変換']){let amount=Math.min(S.stats.mp-S.mp,ceil(actual*[0,.1,.2,.3][S.pass['痛覚変換']]));if(amount>0){S.mp+=amount;addLog(`痛覚変換でMP＋${amount}。`)}}
+if(S.hp<=0&&S.pass['不屈']&&!b.firstStrike){let lv=S.pass['不屈'];S.hp=lv===1?1:Math.max(1,ceil(S.stats.hp*(lv===2?.05:.1)));b.firstStrike=true;addLog('不屈で致命傷に耐えた。')}
+if(S.hp>0&&actual>0&&S.pass['反撃']&&rand()<[0,.2,.3,.4][S.pass['反撃']]){addLog('反撃が発動。');playerHit('physical',1,0,'反撃',true)}
+}
+if(S.hp<=0){gameOver('敵の攻撃で倒れました。');return}
+if(b.poison.length&&b.hp>0){let dot=0;for(let tick of b.poison){if(tick.left>0){dot+=Math.max(1,ceil(b.hp*tick.rate));tick.left--}}b.poison=b.poison.filter(t=>t.left>0);b.hp=Math.max(0,b.hp-dot);if(dot)addLog(`毒で敵に${dot}ダメージ。`)}
+if(b.hp<=0){winBattle();return}b.enemyActed=true;
+}
+function playerHit(type,power,penetration,label,counter=false){const b=S.battle,e=S.enemy;if(!b||b.hp<=0)return 0;const ap=battleSpd(),dp=e.spd;
+if(evaded(ap,dp)){addLog(`${label}は回避された。`);return 0}
+let base=type==='physical'?Math.max(1,S.stats.atk*power-e.def*(1-penetration)):Math.max(1,S.stats.mag*power-e.mag*(1-penetration));let mul=critMult(ap,dp);let dmg=Math.max(1,ceil(base*mul));
+if(type==='physical'&&e.passive==='受け流し'&&rand()<.15){dmg=ceil(dmg*.5);addLog('敵が受け流しを発動。')}
+const actual=Math.max(0,Math.min(b.hp,dmg));b.hp=Math.max(0,b.hp-dmg);addLog(`${label}：${actual}ダメージ${mul>1?'（会心）':''}。`);
+if(b.hp<=0&&e.passive==='不屈'&&!b.enemySturdy){b.hp=1;b.enemySturdy=true;addLog('敵の不屈が発動し、HP1で耐えた。')}
+if(type==='physical'&&!counter&&actual>0&&b.hp>0&&e.passive==='反撃'&&rand()<.2){let r=Math.max(1,ceil(Math.max(1,e.atk-S.stats.def)*critMult(e.spd,battleSpd())));S.hp=Math.max(0,S.hp-r);addLog(`敵の反撃：${r}ダメージ。`);if(S.hp<=0&&S.pass['不屈']&&!b.firstStrike){b.firstStrike=true;S.hp=1;addLog('不屈が発動。')}}
+return actual}
+// Previews are deterministic: they never call rand() or change battle state.
+function speedRates(){
+ const ap=battleSpd(),ep=S.enemy.spd;
+ return {playerCrit:Math.max(0,ap-ep)*5,enemyCrit:Math.max(0,ep-ap)*5,
+  playerDodge:Math.min(25,Math.max(0,ap-ep)),enemyDodge:Math.min(25,Math.max(0,ep-ap))};
+}
+function physicalParams(){
+ let b=S.battle,bonus=1,pen=0,drain=0;
+ if(b.buffs.encourage)bonus+=.2;
+ if(b.buffs.rampage)bonus+=.7*b.buffs.rampage;
+ for(const n of b.phys){if(n==='斬撃')bonus+=.3;else if(n==='強斬撃')bonus+=.6;
+  else if(n==='必殺斬り')bonus+=1.1;else if(n==='捨て身撃')bonus+=.9;
+  else if(n==='貫通撃')pen=Math.max(pen,.5);else if(n==='吸収撃')drain+=.2;}
+ return {bonus,pen,drain};
+}
+function previewHit(type,power,pen=0){
+ let enemy=S.enemy;
+ const base=type==='physical'?Math.max(1,S.stats.atk*power-enemy.def*(1-pen)):
+  Math.max(1,S.stats.mag*power-enemy.mag*(1-pen));
+ return Math.max(1,ceil(base));
+}
+function forecastMagic(item){
+ const b=S.battle;let charge=b.buffs.charge,link=b.link,used=b.firstMagic,details=[],total=0;
+ const penetration=S.pass['魔法貫通']?[0,.2,.35,.5][S.pass['魔法貫通']]:0;
+ for(const part of item.parts){const c=C[part];
+  if(part==='魔力蓄積')charge++;
+  else if(c.kind==='magic'){
+   const combo=link&&S.pass['魔撃連携']?1+[0,.15,.25,.35][S.pass['魔撃連携']]:1;
+   const each=previewHit('magic',c.v*(1+.5*charge)*combo,penetration);
+   const count=part==='連鎖雷'?3:1;
+   const cost=Math.max(0,(c.mp||0)-(!used?(Math.min(c.mp||0,S.pass['迅速詠唱'])):0));
+   details.push(`${part} ${each}${count>1?'×'+count:''}（MP${cost}）`);
+   total+=each*count;used=true;charge=0;link=false;
+  }
+ }
+ return {details,total};
+}
+function previewPanel(){
+ const b=S.battle;if(b.phase!=='main')return '';
+ const r=speedRates(),p=physicalParams(),damage=previewHit('physical',p.bonus,p.pen);
+ const hit=Math.min(b.hp,damage);
+ const text=b.normal?'通常攻撃済み。魔法は追加で使用できます。':
+  `攻撃補正＋${Math.round((p.bonus-1)*100)}%${p.pen?' / 防御'+Math.round(p.pen*100)+'%無視':''}`;
+ const risks=[S.enemy.passive==='受け流し'?'敵の受け流し（15%）で半減する場合があります。':'',
+ S.enemy.passive==='不屈'?'敵の不屈は一度だけ致命傷を耐えます。':'',
+ p.drain?`命中時の吸収撃：実際の与ダメージの${Math.round(p.drain*100)}%をHP回復。`:''].filter(Boolean);
+ return `<div class="forecastPanel" aria-label="ダメージと会心回避の目安"><h3>通常攻撃の予測</h3>
+ <div class="forecastMetrics"><div class="forecastMetric"><strong>${b.normal?'—':hit}</strong><span>与ダメージ（会心・回避なし）</span></div>
+ <div class="forecastMetric"><strong>${b.normal?'—':Math.max(0,b.hp-damage)}</strong><span>攻撃後の敵HP</span></div>
+ <div class="forecastMetric"><strong>${r.playerCrit}%</strong><span>自分の会心率</span></div>
+ <div class="forecastMetric"><strong>${r.enemyDodge}%</strong><span>敵の回避率</span></div></div>
+ <div class="forecastLine">${text}${!b.normal&&damage>=b.hp?' <strong class="good">通常命中なら撃破圏内</strong>':''}</div>
+ <div class="forecastLine">被攻撃時：敵の会心率 ${r.enemyCrit}% / 自分の回避率 ${r.playerDodge}%</div>
+ ${risks.length?`<div class="forecastLine">${risks.map(esc).join(' ')}</div>`:''}
+ <div class="tiny muted">予測は会心・回避・受け流しを含まない基準値です。会心は100%以上で段階的に発生します。敵の行動は未確定です。</div></div>`;
+}
+function cardBattleHint(item){
+ if(!S.battle||S.battle.phase!=='main')return '';
+ const d=def(item);if(!d.kinds.includes('magic'))return '';
+ const f=forecastMagic(item),r=speedRates();
+ return `<div class="forecastChip">魔法予測：${esc(f.details.join(' ＋ '))} / 合計${f.total}（会心・回避なし）</div>`;
+}
+function tip(key,content){return tipClosed[key]?
+ `<div class="guideCollapsed"><button class="small guideBtn" data-action="tipToggle" data-name="${key}">操作のヒントを見る</button></div>`:
+ `<div class="notice guideTip"><div><strong>操作のヒント</strong><p>${content}</p></div><button class="small guideBtn" data-action="tipToggle" data-name="${key}" aria-label="ヒントを閉じる">閉じる</button></div>`}
+function fusePreview(){
+ const selected=S.selectedFuse.map(id=>S.deck.find(c=>c.id===id)).filter(Boolean);
+ if(!selected.length)return '<div class="tiny muted">カードを選択すると、合成後の効果・成長Pを表示します。</div>';
+ const makePart=(item)=>{const d=def(item);return `<div class="previewUnit"><strong>${esc(cardName(item))}</strong><div>${esc(desc(item))}</div><div class="gain">${pstr(d.p)}</div>${d.mp?`<div class="tiny muted">消費MP ${d.mp}</div>`:''}</div>`};
+ const all={id:-1,parts:selected.flatMap(i=>i.parts)},d=def(all);
+ return `<div class="previewBox"><h3>合成前後のプレビュー</h3><div class="previewPair">${makePart(selected[0])}<div class="previewArrow">＋</div>${selected[1]?makePart(selected[1]):'<div class="previewUnit muted">もう1枚選択</div>'}</div>
+ ${selected.length===2?`<div class="previewResult"><strong>合成後：${esc(cardName(all))}</strong><div class="tiny">${esc(desc(all))}</div><div>成長P：${pstr(d.p)}</div>${d.mp?`<div>合計消費MP：${d.mp}</div>`:''}<div class="tiny muted">効果は選択した順に発動します。デッキ枚数 −1 / 再合成不可。</div></div>`:''}</div>`;
+}
+function draw(n){const b=S.battle;for(let i=0;i<n;i++){if(!b.pile.length){if(!b.discard.length)break;b.pile=shuffle(b.discard.splice(0))}b.hand.push(b.pile.pop())}}
+function hasManip(i){return i.parts.some(x=>x==='集中'||x==='手札交換')}
+function startTurn(){const b=S.battle;if(!b||S.screen!=='battle')return;if(b.turn>=35){gameOver('暫定ルール：35ターン以内に倒せませんでした。');return}b.turn++;b.normal=false;b.enemyActed=false;b.phys=[];b.link=false;b.penalty=b.nextPenalty;b.nextPenalty=0;b.exchange=null;b.exchangeSelected=[];draw(Math.max(0,3-b.penalty));
+const my=S.stats.spd+(b.buffs.speed?3:0),their=S.enemy.spd;let myFirst=my===their?rand()<.5:my>their;let playerProc=false,enemyProc=false;
+playerProc=!!S.pass['先制']&&rand()<[0,.1,.2,.3][S.pass['先制']];enemyProc=S.enemy.passive==='先制'&&rand()<.1;
+if(playerProc&&enemyProc)myFirst=rand()<.5;else if(playerProc)myFirst=true;else if(enemyProc)myFirst=false;b.playerFirst=myFirst;addLog(`── 第${b.turn}ターン。${myFirst?'プレイヤー':'敵'}が先攻${playerProc?'（先制発動）':''}。`);
+if(!myFirst){enemyTurn();if(S.screen!=='battle')return}
+b.phase=b.hand.some(hasManip)?'manip':'main';save();render();}
+function canUse(item){const b=S.battle;if(!b||b.exchange)return false;const parts=item.parts;if(b.phase==='manip'&&!hasManip(item))return false;if(b.phase==='main'&&hasManip(item))return false;if(b.normal&&parts.some(x=>C[x].kind==='physical'))return false;let virtualMp=S.mp,virtualHp=S.hp,magicUsed=b.firstMagic;for(const x of parts){const c=C[x];if(c.kind==='magic'){const cost=Math.max(0,c.mp-(magicUsed?0:Math.min(c.mp,S.pass['迅速詠唱'])));if(virtualMp<cost)return false;virtualMp-=cost;magicUsed=true;if(x==='吸魔')virtualMp=Math.min(S.stats.mp,virtualMp+ceil(S.stats.mp*.1))}else if(x==='瞑想'){virtualMp=Math.min(S.stats.mp,virtualMp+ceil(S.stats.mp*.15))}else if(x==='魔力転換'){const loss=ceil(S.stats.hp*.1);if(virtualHp<=loss)return false;virtualHp-=loss;virtualMp=Math.min(S.stats.mp,virtualMp+ceil(S.stats.mp*.25))}else if(x==='捨て身撃'){const loss=ceil(S.stats.hp*.05);if(virtualHp<=loss)return false;virtualHp-=loss}}return true}
+function playCard(uid){const b=S.battle;if(!b||S.screen!=='battle')return;const item=b.hand.find(i=>i.id===uid);if(!item||!canUse(item))return;if(has(item,'手札交換')){b.exchange=uid;b.exchangeSelected=[];save();render();return}resolveCard(item,[])}
+function resolveCard(item,exchanges){const b=S.battle;if(!b||S.screen!=='battle')return;let idx=b.hand.findIndex(x=>x.id===item.id);if(idx<0)return;b.hand.splice(idx,1);b.used++;S.total.used++;let killed=false;
+// Compound cards play all their component effects in listed order. MP is paid by each magic component.
+for(let name of item.parts){const c=C[name];if(c.kind==='physical'){b.phys.push(name);if(name==='捨て身撃'){let amt=ceil(S.stats.hp*.05);S.hp-=amt;addLog(`捨て身撃でHP−${amt}。`)}if(name==='必殺斬り')b.nextPenalty=Math.min(2,b.nextPenalty+1)}
+else if(c.kind==='magic'){let discount=!b.firstMagic?Math.min(c.mp,S.pass['迅速詠唱']):0;const cost=c.mp-discount;S.mp-=cost;b.firstMagic=true;let charge=1+.5*b.buffs.charge;let link=b.link&&S.pass['魔撃連携']?1+[0,.15,.25,.35][S.pass['魔撃連携']]:1;let pen=S.pass['魔法貫通']?[0,.2,.35,.5][S.pass['魔法貫通']]:0;addLog(`${name}を使用（MP−${cost}${discount?'・迅速詠唱':''}）。`);for(let h=0;h<(name==='連鎖雷'?3:1);h++){playerHit('magic',c.v*charge*link,pen,name);if(b.hp<=0)break}if(name==='吸魔'){let r=Math.min(S.stats.mp-S.mp,ceil(S.stats.mp*.1));S.mp+=r;addLog(`吸魔でMP＋${r}。`)}b.buffs.charge=0;b.link=false}
+else if(name==='集中'){draw(2);addLog('集中：カードを2枚引いた。')}
+else if(name==='手札交換'){let take=exchanges||[];for(let id of take){let k=b.hand.findIndex(i=>i.id===id);if(k>=0)b.discard.push(b.hand.splice(k,1)[0])}draw(take.length);addLog(`手札を${take.length}枚交換した。`)}
+else if(name==='鼓舞'){b.buffs.encourage=Math.max(3,b.buffs.encourage);addLog('鼓舞：通常攻撃強化3ターン。')}
+else if(name==='猛攻'){b.buffs.rampage++;addLog('猛攻：次の通常攻撃を強化。')}
+else if(name==='防壁'){b.buffs.wall=Math.max(3,b.buffs.wall);addLog('防壁：3ターン被ダメージ軽減。')}
+else if(name==='鉄壁'){b.buffs.iron++;addLog('鉄壁：次の被ダメージを軽減。')}
+else if(name==='加速'){b.buffs.speed=Math.max(3,b.buffs.speed);addLog('加速：素早さ＋3。')}
+else if(name==='魔力蓄積'){b.buffs.charge++;addLog('魔力蓄積：次の魔法を強化。')}
+else if(name==='毒'){b.poison.push({rate:.05,left:5});addLog('毒を付与（5回）。')}
+else if(name==='応急処置'||name==='治癒'){let amt=Math.min(S.stats.hp-S.hp,ceil(S.stats.hp*c.v));S.hp+=amt;addLog(`${name}でHP＋${amt}。`)}
+else if(name==='瞑想'){let amt=Math.min(S.stats.mp-S.mp,ceil(S.stats.mp*.15));S.mp+=amt;addLog(`瞑想でMP＋${amt}。`)}
+else if(name==='魔力転換'){let amt=ceil(S.stats.hp*.1),restore=Math.min(S.stats.mp-S.mp,ceil(S.stats.mp*.25));S.hp-=amt;S.mp+=restore;addLog(`魔力転換：HP−${amt}・MP＋${restore}。`)}
+else if(name==='小銭袋'||name==='宝の地図'){S.gold+=c.v;addLog(`${name}で${c.v}G獲得。デッキから削除。`)}
+}
+if(b.hp<=0)killed=true;
+if(!item.parts.some(x=>x==='小銭袋'||x==='宝の地図'))b.discard.push(item);else{S.deck=S.deck.filter(c=>c.id!==item.id)}
+b.exchange=null;b.exchangeSelected=[];
+if(S.hp<=0){gameOver('カード使用でHPが尽きました。');return}
+if(killed||b.hp<=0){winBattle();return}if(b.phase==='manip'&&!b.hand.some(hasManip))b.phase='main';save();render()}
+function confirmExchange(){const b=S.battle;if(!b||!b.exchange)return;let item=b.hand.find(i=>i.id===b.exchange);if(!item)return;if(!b.exchangeSelected.length){b.exchange=null;b.exchangeSelected=[];render();return}const n=Math.min(2,b.exchangeSelected.length);resolveCard(item,b.exchangeSelected.slice(0,n))}
+function attack(){const b=S.battle;if(!b||S.screen!=='battle'||b.phase!=='main'||b.normal)return;b.normal=true;const {bonus,pen,drain}=physicalParams();
+const actual=playerHit('physical',bonus,pen,'通常攻撃');if(b.phys.length)b.link=true;if(drain){let amt=Math.min(S.stats.hp-S.hp,ceil(actual*drain));S.hp+=amt;if(amt)addLog(`吸収撃でHP＋${amt}。`)}b.buffs.rampage=0;
+if(S.hp<=0){gameOver('敵の反撃で倒れました。');return}if(b.hp<=0){winBattle();return}save();render()}
+function convertHand(){let b=S.battle;if(!b)return;for(let item of b.hand){let pp=def(item).p;for(let i=0;i<3;i++)S.p[i]+=pp[i];b.exiled.push(item);b.converted++;S.total.converted++}if(b.hand.length)addLog(`手札${b.hand.length}枚を成長Pに変換した。`);b.hand=[]}
+function endTurn(){const b=S.battle;if(!b||S.screen!=='battle'||b.phase==='manip'||b.exchange)return;convertHand();if(!b.enemyActed){enemyTurn();if(S.screen!=='battle')return}if(S.hp<=0){gameOver('倒されました。');return}if(b.hp<=0){winBattle();return}for(let n of ['encourage','wall','speed']){if(b.buffs[n]>0)b.buffs[n]--}startTurn()}
+function winBattle(){if(S.screen!=='battle')return;const b=S.battle;convertHand();S.total.wins++;addLog(`${S.enemy.name}に勝利した。`);S.gold+=S.enemy.boss?8:(S.enemy.strong?6:4);const p=S.enemy.passive;if(p)S.discounts[p]=Math.min(50,S.discounts[p]+(S.enemy.strong?20:10));S.bonusStrong=!!S.enemy.strong;S.screen=S.floor>=20?'clear':'reward';if(S.screen==='reward'){S.rewardIndex=0;makeRewardOffers()}save();render()}
+function gameOver(reason){S.screen='gameover';S.loseReason=reason;save();render()}
+function makeRewardOffers(){const all=Object.keys(C);const candidates=shuffle(all.slice());const better=S.bonusStrong; if(better){const best=candidates.filter(x=>C[x].p.reduce((a,b)=>a+b,0)>=7);S.rewardOptions=best.slice(0,2).concat(candidates.find(x=>!best.slice(0,2).includes(x)));}else S.rewardOptions=candidates.slice(0,3)}
+function selectReward(name){if(S.screen!=='reward')return;if(name){S.deck.push(newItem(name))}S.rewardIndex++;if(S.rewardIndex>=2)S.screen='growth';else makeRewardOffers();save();render()}
+function upgrade(name){if(!['growth','choose','facility'].includes(S.screen))return;let cost=getCost(name),cfg=STATS[name];if(S.p[cfg.p]<cost)return;S.p[cfg.p]-=cost;S.stats[name]+=cfg.n;S.lvl[name]++;if(name==='hp')S.hp+=cfg.n;if(name==='mp')S.mp+=cfg.n;save();render()}
+function buyPass(name){if(!['growth','choose','facility'].includes(S.screen))return;const cost=passCost(name);if(!cost||!canPay(cost))return;for(let i=0;i<3;i++)S.p[i]-=cost[i];S.pass[name]++;save();render()}
+function leaveGrowth(){if(S.screen!=='growth')return;if([3,9,13,19].includes(S.floor)){S.screen='facility';S.facilityMode=null;S.selectedFuse=[];S.shopOptions=shuffle(Object.keys(C)).slice(0,3)}else advanceFloor();save();render()}
+function advanceFloor(){S.floor++;S.battle=null;S.enemy=null;S.screen='choose';S.facilityMode=null;S.selectedFuse=[];makeEnemyOffers();save();render()}
+function rest(){if(S.screen!=='facility')return;let h=Math.min(S.stats.hp-S.hp,ceil(S.stats.hp*.2)),m=Math.min(S.stats.mp-S.mp,ceil(S.stats.mp*.2));S.hp+=h;S.mp+=m;advanceFloor()}
+function useShop(mode,name){if(S.screen!=='facility'||S.facilityMode!=='shop')return;if(mode==='buy'&&S.gold>=12&&S.shopOptions.includes(name)){S.gold-=12;S.deck.push(newItem(name));advanceFloor()}else if(mode==='remove'&&S.gold>=7&&S.deck.length>1){let item=S.deck.find(x=>x.id===Number(name));if(item){S.gold-=7;S.deck=S.deck.filter(x=>x.id!==item.id);advanceFloor()}}else if(mode==='heal'&&S.gold>=5){S.gold-=5;S.hp=Math.min(S.stats.hp,S.hp+ceil(S.stats.hp*.2));advanceFloor()}}
+function fuse(){if(S.screen!=='facility'||S.facilityMode!=='fuse'||S.selectedFuse.length!==2)return;let ids=S.selectedFuse,items=ids.map(id=>S.deck.find(c=>c.id===id));if(items.some(x=>!x||x.parts.length!==1))return;S.deck=S.deck.filter(x=>!ids.includes(x.id));S.deck.push({id:S.uid++,parts:[...items[0].parts,...items[1].parts]});advanceFloor()}
+function chooseFuse(id){if(S.screen!=='facility'||S.facilityMode!=='fuse')return;let card=S.deck.find(x=>x.id===id);if(!card||card.parts.length>1)return;S.selectedFuse=S.selectedFuse.includes(id)?S.selectedFuse.filter(x=>x!==id):(S.selectedFuse.length<2?[...S.selectedFuse,id]:S.selectedFuse);render()}
+function costText(a){return a.map((v,i)=>v?`<span class="${S.p[i]>=v?'':'bad'}">${['心','技','体'][i]}${v}</span>`:'').filter(Boolean).join(' / ')}
+function hud(){let s=S.stats,h=limit(S.hp/s.hp*100,0,100),m=limit(S.mp/s.mp*100,0,100);return `<div class="overview"><div class="pill">第 <b>${Math.min(S.floor,20)}</b> / 20 戦</div><div class="pill">所持金 <b>${S.gold}G</b></div><div class="pill">デッキ <b>${S.deck.length}枚</b></div><div class="pill">勝利 <b>${S.total.wins}</b></div></div><div class="panel"><div class="flex between"><h2>育成中のモンスター</h2><span class="tag green">心${S.p[0]} / 技${S.p[1]} / 体${S.p[2]} P</span></div><div class="hero"><div>HP　<strong>${S.hp}/${s.hp}</strong><div class="meter"><div class="fill hp" style="width:${h}%"></div></div></div><div>MP　<strong>${S.mp}/${s.mp}</strong><div class="meter"><div class="fill mp" style="width:${m}%"></div></div></div></div><div class="stats">${[['atk','攻撃力'],['def','防御力'],['spd','素早さ'],['mag','魔力'],['hp','最大HP'],['mp','最大MP']].map(([k,n])=>`<div class="stat"><strong>${s[k]}</strong><span>${n}</span></div>`).join('')}</div></div>`}
+function enemyHud(){let e=S.enemy,b=S.battle;return `<div class="panel"><div class="flex between"><div><div class="label">第${S.floor}戦の相手</div><h2>${esc(e.name)} <span class="tag ${e.boss?'red':e.strong?'orange':'blue'}">${e.boss?'ボス':e.strong?'強敵':e.kind}</span></h2></div><div class="tag purple">${esc(e.passive)} Lv1</div></div><div>HP <b>${Math.max(0,b.hp)} / ${b.maxhp}</b><div class="meter"><div class="fill hp" style="width:${limit(b.hp/b.maxhp*100,0,100)}%"></div></div></div><div class="flex tiny muted">攻撃 ${e.atk}　防御 ${e.def}　素早さ ${e.spd}　魔力 ${e.mag}　${e.spell===1?'魔法型':e.spell===0?'物理型':'物理・魔法'}</div><div class="flex tiny">${b.poison.length?`<span class="tag purple">毒 ${b.poison.length}層</span>`:''}${b.buffs.encourage?`<span class="tag green">鼓舞 ${b.buffs.encourage}</span>`:''}${b.buffs.wall?`<span class="tag green">防壁 ${b.buffs.wall}</span>`:''}${b.buffs.speed?`<span class="tag green">加速 ${b.buffs.speed}</span>`:''}${b.buffs.iron?'<span class="tag green">鉄壁</span>':''}${b.buffs.rampage?'<span class="tag orange">猛攻</span>':''}${b.buffs.charge?'<span class="tag blue">魔力蓄積</span>':''}</div></div>`}
+function cardHTML(item,action,selected=false,disabled=false){let t=def(item),f=t.isFused;return `<button class="card ${kind(item)} ${selected?'selected':''} ${disabled?'disabled':''}" ${disabled?'disabled':''} data-action="${action}" data-id="${item.id}"><strong>${esc(cardName(item))}</strong><span class="tag ${f?'purple':kind(item)==='magic'?'blue':kind(item)==='physical'?'orange':'green'}">${f?'合成':kind(item)==='magic'?'魔法':kind(item)==='physical'?'物理':'補助'}${t.mp?` / MP${t.mp}`:''}</span><span class="effect">${esc(desc(item))}</span>${action==='use'?cardBattleHint(item):''}<div class="points">P化：${pstr(t.p)}</div></button>`}
+function chooseView(){let bosses=S.floor===10||S.floor===20;return `<div class="grid2"><div class="stack"><div class="panel"><h1 class="title">${bosses?'ボス戦':'戦う敵を選択'}</h1><p class="lead">${bosses?'この敵を倒すと次の区間へ進みます。':'異なる3種類から1体を選びます。強敵は勝利後の報酬が有利です。'}</p>${tip('choose','敵のHP・物理防御・魔力・素早さを比較してください。魔力は魔法攻撃と魔法防御の両方に使われます。強敵は報酬が有利です。')}<div class="enemyChoices ${bosses?'boss':''}">${S.offers.map((e,i)=>`<button class="enemyCard" data-action="enemy" data-id="${i}"><strong>${esc(e.name)}</strong><span class="tag ${e.strong?'orange':'blue'}">${e.boss?'ボス':e.strong?'強敵':'通常'}</span><div class="big">HP ${e.hp}</div><div class="tiny">攻撃 ${e.atk}　防御 ${e.def}<br>素早さ ${e.spd}　魔力 ${e.mag}</div><div class="tiny">${e.spell===0?'物理攻撃主体':e.spell===1?'魔法攻撃主体':'物理・魔法混合'}</div><div class="tiny muted">所持：${esc(e.passive)}（撃破で習得割引）</div><span class="tiny good">この敵と戦う →</span></button>`).join('')}</div></div></div><div class="stack">${hud()}${passiveOwned()}</div></div>`}
+function battleView(){let b=S.battle;let manip=b.phase==='manip';let exchange=!!b.exchange;let selected=b.exchangeSelected;
+return `<div class="grid2"><div class="stack">${enemyHud()}<div class="panel"><div class="flex between"><h2>第${b.turn}ターン <span class="tag">${manip?'手札操作':b.normal?'通常攻撃済み':'行動選択'}</span></h2><span class="tiny muted">山札${b.pile.length} / 捨て札${b.discard.length} / P化除外${b.exiled.length}</span></div>${b.penalty?`<div class="notice warn">必殺斬りの反動：このターンのドロー−${b.penalty}枚</div>`:''}${exchange?`<div class="notice">交換したいカードを最大2枚選んで「交換を実行」してください。0枚なら中止できます。</div>`:b.normal?'<div class="tiny muted spaced">通常攻撃済み。魔法・補助カードの使用後にターンを終了できます。</div>':''}
+${tip(manip?'manip':'battle',manip?'集中・手札交換を先に使うか決めます。ほかのカードは操作を終えてから使用できます。':'物理カードを押すと通常攻撃に重なり、下の予測ダメージが更新されます。魔法はMPを消費して別に攻撃できます。使わなかった手札はP化されます。')}${previewPanel()}<div class="cards">${b.hand.length?b.hand.map(i=>cardHTML(i,exchange?'exchangePick':'use',selected.includes(i.id),exchange?i.id===b.exchange:!canUse(i))).join(''):'<div class="empty">手札がありません</div>'}</div>
+<div class="actions">${exchange?`<button class="primary" data-action="exchangeConfirm">${selected.length?'交換を実行':'交換を中止'}（${selected.length}/2）</button><button data-action="exchangeCancel">中止</button>`:manip?`<button class="primary" data-action="manipDone">手札操作を終える</button>`:`<button class="primary" data-action="attack" ${b.normal?'disabled':''}>${b.normal?'通常攻撃済み':'通常攻撃を行う'} ${b.phys.length?'（'+b.phys.length+'枚を付与）':''}</button><button data-action="endTurn">ターン終了・未使用手札をP化</button>`}</div>
+${b.phys.length?`<div class="tiny muted">通常攻撃に付与：${b.phys.map(esc).join('、')}</div>`:''}</div></div><div class="stack">${hud()}<div class="panel"><button class="small battleLogBtn" data-action="logToggle" aria-expanded="${logVisible}"><b>戦闘ログ（${b.log.length}件）</b><span>${logVisible?'閉じる ▲':'表示する ▼'}</span></button>${logVisible?`<div class="log" style="margin-top:8px">${b.log.map(x=>`<div>${esc(x)}</div>`).join('')}</div>`:''}</div>${passiveOwned()}</div></div>`}
+function passiveOwned(){let list=Object.entries(S.pass).filter(([k,v])=>v>0);return `<div class="panel"><h3>習得済みパッシブ</h3>${list.length?list.map(([k,lv])=>`<div class="flex between tiny"><b>${esc(k)} Lv${lv}</b><span class="muted">${esc(PASS[k].tip[lv-1])}</span></div>`).join(''):'<div class="tiny muted">未習得。勝利後の育成で習得できます。</div>'}</div>`}
+function rewardView(){return `<div class="grid2"><div class="stack"><div class="panel"><h1 class="title">第${S.floor}戦 勝利</h1><p class="lead">報酬カード：${S.rewardIndex+1} / 2 回目。毎回3択から1枚選ぶか、スキップできます。</p>${tip('reward','カードを増やすほど手札の候補は広がりますが、必要なカードを引ける確率は下がります。使用時の効果と、使わずP化した場合のポイントを比べてください。')}${S.bonusStrong?'<div class="notice">強敵・ボス撃破：獲得ゴールドと報酬候補が有利になります。</div>':''}<div class="cards">${S.rewardOptions.map(n=>{let example={id:Object.keys(C).indexOf(n)+100000,parts:[n]};return cardHTML(example,'reward',false,false)}).join('')}</div><div class="actions"><button data-action="rewardSkip">スキップ（カード追加なし）</button></div></div></div><div class="stack">${hud()}${passiveOwned()}</div></div>`}
+function growthTables(){return `<div class="panel"><h2>能力値の成長</h2><div class="tiny muted">強化後の値を緑色で示します。同じ能力を育てるほど必要Pが1増えます。HP・MPの強化時は現在値も増加します。</div><table class="pointsTable"><thead><tr><th>能力</th><th class="num">現在 → 強化後</th><th>成長幅</th><th>費用 / 残りP</th><th></th></tr></thead><tbody>${Object.entries(STATS).map(([k,t])=>`<tr><td>${t.label}</td><td class="num"><span class="statCurrent">${S.stats[k]}</span> → <span class="statFuture">${S.stats[k]+t.n}</span></td><td>+${t.n}</td><td class="cost">${['心','技','体'][t.p]}${getCost(k)} <span class="tiny muted">(${S.p[t.p]} → ${S.p[t.p]-getCost(k)})</span></td><td><button class="small" data-action="upgrade" data-name="${k}" ${S.p[t.p]<getCost(k)?'disabled':''}>強化</button></td></tr>`).join('')}</tbody></table></div>`}
+function passTables(){return `<div class="panel"><div class="flex between"><h2>パッシブ習得・強化</h2><span class="tiny muted">Lv3まで。装備制限なし</span></div><div class="passives">${Object.entries(PASS).map(([name,c])=>{let lv=S.pass[name],cost=passCost(name),disc=S.discounts[name];return `<div class="passive"><div><b>${esc(name)} Lv${lv}${lv>=3?'（最大）':''}</b><div class="detail">${esc(c.tip[Math.min(lv,2)])}</div><div class="tiny cost">${lv<3?`次のLv費用：${costText(cost)}`:'習得済み'} ${disc?`<span class="good">（撃破割引−${disc}%）</span>`:''}</div></div><button class="small" data-action="pass" data-name="${name}" ${!cost||!canPay(cost)?'disabled':''}>${lv?'強化':'習得'}</button></div>`}).join('')}</div></div>`}
+function growthView(){return `<div class="grid2"><div class="stack"><div class="panel"><h1 class="title">戦闘後の育成</h1><p class="lead">獲得した心・技・体Pで能力値やパッシブを強化できます。Pは持ち越し可能です。</p>${tip('growth','能力を強化する前に「現在→強化後」の値と残りPを確認できます。Pは保存でき、パッシブ習得にも使用します。')}<div class="actions"><button class="primary" data-action="growthDone">${[3,9,13,19].includes(S.floor)?'育成を終えて施設へ':'育成を終えて次の戦闘へ'} →</button></div></div>${growthTables()}${passTables()}</div><div class="stack">${hud()}${passiveOwned()}</div></div>`}
+function facilityView(){let m=S.facilityMode;return `<div class="grid2"><div class="stack"><div class="panel"><h1 class="title">施設（第${S.floor}戦後）</h1><p class="lead">この施設では、休息・ショップ・合成から1つだけ選択します。</p>${tip('facility','施設は1回だけ利用できます。休息はHPとMPを回復、ショップは購入・削除・回復から1つ、合成は2枚の効果とPを1枚にまとめます。')}<div class="flex spaced"><button class="${m===null?'primary':''}" data-action="facilityRest">休息：HP/MPを20%回復</button><button data-action="facilityShop">ショップ</button><button data-action="facilityFuse">2枚を合成</button></div>${m==='shop'?`<div class="separator"></div><h3>ショップ（どれか1回利用）</h3><div class="tiny muted">カード購入12G、カード削除7G、有料回復5G。お金は所持${S.gold}G。</div><h3 class="sectionTitle">カード購入</h3><div class="cards">${S.shopOptions.map(n=>cardHTML({id:Object.keys(C).indexOf(n)+100000,parts:[n]},'shopBuy',false,S.gold<12)).join('')}</div><div class="actions"><button data-action="shopHeal" ${S.gold<5||S.hp===S.stats.hp?'disabled':''}>5GでHP20%回復</button></div><h3>カード削除（7G）</h3><div class="deckList">${S.deck.map(i=>`<div class="deckEntry"><span>${esc(cardName(i))}</span><button class="small" data-action="shopRemove" data-id="${i.id}" ${S.gold<7||S.deck.length<=1?'disabled':''}>削除</button></div>`).join('')}</div>`:''}${m==='fuse'?`<div class="separator"></div><h3>合成する2枚を選ぶ</h3><p class="tiny muted">元カードの効果・成長Pを合算して1枚にします。合成後のカードは再合成できません。異なる種類の合成も可能です。</p><div class="deckList">${S.deck.map(i=>`<button class="deckEntry ${S.selectedFuse.includes(i.id)?'selected':''}" data-action="fusePick" data-id="${i.id}" ${i.parts.length>1?'disabled':''}><span>${esc(cardName(i))}</span><span class="tiny">${S.selectedFuse.includes(i.id)?'選択中':i.parts.length>1?'合成済み':'選ぶ'}</span></button>`).join('')}</div>${fusePreview()}<div class="actions"><button class="primary" data-action="fuseConfirm" ${S.selectedFuse.length!==2?'disabled':''}>この2枚を合成する</button></div>`:''}${m===null?'<div class="notice">休息を選ぶと直ちに回復して次の戦闘に進みます。ショップ・合成は詳細を開いてから決定します。</div>':''}</div><div class="panel"><button data-action="facilitySkip">何もせず次へ</button></div>${growthTables()}</div><div class="stack">${hud()}${passiveOwned()}</div></div>`}
+function finalView(clear){return `<div class="grid2"><div class="stack"><div class="panel center"><h1 class="title">${clear?'全20戦クリア':'ゲームオーバー'}</h1><div class="bigNumber ${clear?'good':'bad'}">${clear?'CLEAR':'LOSE'}</div><p>${clear?'最終ボスを倒しました。今回の育成方針を振り返れます。':esc(S.loseReason||'敗北しました。')}</p><div class="actions" style="justify-content:center"><button class="primary" data-action="restart">新しい周回を開始</button></div></div><div class="panel"><h3>周回記録</h3><div>勝利：${S.total.wins} / 20 戦</div><div>使用したカード：${S.total.used}枚</div><div>P化したカード：${S.total.converted}枚</div><div>最終デッキ：${S.deck.length}枚</div></div></div><div class="stack">${hud()}${passiveOwned()}</div></div>`}
+function render(){let content={choose:chooseView,battle:battleView,reward:rewardView,growth:growthView,facility:facilityView,clear:()=>finalView(true),gameover:()=>finalView(false)}[S.screen];$('#root').innerHTML=content?content():'<p>画面を表示できません</p>';if(modal)renderModal()}
+function renderModal(){let html='';if(modal==='help'){html=`<h2>遊び方</h2><p>第1〜20戦を進み、20戦目のボスを倒すとクリアです。HP・MPは次の戦闘に持ち越します。</p><ol><li>各通常戦では、異なる3種類の敵から1体を選択します。</li><li>毎ターン3枚引きます。集中・手札交換がある場合は、ほかのカードを使う前に手札操作を決めます。</li><li>通常攻撃は毎ターン1回無料。物理カードを何枚でも付与できます。魔法はMPを消費して別に攻撃します。</li><li>ターン終了時、使わなかった手札は心・技・体の成長Pに変わり、その戦闘中は戻りません。使ったカードは捨て札になり、山札が尽きると再利用されます。</li><li>戦闘に勝つと報酬を3択×2回。毎回スキップできます。成長Pで能力・パッシブを強化します。</li><li>第3・9・13・19戦の後には施設があります。休息・ショップ・合成から1回選びます。</li></ol><p>素早さ差1につき、速い側の会心率＋5%、回避率＋1%（最大25%）。魔力は魔法攻撃と魔法防御を兼ねます。</p><div class="notice warn">試作用の仮設定：初期値、敵の強さ・行動、施設の配置・価格、パッシブ費用、会心倍率、端数処理、最大35ターンの制限。敵のパッシブも簡易的なものだけ発動します。</div><p class="tiny muted">セーブは現在のブラウザ内に保存します。違うブラウザや端末への移行には対応しません。</p>`}
+else if(modal==='deck'){const count={};for(let i of S.deck){const name=cardName(i);count[name]??={i,n:0};count[name].n++}html=`<h2>デッキ一覧（${S.deck.length}枚）</h2><p class="tiny muted">カードを使えば効果、使わなければ成長Pになります。合成カードは元の2枚分をまとめて発動します。</p><div class="deckList">${Object.values(count).map(({i,n})=>`<div class="deckEntry"><span>${esc(cardName(i))} <b>×${n}</b></span><span class="tiny">${def(i).p.map((v,k)=>v?['心','技','体'][k]+v:'').filter(Boolean).join(' ')}</span></div>`).join('')}</div>`}
+$('#modalRoot').innerHTML=`<div class="modalBackdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true">${html}<div class="actions"><button class="primary" data-action="modalClose">閉じる</button></div></div></div>`}
+function act(e){const el=e.target.closest('[data-action]');if(!el)return;const op=el.dataset.action,id=Number(el.dataset.id),name=el.dataset.name;
+if(op==='tipToggle'){tipClosed[name]=!tipClosed[name];render();return;}
+if(op==='logToggle'){logVisible=!logVisible;render();return;}
+if(op==='enemy')beginEnemy(id);else if(op==='use')playCard(id);else if(op==='exchangePick'){let b=S.battle;if(!b||b.exchange===id)return;let arr=b.exchangeSelected;if(arr.includes(id))b.exchangeSelected=arr.filter(i=>i!==id);else if(arr.length<2)b.exchangeSelected.push(id);render()}
+else if(op==='exchangeConfirm')confirmExchange();else if(op==='exchangeCancel'){S.battle.exchange=null;S.battle.exchangeSelected=[];render()}
+else if(op==='manipDone'){S.battle.phase='main';save();render()}
+else if(op==='attack')attack();else if(op==='endTurn')endTurn();else if(op==='reward')selectReward(Object.keys(C)[id-100000]);else if(op==='rewardSkip')selectReward(null);
+else if(op==='upgrade')upgrade(name);else if(op==='pass')buyPass(name);else if(op==='growthDone')leaveGrowth();else if(op==='facilityRest')rest();else if(op==='facilityShop'){S.facilityMode='shop';render()}else if(op==='facilityFuse'){S.facilityMode='fuse';render()}else if(op==='fusePick')chooseFuse(id);else if(op==='fuseConfirm')fuse();else if(op==='shopBuy')useShop('buy',Object.keys(C)[id-100000]);else if(op==='shopRemove')useShop('remove',id);else if(op==='shopHeal')useShop('heal');else if(op==='facilitySkip')advanceFloor();else if(op==='restart')confirmStart();else if(op==='modalClose'){modal=null;$('#modalRoot').innerHTML=''} }
+function confirmStart(){if(confirm('現在の進行を消して、最初から始めますか？')){modal=null;$('#modalRoot').innerHTML='';startGame(Date.now())}}
+document.addEventListener('click',act);$('#helpButton').addEventListener('click',()=>{modal='help';renderModal()});$('#deckButton').addEventListener('click',()=>{modal='deck';renderModal()});$('#newButton').addEventListener('click',confirmStart);$('#modalRoot').addEventListener('click',e=>{if(e.target.id==='modalBackdrop'){modal=null;$('#modalRoot').innerHTML=''}});
+try{const saved=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(saved?.version===4&&saved?.deck?.length&&saved?.rng!==undefined){S=saved;if(S.screen==='battle'&&(!S.battle||!S.enemy))throw Error('invalid');render()}else startGame(Date.now())}catch(e){startGame(Date.now())}
+</script></body></html>
