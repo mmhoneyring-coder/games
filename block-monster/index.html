@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ブロックモンスター｜プロトタイプ</title>
+<style>
+  :root{
+    --bg:#312a25; --panel:#30343b; --panel2:#3a3f48; --line:#6d665c; --text:#f1e8d7; --muted:#c8bdab;
+    --p1:#5c83ad; --p2:#bd6255; --land1:#4d79a6; --land2:#ad5549; --shared:#9f9788; --empty:#62584b;
+    --score:#d6a83f; --atk:#c87552; --move:#879f58; --range:#5f9eab; --def:#7487b0; --draw:#9f79ad; --hp:#b66e78; --swap:#70a092; --valid:#78c56a; --invalid:#cf5f5f;
+    --toyShadow:0 2px 0 rgba(35,27,19,.32), 0 6px 14px rgba(35,27,19,.16);
+    --toyInset:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.14);
+    --cell:34px;
+  }
+  *{box-sizing:border-box}
+  html,body{min-height:100%;overflow-x:hidden;overflow-y:auto}
+  body{margin:0;background:linear-gradient(180deg,#3d332b 0%,var(--bg) 100%);color:var(--text);font-family:"Avenir Next","Hiragino Sans","Yu Gothic UI","Yu Gothic",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;font-weight:500;letter-spacing:.01em;-webkit-overflow-scrolling:touch}
+  button{font:inherit;font-weight:700;color:inherit;background:#444a54;border:1px solid #696f78;border-bottom-color:#292d33;border-radius:8px;padding:8px 12px;cursor:pointer;box-shadow:0 2px 0 rgba(35,27,19,.28),var(--toyInset)}
+  button:hover:not(:disabled){background:#505762}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .app{max-width:1320px;margin:0 auto;padding:12px}
+  .topbar{position:relative;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch;margin-bottom:10px}
+  .player{background:#353941;border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;gap:14px;align-items:center;min-height:66px;box-shadow:0 2px 0 rgba(35,27,19,.24),var(--toyInset)}
+  .player.active{outline:3px solid currentColor;outline-offset:1px}
+  .player.p1{color:var(--p1)} .player.p2{color:var(--p2)}
+  .playerHeader{display:flex;align-items:center;gap:6px;min-width:0}.player .name{font-weight:800;font-size:17px;min-width:78px;letter-spacing:.02em}.claimStatus{margin-left:auto;visibility:hidden;white-space:nowrap;font-size:10px;font-weight:800;color:#f0d16b;border:1px solid #8a7535;border-radius:4px;padding:1px 5px;line-height:1.2;background:#3a3526}.claimStatus.on{visibility:visible}.player .stat{color:var(--text);font-weight:600}
+  .centerInfo{position:relative;background:#353941;border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:210px;text-align:center;display:flex;flex-direction:column;justify-content:center;box-shadow:0 2px 0 rgba(35,27,19,.24),var(--toyInset)}
+  .centerInfo b{font-size:18px;font-weight:800;letter-spacing:.03em}
+  .rulesBtn{position:absolute;top:4px;right:4px;width:24px;height:24px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;background:#464c56;z-index:60}.topbar #p2Panel{padding-right:38px}
+  .rulesModal{z-index:70}.rulesBox{width:min(760px,100%);max-height:calc(100dvh - 36px);display:flex;flex-direction:column;overflow:hidden}.rulesHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.rulesHeader h2{margin:0}.rulesHeader button{padding:6px 10px}.rulesTabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #746b5d}.rulesTabs button{padding:7px 10px;border-radius:6px;background:#444a54;border-color:#696f78;box-shadow:none}.rulesTabs button.active{background:#59616d;border-color:#828a96;box-shadow:inset 0 -2px 0 #d6a83f}.rulesPane{display:none;min-height:0;overflow:auto;padding-right:3px}.rulesPane.active{display:block}.rulesGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ruleItem{background:#d2c3a7;border:1px solid #8b7f6d;color:#2e2b27;border-radius:8px;padding:9px 10px}.ruleItem b{display:block;margin-bottom:5px;font-size:14px;line-height:1.2;color:#2e2b27}.ruleItem span{display:block;color:#5f574c;font-size:12px;line-height:1.5}.ruleLegend{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.ruleLegend em{font-style:normal;font-size:11px;font-weight:800;padding:2px 5px;border:1px solid #8b7f6d;border-radius:4px;background:#bbae95;color:#2e2b27}.rulesDataGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}.rulesDataItem{background:#d2c3a7;border:1px solid #8b7f6d;color:#2e2b27;border-radius:8px;padding:9px 10px}.rulesDataItem b{display:block;margin-bottom:4px}.rulesDataItem span{color:#5f574c;font-size:12px;line-height:1.45}.unitDataWrap{overflow-x:auto;background:#d2c3a7;border:1px solid #8b7f6d;color:#2e2b27;border-radius:8px;padding:8px}.unitData{width:100%;border-collapse:collapse;font-size:12px}.unitData th,.unitData td{padding:6px 5px;text-align:center;border-bottom:1px solid #6d6355;white-space:nowrap}.unitData th:first-child,.unitData td:first-child{text-align:left}.unitData tr:last-child td{border-bottom:0}.unitData th{color:#2e2b27}.unitData td{color:#5f574c}.dataNote{margin-top:5px;font-size:11px;color:#665e52;line-height:1.4}
+  .layout{display:grid;grid-template-columns:minmax(600px,1fr) 320px;gap:12px;align-items:start}
+  .boardWrap{background:#594638;border:1px solid #786655;border-radius:12px;padding:10px;overflow:auto;box-shadow:0 3px 0 rgba(10,14,22,.3),0 8px 18px rgba(35,27,19,.16)}
+  .board{display:grid;grid-template-columns:repeat(13,var(--cell));grid-template-rows:repeat(15,var(--cell));gap:2px;width:max-content;background:#30343a;border:3px solid #746958;border-radius:8px;padding:4px;box-shadow:inset 0 2px 6px rgba(42,30,18,.34),0 2px 0 rgba(255,247,230,.08)}
+  .cell{position:relative;width:var(--cell);height:var(--cell);background:linear-gradient(180deg,#74695b 0%,var(--empty) 100%);border:0;padding:0;border-radius:4px;display:flex;align-items:center;justify-content:center;user-select:none;box-shadow:inset 0 1px 0 rgba(255,247,226,.18),inset 0 -1px 0 rgba(54,46,38,.18)}
+  .cell::after{content:"";position:absolute;inset:0;border:1px solid rgba(61,56,49,.18);border-radius:4px;pointer-events:none}
+  .cell.terrain{background:linear-gradient(180deg,#a79e8d 0%,#918877 100%)}.cell.land-p1{background:linear-gradient(180deg,#628ab5 0%,#4d79a6 100%)}.cell.land-p2{background:linear-gradient(180deg,#c16e61 0%,#ad5549 100%)}
+  .cell.base-p1{background:linear-gradient(180deg,#5b82ad 0%,#416c96 100%)}.cell.base-p2{background:linear-gradient(180deg,#b9665a 0%,#974a42 100%)}.cell.island{background:linear-gradient(180deg,#c5a34e 0%,#a98536 100%)}
+  .cell.base-p1,.cell.base-p2{box-shadow:inset 0 0 0 2px rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.island{box-shadow:inset 0 0 0 2px rgba(255,243,184,.28),inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.fx-score{box-shadow:inset 0 0 0 1px rgba(255,226,130,.52), inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.fx-atkBoost{box-shadow:inset 0 0 0 1px rgba(255,174,131,.48), inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.fx-moveBoost{box-shadow:inset 0 0 0 1px rgba(207,230,123,.44), inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.fx-rangeBoost{box-shadow:inset 0 0 0 1px rgba(157,228,255,.46), inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.fx-defBoost{box-shadow:inset 0 0 0 1px rgba(185,200,255,.46), inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.fx-draw{box-shadow:inset 0 0 0 1px rgba(214,178,239,.48), inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.fx-hpUp{box-shadow:inset 0 0 0 1px rgba(255,183,194,.5), inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.fx-swap{box-shadow:inset 0 0 0 1px rgba(160,230,208,.48), inset 0 -1px 0 rgba(0,0,0,.18)}
+  .cell.deployable{box-shadow:inset 0 0 0 2px rgba(122,196,122,.72)}
+  .cell.preview-good{box-shadow:inset 0 0 0 3px var(--valid)}.cell.preview-bad{box-shadow:inset 0 0 0 3px var(--invalid)}
+  .cell.move-next{box-shadow:inset 0 0 0 3px var(--valid),var(--toyInset); background-image:radial-gradient(circle at center, rgba(127,212,107,.28) 0 46%, transparent 47%)}.cell.attackable{box-shadow:inset 0 0 0 3px #f1a45b,var(--toyInset)}
+  .coord{position:absolute;left:2px;top:1px;font-size:8px;color:rgba(255,255,255,.22);pointer-events:none}
+  .effect{position:absolute;right:2px;bottom:2px;min-width:16px;height:14px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;background:#3a3127;padding:0 3px;border-radius:3px;border:1px solid rgba(255,255,255,.14);pointer-events:none;box-shadow:0 1px 2px rgba(0,0,0,.28);letter-spacing:.02em}
+  .effect.preview-effect{opacity:.5}
+  .effect.score{color:#ffe282;background:#544319;border-color:#8f7331}.effect.atkBoost{color:#ffcfb2;background:#553022;border-color:#8c553e}.effect.moveBoost{color:#ebf6bf;background:#3c4d24;border-color:#69853e}.effect.rangeBoost{color:#d3f5ff;background:#234a57;border-color:#3d8095}.effect.defBoost{color:#dee5ff;background:#334363;border-color:#6079b8}.effect.draw{color:#f0dcff;background:#4d365d;border-color:#8b67a3}.effect.hpUp{color:#ffdce2;background:#5c3038;border-color:#a45b68}.effect.swap{color:#d9fff4;background:#2f554c;border-color:#5f9a8a}
+  .unit{--unit-bg:#32363d;--damage-pct:0%;position:relative;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#f7f3ea;background:linear-gradient(to bottom,rgba(18,16,14,.3) 0 var(--damage-pct),transparent var(--damage-pct) 100%),var(--unit-bg);border:3px solid #9a9183;z-index:4;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 0 #211c17,0 3px 6px rgba(0,0,0,.42);text-shadow:0 1px 0 rgba(0,0,0,.32)}
+  .unit::before{content:"";position:absolute;left:4px;right:4px;top:3px;height:1px;background:rgba(255,255,255,.18);pointer-events:none}
+  .unit.p1{border-color:var(--p1);--unit-bg:#33465b}.unit.p2{border-color:var(--p2);--unit-bg:#563a36}.unit.boosted{border-color:#f2c95d;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 0 #211c17,0 3px 6px rgba(0,0,0,.42)}.unit.selected{outline:2px solid #fff;outline-offset:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 1px rgba(255,255,255,.18),0 3px 7px rgba(0,0,0,.5)}.unit.acted{opacity:.45;filter:saturate(.55)}
+  .baseLabel{font-weight:900;font-size:10px;z-index:2;text-shadow:0 1px 0 rgba(0,0,0,.2);letter-spacing:.04em}.islandLabel{font-size:10px;font-weight:900;color:#fff2a4;z-index:2;text-shadow:0 1px 0 rgba(0,0,0,.24);letter-spacing:.02em}
+  .effect.over-unit{z-index:6}.islandLabel.over-unit{position:absolute;right:2px;bottom:2px;z-index:6;min-width:16px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px;border-radius:3px;color:#ffe282;background:#544319;border:1px solid #8f7331;font-size:9px;line-height:1;text-shadow:none;box-shadow:0 1px 2px rgba(0,0,0,.28)}
+  .side{display:flex;flex-direction:column;gap:10px}
+  .panel{background:#353941;border:1px solid var(--line);border-radius:10px;padding:10px;box-shadow:0 2px 0 rgba(35,27,19,.22),var(--toyInset)}
+  .panel h3{font-size:14px;font-weight:800;margin:0 0 8px;color:#e8decc;letter-spacing:.02em}.hint{color:var(--muted);line-height:1.5;font-size:12px;font-weight:600;min-height:38px}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.actions button.active{outline:2px solid #fff}#confirmLandBtn{display:none}#confirmLandBtn{background:#58764f;border-color:#7fa173}#passBtn{background:#585146;border-color:#7d7262}#rotateBtn{background:#526276;border-color:#75869b}#exchangeBtn{background:#766044;border-color:#9b7f55}#cancelBtn{background:#5a544b;border-color:#7a7165}#moveBtn{background:#5a704e;border-color:#7f956f}#attackBtn{background:#86584b;border-color:#ae7664}#finishMoveBtn{background:#4f7568;border-color:#73998b}
+  .hand{display:flex;flex-direction:column;gap:8px;max-height:430px;overflow:auto}.card{border:1px solid #8b7f6d;background:#d2c3a7;color:#2e2b27;border-radius:10px;padding:8px;cursor:pointer;display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;box-shadow:0 2px 0 rgba(35,27,19,.26),0 4px 9px rgba(35,27,19,.12)}
+  .card:hover{background:#decfb2}.card.selected{outline:none;box-shadow:inset 0 0 0 2px #f2c95d,0 2px 0 rgba(35,27,19,.26),0 4px 9px rgba(35,27,19,.12)}.card .title{font-weight:900;letter-spacing:.01em}.card .desc{color:#5f574c;font-size:11px;font-weight:600;line-height:1.35}.card .mini{width:46px;height:46px;display:grid;grid-template-columns:repeat(4,10px);grid-template-rows:repeat(4,10px);gap:1px;align-content:center;justify-content:center;background:#3a3d43;border:1px solid #70695e;border-radius:5px;box-shadow:inset 0 1px 3px rgba(0,0,0,.3)}
+  .mini span{width:10px;height:10px;background:linear-gradient(180deg,#a79e8d 0%,#918877 100%);border:1px solid rgba(255,248,232,.22);border-radius:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.18)}
+  .mini span.fx-score{background:linear-gradient(180deg,#887744 0%,#6f6334 100%);box-shadow:inset 0 0 0 2px #e5bf4d}
+  .mini span.fx-atkBoost{background:linear-gradient(180deg,#7d5a4d 0%,#64453b 100%);box-shadow:inset 0 0 0 2px #dc8054}
+  .mini span.fx-moveBoost{background:linear-gradient(180deg,#64734c 0%,#4e5b3a 100%);box-shadow:inset 0 0 0 2px #91b956}
+  .mini span.fx-rangeBoost{background:linear-gradient(180deg,#486b74 0%,#38545c 100%);box-shadow:inset 0 0 0 2px #5db4c8}
+  .mini span.fx-defBoost{background:linear-gradient(180deg,#535f7a 0%,#414b61 100%);box-shadow:inset 0 0 0 2px #8097d8}
+  .mini span.fx-draw{background:linear-gradient(180deg,#675072 0%,#513e5b 100%);box-shadow:inset 0 0 0 2px #b58ad6}
+  .mini span.fx-hpUp{background:linear-gradient(180deg,#7a4d56 0%,#603940 100%);box-shadow:inset 0 0 0 2px #d77f8e}
+  .mini span.fx-swap{background:linear-gradient(180deg,#4d7168 0%,#38574f 100%);box-shadow:inset 0 0 0 2px #78b9a8}
+  .unitMini{position:relative;width:42px;height:42px;border-radius:8px;background:#353941;border:2px solid #9a9183;display:flex;align-items:center;justify-content:center;color:#f7f9fc;font-weight:900;font-size:14px;margin:auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 0 #211c17,0 3px 7px rgba(0,0,0,.28);text-shadow:0 1px 0 rgba(0,0,0,.32)}
+  .unitMini::before{content:"";position:absolute;left:6px;right:6px;top:5px;height:1px;background:rgba(255,255,255,.18)}
+  .log{height:160px;overflow:auto;background:#25282d;border-radius:7px;padding:7px;font-size:11px;line-height:1.45;color:#d7cdbd}.log div+div{margin-top:3px}
+  .statusBox{font-size:12px;line-height:1.55}.tag{display:inline-block;padding:2px 6px;border-radius:4px;background:#464b54;border:1px solid #6d665c;margin-right:4px}
+  .modal{position:fixed;inset:0;background:#1d1914d9;display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}.modal.hidden{display:none}.modalBox{width:min(680px,100%);background:#353941;border:1px solid #6f6a60;border-radius:10px;padding:18px;box-shadow:0 14px 40px #0008}.modalBox h2{margin:0 0 8px}.modalBox p{color:#ddd3c1;line-height:1.55}.mulliganCards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.mCard{background:#4b5058;border:1px solid #70747b;border-radius:8px;padding:10px;cursor:pointer;min-height:100px;box-shadow:0 2px 0 rgba(35,27,19,.2)}.mCard.reroll{outline:2px solid #d6a83f;background:#5a4a34}.mCard.disabled{opacity:.4;cursor:not-allowed}.mCard b{display:block;margin-bottom:5px}.mulliganCard.reroll{outline:2px solid #d6a83f;outline-offset:1px;background:#5a4a34}.modalBtns{display:flex;justify-content:flex-end;gap:8px}.modal.compact-choice .modalBox{width:min(560px,100%);padding:16px}.modal.compact-choice #modalBody{display:none}.modal.compact-choice .mulliganCards{grid-template-columns:repeat(2,1fr)!important;margin:10px 0 0}.modal.compact-choice .mCard{min-height:84px}.modal.compact-choice .modalBtns{display:none}
+  .small{font-size:11px;color:var(--muted)}
+  .mobilePlayTabs{display:none}
+  .mobilePlayTabs button{padding:7px 8px;border-radius:8px}
+  .mobilePlayTabs button.active{background:#5d5549;border-color:#7e7363;font-weight:800}
+  @media(max-width:980px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.hand{max-height:300px}.topbar{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px}.topbar #p1Panel{grid-column:1;grid-row:1}.topbar .centerInfo{grid-column:2;grid-row:1}.topbar #p2Panel{grid-column:3;grid-row:1;padding-right:26px}.player{grid-row:1;min-width:0}}
+  @media(max-width:640px){
+    :root{--mobile-side:172px;--cell:min(42px,calc((100vw - 56px)/13),calc((100dvh - 88px - var(--mobile-side))/15))}
+    html,body{width:100%;height:100%;overflow:hidden}
+    body{height:100dvh;max-height:100dvh;overscroll-behavior:none}
+    .app{height:100dvh;max-height:100dvh;padding:4px;overflow:hidden;display:flex;flex-direction:column}
+    .topbar{flex:0 0 auto;display:grid;grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr) 38px;gap:3px;margin-bottom:4px;align-items:stretch}
+    .topbar #p1Panel{grid-column:1;grid-row:1}
+    .topbar .centerInfo{grid-column:2;grid-row:1}
+    .topbar #p2Panel{grid-column:3;grid-row:1;padding-right:5px}
+    .topbar #rulesBtn{position:static;grid-column:4;grid-row:1;width:36px;height:36px;align-self:start;justify-self:end;margin-top:1px;padding:0;font-size:19px;line-height:1;border-radius:7px;z-index:60}
+    .player{grid-row:1;display:block;padding:4px 5px;min-height:48px;min-width:0}
+    .playerHeader{gap:3px;margin-bottom:2px}.player .name{min-width:0;font-size:12px;line-height:1.1;margin-bottom:0}.claimStatus{font-size:8px;padding:1px 3px}
+    .player .stat{font-size:11px;line-height:1.12;white-space:nowrap}
+    .centerInfo{padding:4px 2px;min-width:0;min-height:48px;gap:0}
+    .centerInfo b{font-size:11px;line-height:1.05;white-space:nowrap}
+    .rulesBtn{box-shadow:none}
+    .rulesModal{padding:8px}.rulesModal .rulesBox{height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);display:flex;grid-template-rows:none;padding:12px}.rulesTabs{margin-bottom:8px;padding-bottom:6px}.rulesTabs button{font-size:12px;padding:6px 4px}.rulesGrid,.rulesDataGrid{grid-template-columns:1fr}.ruleItem,.rulesDataItem{padding:8px}.ruleItem span,.rulesDataItem span{font-size:12px;line-height:1.5}.unitData{font-size:11px}.unitData th,.unitData td{padding:5px 3px}.dataNote{font-size:11px}
+    .layout{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:4px;overflow:hidden}
+    .boardWrap{flex:0 0 auto;padding:3px;display:flex;justify-content:center;overflow:hidden}
+    .board{margin:0 auto;touch-action:none}
+    .cell{font-size:11px}
+    .effect{font-size:8px;right:1px;bottom:1px;min-width:13px;height:12px;padding:0 2px}
+    .baseLabel,.islandLabel{font-size:8px}.islandLabel.over-unit{right:1px;bottom:1px;min-width:13px;height:12px;padding:0 2px;font-size:8px}
+    .unit{width:calc(var(--cell) - 6px);height:calc(var(--cell) - 6px);font-size:10px;border-width:2px;border-radius:5px}
+    .side{flex:0 0 var(--mobile-side);height:var(--mobile-side);min-height:var(--mobile-side);width:100%;display:grid;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:32px minmax(0,1fr);gap:0;overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px}
+    .mobilePlayTabs{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding-bottom:3px;border-bottom:1px solid var(--line)}
+    .mobilePlayTabs button{padding:3px 6px;font-size:12px;font-weight:800;line-height:1;border:0;border-radius:4px;background:transparent;box-shadow:none}
+    .mobilePlayTabs button.active{background:#474d57;border:0;box-shadow:inset 0 -2px 0 #7e8692}
+    #actionPanel.mobile-pane-hidden,#handPanel.mobile-pane-hidden{display:none!important}
+    #actionPanel>h3,#handPanel>h3{display:none}
+    #selectionPanel,#logPanel{display:none}
+    .panel{padding:4px}
+    #actionPanel,#handPanel{grid-column:1 / -1;width:100%;height:100%;min-height:0;overflow:hidden;border:0;border-radius:0;background:transparent;padding:4px 0 0;justify-self:stretch;align-self:stretch}
+    #actionPanel{display:grid;grid-template-rows:minmax(0,1fr) 20px;gap:4px}
+    .actionWorkbench{min-height:0;height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(132px,40%);gap:6px;align-items:stretch}
+    .actionLeft{min-width:0;min-height:0;display:flex;align-items:stretch}
+    .actionContext{width:100%;min-height:0;padding:5px 7px;border:1px solid #59606a;border-radius:7px;background:#2b3037;font-size:11px;line-height:1.35;font-weight:700;color:var(--text);white-space:normal;overflow:hidden;display:flex;align-items:center}
+    .actionContext:empty{display:none}
+    .landDpad{display:none;width:100%;height:100%;align-self:stretch;margin:0;grid-template-columns:minmax(0,1fr) minmax(0,.72fr) minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:4px}
+    .landDpad button{display:block;min-width:0;min-height:0;padding:0;border-radius:7px;font-size:22px;line-height:1;box-shadow:0 1px 0 rgba(35,27,19,.28),var(--toyInset)}
+    .landDpad button:disabled{opacity:.28}
+    #landLeftBtn{grid-column:1;grid-row:1 / 3}#landUpBtn{grid-column:2;grid-row:1}#landDownBtn{grid-column:2;grid-row:2}#landRightBtn{grid-column:3;grid-row:1 / 3}.dpadCenter{display:none}
+    #actionPanel[data-kind="land"] .actionContext{display:none}
+    #actionPanel[data-kind="land"] .landDpad{display:grid}
+    .hint{height:20px;min-height:20px;font-size:10px;line-height:20px;margin:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    .actions{height:100%;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(30px,1fr);gap:4px;align-content:stretch}
+    #confirmLandBtn{display:none}
+    .actions button{display:none;height:100%;min-height:30px;padding:3px 2px;font-size:11px;font-weight:800;line-height:1.08;min-width:0;border-radius:6px;box-shadow:0 1px 0 rgba(35,27,19,.28),var(--toyInset)}
+    .actions button.mobile-visible{display:block}
+    .actions #confirmLandBtn.mobile-visible{display:block}
+    .actions button.mobile-wide{grid-column:1 / -1}
+    .side[data-mobile-layout]{flex-basis:var(--mobile-side);height:var(--mobile-side);min-height:var(--mobile-side)}
+    .modal{padding:8px}.modalBox{width:100%;height:min(520px,calc(100dvh - 16px));max-height:calc(100dvh - 16px);padding:12px;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;overflow:hidden}.modalBox h2{margin-bottom:4px}#modalBody{min-height:0;max-height:72px;overflow:auto}.modal.result-compact .modalBox{width:min(360px,calc(100vw - 24px));height:auto;max-height:none;display:block;padding:14px}.modal.result-compact #modalBody{max-height:none;overflow:visible}.modal.result-compact #modalBody p{margin:6px 0 0}.modal.result-compact .modalBtns{margin-top:12px}.modalBox .mulliganCards{grid-template-columns:repeat(3,minmax(0,1fr));min-height:0;overflow-y:auto;align-content:start;margin:8px 0;gap:4px}.modalBox .mCard{min-height:72px}.modalBox .mulliganCard{min-width:0;grid-template-columns:34px minmax(0,1fr);gap:4px;padding:4px;align-items:center}.modalBox .mulliganCard .title{font-size:11px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modalBox .mulliganCard .desc{font-size:9px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.modalBox .mulliganCard .mini{transform:scale(.68);transform-origin:center}.modalBox .mulliganCard .unitMini{width:30px;height:30px;font-size:11px;border-width:2px;border-radius:6px}.modal.compact-choice .modalBox{height:auto;max-height:none;display:block;padding:12px}.modal.compact-choice h2{margin-bottom:8px}.modal.compact-choice #modalBody{display:none}.modal.compact-choice .mulliganCards{grid-template-columns:repeat(2,minmax(0,1fr))!important;overflow:visible;min-height:0;margin:8px 0 0;gap:6px}.modal.compact-choice .mCard{min-height:68px}
+    .hand{height:100%;max-height:none;flex-direction:row;align-items:stretch;gap:8px;overflow-x:auto;overflow-y:hidden;padding:2px 4px 4px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;touch-action:pan-x}
+    .hand .card{flex:0 0 154px;height:100%;grid-template-columns:1fr;grid-template-rows:50px minmax(0,1fr);gap:4px;padding:7px 6px;scroll-snap-align:start;min-height:0;overflow:hidden;text-align:center;align-items:start}
+    .hand .card>div:first-child{height:50px;display:flex;align-items:center;justify-content:center;min-width:0}
+    .hand .card>div:last-child{min-width:0;overflow:hidden}
+    .hand .card .title{font-size:13px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+    .hand .card .desc{font-size:11px;line-height:1.28;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+    .hand .mini{transform:scale(.98);transform-origin:center}
+    .hand .unitMini{width:46px;height:46px;font-size:14px;border-width:2px;border-radius:7px}
+    .modal.mulligan-mode .modalBox{height:auto;max-height:calc(100dvh - 24px);display:flex;flex-direction:column;padding:14px}
+    .modal.mulligan-mode #modalBody{max-height:none;overflow:visible}
+    .modal.mulligan-mode .mulliganCards{grid-template-columns:repeat(2,minmax(0,1fr))!important;overflow:visible;gap:8px;margin:10px 0 12px}
+    .modal.mulligan-mode .mulliganCard{grid-template-columns:46px minmax(0,1fr);gap:7px;padding:7px;min-height:96px}
+    .modal.mulligan-mode .mulliganCard .title{font-size:13px;line-height:1.15}
+    .modal.mulligan-mode .mulliganCard .desc{font-size:11px;line-height:1.25;-webkit-line-clamp:4}
+    .modal.mulligan-mode .mulliganCard .mini{transform:scale(.9)}
+    .modal.mulligan-mode .mulliganCard .unitMini{width:40px;height:40px;font-size:13px}
+    .modal.mulligan-mode .modalBtns{margin-top:2px}
+  }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div id="p1Panel" class="player p1"><div class="playerHeader"><div id="p1Name" class="name">PLAYER 1</div><span id="p1claim" class="claimStatus">11点維持中</span></div><div class="stat">HP <b id="p1hp">9</b>｜占領 <b id="p1score">0</b>/11</div></div>
+    <div class="centerInfo"><b id="turnNo">準備中</b></div>
+    <div id="p2Panel" class="player p2"><div class="playerHeader"><div id="p2Name" class="name">PLAYER 2</div><span id="p2claim" class="claimStatus">11点維持中</span></div><div class="stat">HP <b id="p2hp">9</b>｜占領 <b id="p2score">0</b>/11｜手札 <b id="p2hand">0</b></div></div>
+    <button id="rulesBtn" class="rulesBtn" type="button" aria-label="ルールを見る" title="ルール">?</button>
+  </div>
+
+  <div class="layout">
+    <div class="boardWrap"><div id="board" class="board"></div></div>
+    <div class="side">
+      <div id="mobilePlayTabs" class="mobilePlayTabs">
+        <button id="handTabBtn" type="button" class="active">手札0・山24</button>
+        <button id="actionTabBtn" type="button">行動 ○○</button>
+      </div>
+      <div id="actionPanel" class="panel mobile-pane-hidden">
+        <h3 id="actionTitle">行動 ○○</h3>
+        <div class="actionWorkbench">
+          <div class="actionLeft">
+            <div id="actionContext" class="actionContext"></div>
+            <div id="landDpad" class="landDpad" aria-label="土地位置を微調整">
+              <button id="landUpBtn" type="button" aria-label="上へ1マス">▲</button>
+              <button id="landLeftBtn" type="button" aria-label="左へ1マス">◀</button>
+              <span class="dpadCenter"></span>
+              <button id="landRightBtn" type="button" aria-label="右へ1マス">▶</button>
+              <button id="landDownBtn" type="button" aria-label="下へ1マス">▼</button>
+            </div>
+          </div>
+          <div class="actions">
+            <button id="moveBtn" disabled>移動</button><button id="attackBtn" disabled>攻撃</button>
+            <button id="exchangeBtn" disabled>手札交換</button><button id="finishMoveBtn" disabled>移動終了</button>
+            <button id="passBtn">ターン終了</button><button id="rotateBtn" disabled>回転</button>
+            <button id="cancelBtn">解除</button><button id="confirmLandBtn" disabled>決定</button>
+          </div>
+        </div>
+        <div id="hint" class="hint">カードまたは自軍ユニットを選択してください。</div>
+      </div>
+      <div id="handPanel" class="panel">
+        <h3 id="handTitle">手札 0｜山札 24</h3>
+        <div id="hand" class="hand"></div>
+      </div>
+      <div id="selectionPanel" class="panel">
+        <h3>選択中</h3><div id="selectionInfo" class="statusBox">なし</div>
+      </div>
+      <div id="logPanel" class="panel"><h3>ログ</h3><div id="log" class="log"></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modalBox">
+    <h2 id="modalTitle">ブロックモンスター</h2>
+    <div id="modalBody"></div>
+    <div id="modalCards" class="mulliganCards"></div>
+    <div class="modalBtns"><button id="modalAltBtn" type="button" style="display:none">戻る</button><button id="modalBtn">開始</button></div>
+  </div>
+</div>
+
+<div id="rulesModal" class="modal hidden rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <div class="modalBox rulesBox">
+    <div class="rulesHeader"><h2 id="rulesTitle">ルール</h2><button id="rulesCloseBtn" type="button">閉じる</button></div>
+    <div class="rulesTabs">
+      <button id="rulesBasicTab" type="button" class="active">基本ルール</button>
+      <button id="rulesDataTab" type="button">データ</button>
+    </div>
+
+    <div id="rulesBasicPane" class="rulesPane active">
+      <div class="rulesGrid">
+        <div class="ruleItem"><b>勝利条件</b><span>① 占領11点以上で自分のターンを終了し、相手の次ターン終了時にも11点以上を維持する。<br>② 相手拠点のHPを0にする。<br>11点維持を阻止された側は恒久+1点。</span></div>
+        <div class="ruleItem"><b>1ターンにできること</b><span>ターン開始時に1枚ドロー。1ターンに2行動する。<br>土地設置／ユニット配置／移動／攻撃／手札交換は、それぞれ1行動。</span></div>
+        <div class="ruleItem"><b>土地の置き方</b><span>自分の拠点、または拠点からつながっている自分の土地に接するように置く。</span></div>
+        <div class="ruleItem"><b>ユニットの配置</b><span>自分が置いた通常土地に配置できる。未使用の特殊マスには直接配置できない。</span></div>
+        <div class="ruleItem"><b>ユニットの移動</b><span>上下左右に移動する。土地のないマスは通れない。<br>味方ユニットは通過できるが停止できず、敵ユニットは通過できない。固有の移動ルールは「データ」で確認。</span></div>
+        <div class="ruleItem"><b>攻撃のしかた</b><span>射程内の敵ユニット、または相手拠点を攻撃できる。攻撃値ぶんダメージを与える。</span></div>
+        <div class="ruleItem"><b>特殊マス</b><span>ユニットが移動して停止したときに発動する。<br>得点は占領している間だけ加算。HP+1は最大HPと現在HPが+1。位置交換は手札1枚で味方1体と場所を交換する。強化・ドロー・HP+1・位置交換は1回使うと通常の道になる。</span></div>
+        <div class="ruleItem"><b>強化の使い方</b><span>強化値ぶん手札を捨てて使用する。<br>移動強化は移動前、射程強化は対象選択前、攻撃強化は攻撃対象選択後、防御強化は攻撃を受けたときに選ぶ。</span></div>
+      </div>
+    </div>
+
+    <div id="rulesDataPane" class="rulesPane">
+      <div class="rulesDataGrid">
+        <div class="rulesDataItem"><b>ゲーム数値</b><span>拠点HP 9｜勝利点 11｜初期手札 3｜手札上限なし｜1ターン 2行動｜開始時以外は毎ターン1枚ドロー</span></div>
+        <div class="rulesDataItem"><b>山札</b><span>全24枚｜土地14枚｜ユニット10枚。ユニットは5種類×2枚。後手だけ初期手札を1回マリガンできる。</span></div>
+        <div class="rulesDataItem"><b>固定島</b><span>盤面中央に3か所。各★3点。土地を置くための接続先にはならない。</span></div>
+        <div class="rulesDataItem"><b>特殊マス記号</b><div class="ruleLegend"><em>★ 得点</em><em>攻 攻撃</em><em>移 移動</em><em>射 射程</em><em>防 防御</em><em>引 1枚ドロー</em><em>HP HP+1</em><em>換 位置交換</em><em>拠 拠点</em></div></div>
+      </div>
+
+      <div class="unitDataWrap">
+        <table class="unitData" aria-label="ユニット性能">
+          <thead><tr><th>ユニット</th><th>攻</th><th>HP</th><th>移</th><th>射</th></tr></thead>
+          <tbody>
+            <tr><td>兵士</td><td>2</td><td>4</td><td>2</td><td>1</td></tr>
+            <tr><td>弓兵</td><td>2</td><td>3</td><td>2</td><td>3</td></tr>
+            <tr><td>騎兵</td><td>3</td><td>3</td><td>3固定</td><td>1</td></tr>
+            <tr><td>かえる騎兵</td><td>2</td><td>3</td><td>2</td><td>2</td></tr>
+            <tr><td>盾兵</td><td>1</td><td>5</td><td>1</td><td>1</td></tr>
+          </tbody>
+        </table>
+        <div class="dataNote">騎兵：移動は必ず3マス。かえる騎兵：移動2の範囲で空白1マスを飛び越えられる。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const W=13,H=15,WIN_SCORE=11,BASE_HP=9,HEAL_AMOUNT=1;
+const BOT_ACTION_DELAY=700,BOT_TURN_END_DELAY=650;
+const BASES=[{x:6,y:14},{x:6,y:0}];
+const ISLANDS=[
+  {x:3,y:7,score:3},{x:6,y:7,score:3},{x:9,y:7,score:3}
+];
+const SHAPES={
+ I:[[0,0],[1,0],[2,0],[3,0]], O:[[0,0],[1,0],[0,1],[1,1]], T:[[0,0],[1,0],[2,0],[1,1]],
+ L:[[0,0],[0,1],[0,2],[1,2]], J:[[1,0],[1,1],[1,2],[0,2]], S:[[1,0],[2,0],[0,1],[1,1]], Z:[[0,0],[1,0],[1,1],[2,1]]
+};
+const UNIT_TYPES={
+ soldier:{name:'兵士',short:'兵',atk:2,hp:4,move:2,range:1},
+ archer:{name:'弓兵',short:'弓',atk:2,hp:3,move:2,range:3},
+ cavalry:{name:'騎兵',short:'騎',atk:3,hp:3,move:3,range:1,fixed:true},
+ frog:{name:'かえる騎兵',short:'蛙',atk:2,hp:3,move:2,range:2,frog:true},
+ shield:{name:'盾兵',short:'盾',atk:1,hp:5,move:1,range:1}
+};
+const AI_PROFILE_IDS=['standard','island','growth','base'];
+const AI_PROFILES={
+ standard:{name:'標準'},
+ island:{name:'飛び地得点'},
+ growth:{name:'自陣型'},
+ base:{name:'拠点撃破'}
+};
+const INITIAL_AI_PROFILE=AI_PROFILE_IDS[Math.floor(Math.random()*AI_PROFILE_IDS.length)];
+let uid=1;
+function land(shape,effects=[]){return {id:'c'+uid++,kind:'land',shape,effects,rot:0};}
+function landFx(index,type,value=1){return {index,effect:{type,value}};}
+function unitCard(type){return {id:'c'+uid++,kind:'unit',type};}
+function makeDeck(){
+  uid=1;
+  const cards=[
+    land('I',[landFx(2,'draw',1),landFx(1,'score',2)]), land('I',[landFx(1,'hpUp',1),landFx(2,'score',3)]),
+    land('O',[landFx(0,'defBoost',1),landFx(3,'score',1)]), land('O',[landFx(1,'draw',1),landFx(2,'moveBoost',1)]),
+    land('T',[landFx(0,'atkBoost',1),landFx(3,'moveBoost',1)]), land('T',[landFx(1,'score',2),landFx(3,'hpUp',1)]),
+    land('S',[landFx(0,'draw',1),landFx(3,'rangeBoost',1)]), land('S',[landFx(1,'swap',1),landFx(2,'defBoost',1)]),
+    land('Z',[landFx(0,'atkBoost',1),landFx(3,'score',1)]), land('Z',[landFx(1,'hpUp',1),landFx(2,'moveBoost',1)]),
+    land('L',[landFx(2,'score',2),landFx(0,'rangeBoost',1)]), land('L',[landFx(3,'draw',1),landFx(1,'atkBoost',1)]),
+    land('J',[landFx(0,'score',3),landFx(2,'defBoost',1)]), land('J',[landFx(1,'swap',1),landFx(3,'rangeBoost',1)]),
+    unitCard('soldier'),unitCard('soldier'),
+    unitCard('archer'),unitCard('archer'),
+    unitCard('cavalry'),unitCard('cavalry'),
+    unitCard('frog'),unitCard('frog'),
+    unitCard('shield'),unitCard('shield')
+  ];
+  return shuffle(cards);
+}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const state={
+  players:[mkPlayer(0),mkPlayer(1)],active:0,turn:0,phase:'setup',winner:null,
+  terrain:new Map(),units:new Map(),selectedCard:null,selectedUnit:null,mode:null,hover:null,
+  moveCtx:null,moveOptions:null,mulliganPlayer:0,mulliganReroll:new Set(),actionsLeft:0,claimOwner:null,
+  gameMode:null,humanPlayer:0,firstPlayer:0,aiThinking:false,mulliganAfter:null,lastMoveSrc:new Map(),mobilePane:'hand',landTapConfirm:null,moveBoostPlan:null,attackBoostPlan:null,
+  aiProfile:INITIAL_AI_PROFILE,aiDifficulty:'normal'
+};
+function mkPlayer(i){return {id:i,name:'PLAYER '+(i+1),deck:makeDeck(),hand:[],discard:[],score:0,permanentScore:0,baseHp:BASE_HP};}
+function key(x,y){return x+','+y}
+function inBoard(x,y){return x>=0&&x<W&&y>=0&&y<H}
+function orth(x,y){return [[x+1,y],[x-1,y],[x,y+1],[x,y-1]].filter(([a,b])=>inBoard(a,b));}
+function manhattan(a,b){return Math.abs(a.x-b.x)+Math.abs(a.y-b.y)}
+function cellAt(x,y){return state.terrain.get(key(x,y))||null}
+function unitAt(x,y){return state.units.get(key(x,y))||null}
+function isBase(x,y){return BASES.findIndex(b=>b.x===x&&b.y===y)}
+function isOwnHalf(p,x){return p===0?x<=8:x>=9}
+function recycleDiscard(p){const pl=state.players[p];if(pl.deck.length||!pl.discard.length)return false;pl.deck=shuffle(pl.discard.splice(0));log(`PLAYER ${p+1}: 捨て札をシャッフルして山札に戻した`);return true;}
+function draw(p,n=1){const pl=state.players[p];for(let i=0;i<n;i++){if(!pl.deck.length)recycleDiscard(p);if(!pl.deck.length)break;pl.hand.push(pl.deck.pop());}updateStats();}
+function log(msg){const el=document.getElementById('log');const d=document.createElement('div');d.textContent=msg;el.appendChild(d);el.scrollTop=el.scrollHeight;}
+function start(){
+  for(let p=0;p<2;p++){draw(p,3)}
+  for(const isl of ISLANDS){state.terrain.set(key(isl.x,isl.y),{kind:'island',owner:null,effect:{type:'score',value:isl.score},used:false});}
+  state.gameMode='ai';state.humanPlayer=0;
+  document.getElementById('p1Name').textContent='あなた';document.getElementById('p2Name').textContent='AI';
+  render();showDifficultySelect();
+}
+
+function setRulesTab(name){
+  const basic=name!=='data';
+  document.getElementById('rulesBasicTab').classList.toggle('active',basic);
+  document.getElementById('rulesDataTab').classList.toggle('active',!basic);
+  document.getElementById('rulesBasicPane').classList.toggle('active',basic);
+  document.getElementById('rulesDataPane').classList.toggle('active',!basic);
+}
+function openRules(){setRulesTab('basic');document.getElementById('rulesModal').classList.remove('hidden');}
+function closeRules(){document.getElementById('rulesModal').classList.add('hidden');}
+function setModalCompact(on){const m=document.getElementById('modal');m.classList.remove('result-compact','mulligan-mode');m.classList.toggle('compact-choice',!!on);const alt=document.getElementById('modalAltBtn');if(alt){alt.style.display='none';alt.onclick=null;}}
+
+function showChoice(title,body,options){
+  state.phase='setup';
+  const m=document.getElementById('modal');setModalCompact(true);m.classList.remove('hidden');
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body?`<p>${body}</p>`:'';
+  const wrap=document.getElementById('modalCards');wrap.innerHTML='';
+  wrap.style.gridTemplateColumns=`repeat(${Math.min(options.length,2)},1fr)`;
+  for(const opt of options){
+    const d=document.createElement('div');d.className='mCard';
+    d.innerHTML=`<b>${opt.label}</b><span class="small">${opt.desc||''}</span>`;
+    d.onclick=opt.onChoose;wrap.appendChild(d);
+  }
+  document.getElementById('modalBtn').style.display='none';
+}
+function showDifficultySelect(){
+  showChoice('難易度','',[
+    {label:'普通',desc:'',onChoose:()=>{state.aiDifficulty='normal';showFirstPlayerSelect();}},
+    {label:'強い',desc:'',onChoose:()=>{state.aiDifficulty='strong';showFirstPlayerSelect();}}
+  ]);
+}
+function showFirstPlayerSelect(){
+  showChoice('先手・後手','',[
+    {label:'先手',desc:'',onChoose:()=>startWithFirstPlayer(0)},
+    {label:'後手',desc:'',onChoose:()=>startWithFirstPlayer(1)}
+  ]);
+}
+function startWithFirstPlayer(first){
+  document.getElementById('modal').classList.add('hidden');
+  state.firstPlayer=first;
+  const second=1-first,ai=1-state.humanPlayer;
+  if(second===ai){botMulligan(ai);beginTurn(first);}
+  else showMulligan(second,()=>beginTurn(first));
+}
+function showMulligan(p,after){
+  state.phase='mulligan';state.mulliganPlayer=p;state.mulliganAfter=after||null;state.mulliganReroll.clear();
+  const m=document.getElementById('modal');setModalCompact(false);m.classList.add('mulligan-mode');m.classList.remove('hidden');
+  document.getElementById('modalTitle').textContent=`PLAYER ${p+1} 初期手札`;
+  document.getElementById('modalBody').innerHTML='<p>引き直すカードを選択。引き直しは1回のみ。</p>';
+  const wrap=document.getElementById('modalCards');wrap.innerHTML='';wrap.style.gridTemplateColumns='repeat(3,1fr)';
+  state.players[p].hand.forEach((c,i)=>{const d=document.createElement('div');d.className='card mulliganCard';d.dataset.i=i;d.innerHTML=cardVisualHtml(c);d.onclick=()=>{if(state.mulliganReroll.has(i))state.mulliganReroll.delete(i);else state.mulliganReroll.add(i);d.classList.toggle('reroll');};wrap.appendChild(d)});
+  const btn=document.getElementById('modalBtn');btn.style.display='inline-block';btn.textContent='引き直しを確定';btn.onclick=confirmMulligan;
+}
+function confirmMulligan(){
+  const p=state.mulliganPlayer,pl=state.players[p];const inds=[...state.mulliganReroll].sort((a,b)=>b-a);const returned=[];
+  for(const i of inds)returned.push(pl.hand.splice(i,1)[0]);
+  draw(p,returned.length);pl.deck=shuffle(pl.deck.concat(returned));
+  const after=state.mulliganAfter;state.mulliganAfter=null;document.getElementById('modal').classList.add('hidden');if(after)after();
+}
+function botMulligan(p){
+  const pl=state.players[p],lands=[],units=[];
+  pl.hand.forEach((c,i)=>(c.kind==='land'?lands:units).push(i));
+  let rer=[];
+  if(!lands.length)rer=pl.hand.map((_,i)=>i);
+  else if(!units.length){
+    const keep=lands.reduce((best,i)=>{
+      const c=pl.hand[i],score=(c.effects||[]).some(e=>e.effect.type==='score')?100:0;
+      const b=pl.hand[best],bscore=(b.effects||[]).some(e=>e.effect.type==='score')?100:0;
+      return score+(c.effects||[]).length>bscore+(b.effects||[]).length?i:best;
+    },lands[0]);
+    rer=pl.hand.map((_,i)=>i).filter(i=>i!==keep);
+  }
+  if(rer.length){const returned=[];for(const i of rer.sort((a,b)=>b-a))returned.push(pl.hand.splice(i,1)[0]);draw(p,returned.length);pl.deck=shuffle(pl.deck.concat(returned));}
+}
+function isAITurn(){return state.active!==state.humanPlayer&&state.phase==='play'&&state.winner===null;}
+function setMobilePane(name){
+  state.mobilePane=name==='action'?'action':'hand';
+  const handPanel=document.getElementById('handPanel'),actionPanel=document.getElementById('actionPanel'),handTab=document.getElementById('handTabBtn'),actionTab=document.getElementById('actionTabBtn');
+  if(!handPanel||!actionPanel)return;
+  const hand=state.mobilePane==='hand';
+  handPanel.classList.toggle('mobile-pane-hidden',!hand);
+  actionPanel.classList.toggle('mobile-pane-hidden',hand);
+  handTab?.classList.toggle('active',hand);
+  actionTab?.classList.toggle('active',!hand);
+  if(hand)document.querySelector('.side')?.setAttribute('data-mobile-layout','hand');
+}
+function beginTurn(p){
+  state.active=p;state.turn++;state.actionsLeft=2;state.phase='play';clearSelection();draw(p,1);log(`TURN ${state.turn}: PLAYER ${p+1}（2行動）`);
+  setMobilePane(isAITurn()?'action':'hand');render();
+  if(isAITurn()){scheduleBotAction();return;}
+}
+
+function exchangeSelectedCard(){
+  if(isAITurn()||state.phase!=='play'||!state.selectedCard)return;
+  const p=state.active,pl=state.players[p],idx=pl.hand.findIndex(c=>c.id===state.selectedCard.id);
+  if(idx<0)return;
+  const card=pl.hand.splice(idx,1)[0];
+  pl.discard.push(card);
+  draw(p,1);
+  afterAction(`PLAYER ${p+1}: 手札を1枚捨てて1枚ドロー`);
+}
+
+function boostValue(u,kind){return Math.max(0,u?.[kind]||0);}
+function unitHasBoost(u){return !!u&&['atkBoost','moveBoost','rangeBoost','defBoost'].some(kind=>boostValue(u,kind)>0);}
+function applyUnitDamageShade(el,u){const max=Math.max(1,u?.maxHp||UNIT_TYPES[u?.type]?.hp||1),hp=Math.max(0,Math.min(max,u?.hp??max));el.style.setProperty('--damage-pct',`${((max-hp)/max)*100}%`);}
+function canPayBoost(p,n){return n>0&&state.players[p].hand.length>=n;}
+function hasCardIds(p,ids){const handIds=new Set(state.players[p].hand.map(c=>c.id));return ids.length===new Set(ids).size&&ids.every(id=>handIds.has(id));}
+function payCardIds(p,ids){
+  if(!hasCardIds(p,ids))return false;
+  const pl=state.players[p],idxs=[];
+  for(const id of ids){const i=pl.hand.findIndex(c=>c.id===id);if(i<0)return false;idxs.push(i);}
+  for(const i of [...idxs].sort((a,b)=>b-a))pl.discard.push(pl.hand.splice(i,1)[0]);
+  updateStats();return true;
+}
+function botCardUtility(p,c){
+  if(c.kind==='unit'){const t=UNIT_TYPES[c.type],unitCount=[...state.units.values()].filter(u=>u.owner===p).length;return (unitCount<4?8:5)+t.hp*.3+t.move*.5+t.range*.4;}
+  const kinds=new Set((c.effects||[]).map(e=>e.effect.type));let util=4+(c.effects||[]).length*.7;
+  if(kinds.has('score'))util+=4+(c.effects||[]).filter(e=>e.effect.type==='score').reduce((a,e)=>a+e.effect.value,0);
+  util+=(c.effects||[]).filter(e=>['atkBoost','moveBoost','rangeBoost','defBoost'].includes(e.effect.type)).length*.8;util+=(c.effects||[]).filter(e=>e.effect.type==='draw').reduce((a,e)=>a+e.effect.value*2,0);util+=(c.effects||[]).filter(e=>e.effect.type==='hpUp').reduce((a,e)=>a+e.effect.value*2,0);util+=(c.effects||[]).filter(e=>e.effect.type==='swap').length*1.5;
+  return util;
+}
+function botPaymentIds(p,n){
+  if(!canPayBoost(p,n))return null;
+  return state.players[p].hand.map(c=>({id:c.id,v:botCardUtility(p,c)+botRandom()*.02})).sort((a,b)=>a.v-b.v).slice(0,n).map(x=>x.id);
+}
+function sideLabel(p){return p===state.humanPlayer?'あなた':'AI';}
+function unitSubject(u){return `${sideLabel(u.owner)}の${UNIT_TYPES[u.type].name}`;}
+function showMethodChoice(title,options,body=''){
+  const m=document.getElementById('modal'),wrap=document.getElementById('modalCards'),btn=document.getElementById('modalBtn'),alt=document.getElementById('modalAltBtn');
+  setModalCompact(false);m.classList.remove('hidden');
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  wrap.innerHTML='';wrap.style.gridTemplateColumns=`repeat(${Math.min(options.length,3)},1fr)`;
+  for(const opt of options){const d=document.createElement('div');d.className='mCard';d.innerHTML=`<b>${opt.label}</b>${opt.desc?`<span class="small">${opt.desc}</span>`:''}`;d.onclick=opt.onChoose;wrap.appendChild(d);}
+  btn.style.display='none';btn.onclick=null;alt.style.display='none';alt.onclick=null;
+}
+function cancelUnitAction(kind){
+  document.getElementById('modal').classList.add('hidden');
+  state.mode=null;state.moveCtx=null;state.moveOptions=null;
+  if(kind==='move')state.moveBoostPlan=null;
+  if(kind==='attack')state.attackBoostPlan=null;
+  setMobilePane('action');render();
+}
+function showBattleDecision({sel,targetKey=null,baseIndex=null,plan}){
+  const attacker=sel.u,target=targetKey?state.units.get(targetKey):null,targetType=target?'unit':'base';
+  if(targetType==='unit'&&!target){afterAction(`PLAYER ${state.active+1}: 攻撃`);return;}
+  const atkN=boostValue(attacker,'atkBoost'),defN=target?boostValue(target,'defBoost'):0;
+  const battleChoiceSummary=(damage,label)=>{
+    const targetName=target?unitSubject(target):`${sideLabel(baseIndex)}の拠点`;
+    const hp=target?target.hp:state.players[baseIndex].baseHp;
+    const after=Math.max(0,hp-Math.max(0,damage));
+    const end=after<=0?(target?'（撃破）':'（拠点破壊）'):'';
+    return `<p><b>${unitSubject(attacker)} → ${targetName}</b><br>${label}：${Math.max(0,damage)}ダメージ<br>HP ${hp} → ${after}${end}</p>`;
+  };
+  const reservedRangeCards=attacker.owner===state.humanPlayer&&plan.useRange?(plan.cardIds||[]).length:0;
+  const humanCanAtk=attacker.owner===state.humanPlayer&&atkN>0&&state.players[attacker.owner].hand.length-reservedRangeCards>=atkN;
+
+  function executeBattle(useAtk,attackCardIds,useDef,defenseCardIds){
+    const attackerIds=attacker.owner===state.humanPlayer
+      ?[...(plan.useRange?plan.cardIds:[]),...(useAtk?attackCardIds:[])]
+      :[...(plan.cardIds||[])];
+    const defenderIds=useDef?[...(defenseCardIds||[])]:[];
+    if(attackerIds.length&&!hasCardIds(attacker.owner,attackerIds)){hint('強化に使う手札を選び直してください。');document.getElementById('modal').classList.add('hidden');setMobilePane('action');render();return;}
+    if(target&&defenderIds.length&&!hasCardIds(target.owner,defenderIds)){hint('防御に使う手札を選び直してください。');document.getElementById('modal').classList.add('hidden');setMobilePane('action');render();return;}
+    if(attackerIds.length&&!payCardIds(attacker.owner,attackerIds)){hint('強化に使う手札が不足しています。');document.getElementById('modal').classList.add('hidden');setMobilePane('action');render();return;}
+    if(target&&defenderIds.length&&!payCardIds(target.owner,defenderIds)){hint('防御に使う手札が不足しています。');document.getElementById('modal').classList.add('hidden');setMobilePane('action');render();return;}
+    document.getElementById('modal').classList.add('hidden');
+    if(plan.useRange)log(`${unitSubject(attacker)}: 手札${boostValue(attacker,'rangeBoost')}枚で射程+${boostValue(attacker,'rangeBoost')}`);
+    if(useAtk)log(`${unitSubject(attacker)}: 手札${atkN}枚で攻撃+${atkN}`);
+    if(useDef&&target)log(`${unitSubject(target)}: 手札${defN}枚で防御+${defN}`);
+    attacker.actedTurn=state.turn;
+    const finalDmg=UNIT_TYPES[attacker.type].atk+(useAtk?atkN:0);
+    if(targetType==='base'){
+      state.players[baseIndex].baseHp-=finalDmg;
+      log(`${unitSubject(attacker)} → ${sideLabel(baseIndex)}の拠点: ${finalDmg}ダメージ`);
+      afterAction(`PLAYER ${state.active+1}: 拠点を攻撃`);return;
+    }
+    const liveTarget=state.units.get(targetKey);
+    if(!liveTarget){afterAction(`PLAYER ${state.active+1}: 攻撃`);return;}
+    const actual=Math.max(0,finalDmg-(useDef?defN:0));
+    liveTarget.hp-=actual;
+    log(`${unitSubject(attacker)} → ${unitSubject(liveTarget)}: ${actual}ダメージ${useDef?`（${unitSubject(liveTarget)} 防御-${defN}）`:''}`);
+    if(liveTarget.hp<=0){
+      if(liveTarget.sourceCard)state.players[liveTarget.owner].discard.push(liveTarget.sourceCard);
+      state.units.delete(targetKey);log(`${unitSubject(liveTarget)}を撃破（捨て札へ）`);
+    }
+    afterAction(`PLAYER ${state.active+1}: 攻撃`);
+  }
+
+  function chooseDefense(useAtk,attackCardIds){
+    const incoming=UNIT_TYPES[attacker.type].atk+(useAtk?atkN:0);
+    if(targetType!=='unit'){
+      if(baseIndex===state.humanPlayer&&attacker.owner!==state.humanPlayer){
+        const label=useAtk?'強化攻撃':'通常攻撃';
+        showMethodChoice('攻撃を受けます',[
+          {label:'続ける',desc:'',onChoose:()=>executeBattle(useAtk,attackCardIds,false,[])}
+        ],battleChoiceSummary(incoming,label));
+        return;
+      }
+      executeBattle(useAtk,attackCardIds,false,[]);return;
+    }
+    if(target.owner!==state.humanPlayer){
+      let useDef=botShouldUseDefense(targetKey,target,incoming),ids=[];
+      if(useDef){ids=botPaymentIds(target.owner,defN)||[];if(ids.length!==defN)useDef=false;}
+      executeBattle(useAtk,attackCardIds,useDef,ids);return;
+    }
+    if(!(defN>0&&canPayBoost(target.owner,defN))){
+      showMethodChoice('攻撃を受けます',[
+        {label:'続ける',desc:'',onChoose:()=>executeBattle(useAtk,attackCardIds,false,[])}
+      ],battleChoiceSummary(incoming,useAtk?'強化攻撃':'通常攻撃'));
+      return;
+    }
+    const showDefenseChoice=()=>showMethodChoice('防御',[
+      {label:'強化防御',desc:`防御 +${defN}`,onChoose:()=>showSpendCardsOverlay(
+        target.owner,defN,`${unitSubject(target)}：防御強化`,`${unitSubject(target)}が防御強化+${defN}を使います。`,
+        ids=>executeBattle(useAtk,attackCardIds,true,ids),showDefenseChoice,{confirmLabel:'このカードを捨てる',backLabel:'もどる'}
+      )},
+      {label:'通常防御',desc:'強化を使わない',onChoose:()=>executeBattle(useAtk,attackCardIds,false,[])}
+    ],battleChoiceSummary(incoming,'通常防御'));
+    showDefenseChoice();
+  }
+
+  if(attacker.owner!==state.humanPlayer){chooseDefense(!!plan.useAtk,[]);return;}
+  if(!humanCanAtk){chooseDefense(false,[]);return;}
+  const showAttackChoice=()=>showMethodChoice('攻撃',[
+    {label:'強化攻撃',desc:`攻撃 +${atkN}`,onChoose:()=>showSpendCardsOverlay(
+      attacker.owner,atkN,`${unitSubject(attacker)}：攻撃強化`,`${unitSubject(attacker)}が攻撃強化+${atkN}を使います。`,
+      ids=>chooseDefense(true,ids),showAttackChoice,{excludeIds:plan.useRange?plan.cardIds:[],confirmLabel:'このカードを捨てる',backLabel:'もどる'}
+    )},
+    {label:'通常攻撃',desc:'強化を使わない',onChoose:()=>chooseDefense(false,[])},
+    {label:'攻撃をやめる',desc:'ユニットの行動選択に戻る',onChoose:()=>cancelUnitAction('attack')}
+  ],battleChoiceSummary(UNIT_TYPES[attacker.type].atk,'通常攻撃'));
+  showAttackChoice();
+}
+
+function botShouldUseDefense(targetKey,target,incoming){
+  const n=boostValue(target,'defBoost');
+  if(!n||!canPayBoost(target.owner,n))return false;
+  const onScore=cellAt(...targetKey.split(',').map(Number))?.effect?.type==='score';
+  const preventsDeath=incoming>=target.hp&&Math.max(0,incoming-n)<target.hp;
+  const meaningfulHold=onScore&&incoming>1&&target.hp-incoming>0;
+  return preventsDeath||meaningfulHold;
+}
+function showSpendCardsOverlay(p,count,title,body,onConfirm,onCancel,options={}){
+  const pl=state.players[p],m=document.getElementById('modal'),wrap=document.getElementById('modalCards'),btn=document.getElementById('modalBtn'),alt=document.getElementById('modalAltBtn');
+  const excluded=new Set(options.excludeIds||[]),available=pl.hand.filter(c=>!excluded.has(c.id));
+  setModalCompact(false);m.classList.remove('hidden');document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=`<p>${body}<br>捨てるカードを${count}枚選んでください。<br><span class="small">ここではまだカードを捨てません。</span></p>`;
+  wrap.innerHTML='';wrap.style.gridTemplateColumns='repeat(3,1fr)';
+  const selected=new Set((options.initialIds||[]).filter(id=>available.some(c=>c.id===id)).slice(0,count)),els=new Map();
+  const refresh=()=>{
+    for(const [id,d] of els)d.classList.toggle('reroll',selected.has(id));
+    btn.disabled=selected.size!==count;
+    btn.textContent=selected.size===count?(options.confirmLabel||'このカードを捨てる'):`カードを${count}枚選択（${selected.size}/${count}）`;
+  };
+  available.forEach(c=>{
+    const d=document.createElement('div');d.className='mCard';d.innerHTML=`<b>${cardTitle(c)}</b><span class="small">${cardDesc(c)}</span>`;
+    els.set(c.id,d);d.onclick=()=>{if(selected.has(c.id))selected.delete(c.id);else{if(selected.size>=count){const oldest=selected.values().next().value;if(oldest!==undefined)selected.delete(oldest);}selected.add(c.id);}refresh();};wrap.appendChild(d);
+  });
+  btn.style.display='inline-block';btn.disabled=true;btn.onclick=()=>{if(selected.size!==count)return;const ids=[...selected];m.classList.add('hidden');onConfirm(ids);};
+  if(onCancel){alt.style.display='inline-block';alt.textContent=options.backLabel||'もどる';alt.onclick=()=>{m.classList.add('hidden');onCancel();};}
+  refresh();
+}
+
+function afterAction(actionText){
+  if(actionText)log(actionText);state.actionsLeft=Math.max(0,state.actionsLeft-1);clearSelection();
+  if(state.active===state.humanPlayer&&state.actionsLeft>0){
+    setMobilePane(state.players[state.humanPlayer].hand.length?'hand':'action');
+  }
+  render();
+  if(checkBaseWin())return;
+  if(state.actionsLeft<=0){if(isAITurn())scheduleBotTurnEnd();else finishTurn();}
+  else{state.phase='play';render();if(isAITurn())scheduleBotAction();}
+}
+function finishTurn(){
+  clearSelection();render();
+  if(resolveOccupationAtTurnEnd(state.active,finishEndTurn))return;
+  finishEndTurn();
+}
+function finishEndTurn(){beginTurn(1-state.active);}
+function occupiedScore(p){
+  let total=0;
+  for(const [k,tile] of state.terrain){
+    if(tile?.effect?.type!=='score')continue;
+    const u=state.units.get(k);
+    if(u&&u.owner===p)total+=tile.effect.value;
+  }
+  return total;
+}
+function controlledScore(p){return occupiedScore(p)+(state.players[p].permanentScore||0);}
+function declareWin(w,reason){
+  state.winner=w;state.phase='gameover';render();const m=document.getElementById('modal');setModalCompact(false);m.classList.add('result-compact');m.classList.remove('hidden');document.getElementById('modalTitle').textContent=`PLAYER ${w+1} 勝利`;
+  document.getElementById('modalBody').innerHTML=`<p>${reason}<br>占領 ${controlledScore(w)}点 / 相手拠点HP ${state.players[1-w].baseHp}</p>`;document.getElementById('modalCards').innerHTML='';const b=document.getElementById('modalBtn');b.style.display='inline-block';b.textContent='最初から';b.onclick=()=>location.reload();return true;
+}
+function checkBaseWin(){
+  if(state.players[0].baseHp<=0)return declareWin(1,'拠点を破壊');
+  if(state.players[1].baseHp<=0)return declareWin(0,'拠点を破壊');
+  return false;
+}
+function showClaimAnnouncement(p,pts,after){
+  const m=document.getElementById('modal'),wrap=document.getElementById('modalCards'),b=document.getElementById('modalBtn');
+  setModalCompact(false);m.classList.remove('hidden');
+  document.getElementById('modalTitle').textContent='11点維持開始';
+  document.getElementById('modalBody').innerHTML=`<p>${p===state.humanPlayer?'あなた':'AI'}が占領${pts}点に到達しました。<br>相手ターン終了まで11点以上を維持すると勝利です。</p>`;
+  wrap.innerHTML='';
+  b.style.display='inline-block';b.disabled=false;b.textContent='続ける';
+  b.onclick=()=>{m.classList.add('hidden');if(after)after();};
+}
+function resolveOccupationAtTurnEnd(p,afterClaimAnnounce){
+  if(state.claimOwner!==null&&state.claimOwner!==p){
+    const claimant=state.claimOwner,pts=controlledScore(claimant);
+    if(pts>=WIN_SCORE)return declareWin(claimant,`占領${pts}点を相手ターン終了まで維持`);
+    state.players[claimant].permanentScore=(state.players[claimant].permanentScore||0)+1;
+    log(`PLAYER ${claimant+1}: 11点維持に失敗。恒久+1点（恒久点 ${state.players[claimant].permanentScore}）`);
+    state.claimOwner=null;
+  }
+  if(state.claimOwner===null){
+    const pts=controlledScore(p);
+    if(pts>=WIN_SCORE){
+      state.claimOwner=p;
+      log(`PLAYER ${p+1}: 占領${pts}点。PLAYER ${2-p}は次の1ターンで阻止可能`);
+      showClaimAnnouncement(p,pts,afterClaimAnnounce);
+      return true;
+    }
+  }
+  return false;
+}
+function clearSelection(){state.selectedCard=null;state.selectedUnit=null;state.mode=null;state.hover=null;state.landTapConfirm=null;state.moveCtx=null;state.moveOptions=null;state.moveBoostPlan=null;state.attackBoostPlan=null;}
+function usesMobileLandConfirm(){return window.matchMedia('(max-width:640px)').matches;}
+let landDragPointer=null,landDragStart=null,landDragMoved=false,landDragLast=null,landDragSuppressClickUntil=0;
+function boardCellFromPoint(clientX,clientY){const el=document.elementFromPoint(clientX,clientY)?.closest?.('.cell');const board=document.getElementById('board');if(!el||!board?.contains(el))return null;return {x:Number(el.dataset.x),y:Number(el.dataset.y)};}
+function setMobileLandPreview(x,y,dragging=false){if(!usesMobileLandConfirm()||state.selectedCard?.kind!=='land')return;const card=state.selectedCard;state.hover={x,y};state.landTapConfirm={cardId:card.id,x,y,rot:card.rot||0};const chk=validLandPlacement(card,x,y);updateLandPreview(x,y);updateButtons();if(dragging)hint(chk.ok?'位置を調整して「決定」':'設置できません。位置を調整してください');}
+function nudgeMobileLand(dx,dy){
+  if(!usesMobileLandConfirm()||state.phase!=='play'||isAITurn()||state.selectedCard?.kind!=='land'||!state.landTapConfirm)return;
+  const x=Math.max(0,Math.min(W-1,state.landTapConfirm.x+dx));
+  const y=Math.max(0,Math.min(H-1,state.landTapConfirm.y+dy));
+  setMobileLandPreview(x,y,true);
+}
+function initMobileLandDrag(){const board=document.getElementById('board');if(!board)return;board.addEventListener('pointerdown',e=>{if(!usesMobileLandConfirm()||state.phase!=='play'||isAITurn()||state.selectedCard?.kind!=='land')return;const cell=e.target.closest?.('.cell');if(!cell)return;landDragPointer=e.pointerId;landDragStart={clientX:e.clientX,clientY:e.clientY,x:Number(cell.dataset.x),y:Number(cell.dataset.y)};landDragMoved=false;landDragLast=`${cell.dataset.x},${cell.dataset.y}`;setMobileLandPreview(landDragStart.x,landDragStart.y,false);try{board.setPointerCapture(e.pointerId)}catch{};});board.addEventListener('pointermove',e=>{if(e.pointerId!==landDragPointer||!landDragStart)return;const dx=e.clientX-landDragStart.clientX,dy=e.clientY-landDragStart.clientY;if(!landDragMoved&&Math.hypot(dx,dy)>=6)landDragMoved=true;if(!landDragMoved)return;const cell=boardCellFromPoint(e.clientX,e.clientY);if(!cell)return;const k=`${cell.x},${cell.y}`;if(k===landDragLast)return;landDragLast=k;setMobileLandPreview(cell.x,cell.y,true);e.preventDefault();});const finish=e=>{if(e.pointerId!==landDragPointer)return;if(landDragMoved)landDragSuppressClickUntil=performance.now()+350;try{board.releasePointerCapture(e.pointerId)}catch{};landDragPointer=null;landDragStart=null;landDragMoved=false;landDragLast=null;};board.addEventListener('pointerup',finish);board.addEventListener('pointercancel',finish);}
+function rotatedCoords(card){let pts=SHAPES[card.shape].map(([x,y],i)=>({x,y,i}));let r=((card.rot||0)%4+4)%4;for(let t=0;t<r;t++)pts=pts.map(p=>({x:-p.y,y:p.x,i:p.i}));const minX=Math.min(...pts.map(p=>p.x)),minY=Math.min(...pts.map(p=>p.y));return pts.map(p=>({x:p.x-minX,y:p.y-minY,i:p.i}));}
+function connectedTerrain(player){
+  const ownLand=(x,y)=>{const t=cellAt(x,y);return !!t&&t.kind==='land'&&t.owner===player;};
+  const seen=new Set(),q=[];for(const [x,y] of orth(BASES[player].x,BASES[player].y)){if(ownLand(x,y)){seen.add(key(x,y));q.push([x,y]);}}
+  while(q.length){const [x,y]=q.shift();for(const [nx,ny] of orth(x,y)){const k=key(nx,ny);if(!seen.has(k)&&ownLand(nx,ny)){seen.add(k);q.push([nx,ny]);}}}
+  return seen;
+}
+function validLandPlacement(card,ax,ay){
+  const pts=rotatedCoords(card).map(p=>({x:ax+p.x,y:ay+p.y,i:p.i}));if(pts.some(p=>!inBoard(p.x,p.y)||cellAt(p.x,p.y)||isBase(p.x,p.y)>=0))return {ok:false,pts};
+  const conn=connectedTerrain(state.active);let touch=false;
+  for(const p of pts){for(const [nx,ny] of orth(p.x,p.y)){if(nx===BASES[state.active].x&&ny===BASES[state.active].y)touch=true;if(conn.has(key(nx,ny)))touch=true;}}
+  return {ok:touch,pts};
+}
+function placeLand(cardIndex,ax,ay){const pl=state.players[state.active],card=pl.hand[cardIndex];const chk=validLandPlacement(card,ax,ay);if(!chk.ok){hint('自分の拠点か自分の土地につなげてください');return;}
+  for(const p of chk.pts){const fx=(card.effects||[]).find(f=>f.index===p.i);const eff=fx?{...fx.effect}:null;state.terrain.set(key(p.x,p.y),{kind:'land',owner:state.active,effect:eff,used:false});}
+  pl.hand.splice(cardIndex,1);afterAction(`PLAYER ${state.active+1}: ${card.shape}土地を設置`);
+}
+function validDeployCells(p){const out=[];for(const [k,tile] of state.terrain){if(tile?.kind!=='land'||tile.owner!==p)continue;if(tile.effect&&!tile.used)continue;const [x,y]=k.split(',').map(Number);if(!unitAt(x,y)&&isBase(x,y)<0)out.push(k);}return new Set(out);}
+function deployUnit(cardIndex,x,y){const pl=state.players[state.active],card=pl.hand[cardIndex];const valid=validDeployCells(state.active);if(!valid.has(key(x,y)))return;const t=UNIT_TYPES[card.type];state.units.set(key(x,y),{id:'u'+Date.now()+Math.random(),owner:state.active,type:card.type,hp:t.hp,maxHp:t.hp,atkBoost:0,moveBoost:0,rangeBoost:0,defBoost:0,sourceCard:card,actedTurn:state.turn});pl.hand.splice(cardIndex,1);afterAction(`PLAYER ${state.active+1}: ${t.name}を配置`);}
+function beginMove(){
+  if(!state.selectedUnit||state.selectedUnit.u.owner!==state.active)return;const {u}=state.selectedUnit;if(u.actedTurn===state.turn){hint('このユニットはこのターンすでに行動済みです。');return;}
+  const open=plan=>{document.getElementById('modal').classList.add('hidden');state.moveBoostPlan=plan;state.moveOptions=findMoveOptions(state.selectedUnit,plan.useBoost);state.mode='move';setMobilePane('action');render();if(!state.moveOptions.size)hint('移動できるマスがありません。強化を変更するか解除してください。');};
+  const n=boostValue(u,'moveBoost');
+  if(!(n&&canPayBoost(u.owner,n))){open({useBoost:false,cardIds:[]});return;}
+  const showMoveChoice=()=>showMethodChoice('移動',[
+    {label:'強化移動',desc:`移動 +${n}`,onChoose:()=>showSpendCardsOverlay(
+      u.owner,n,`${unitSubject(u)}：移動強化`,`${unitSubject(u)}が移動強化+${n}を使います。`,
+      ids=>open({useBoost:true,cardIds:ids}),showMoveChoice,{initialIds:state.moveBoostPlan?.useBoost?state.moveBoostPlan.cardIds:[],confirmLabel:'このカードを捨てる',backLabel:'もどる'}
+    )},
+    {label:'通常移動',desc:'強化を使わない',onChoose:()=>open({useBoost:false,cardIds:[]})},
+    {label:'移動をやめる',desc:'ユニットの行動選択に戻る',onChoose:()=>cancelUnitAction('move')}
+  ]);
+  showMoveChoice();
+}
+
+function findMoveOptions(sel,useBoost=false){
+  const {x:startX,y:startY,u}=sel,t=UNIT_TYPES[u.type],results=new Map(),startKey=key(startX,startY),moveLimit=t.move+(useBoost?boostValue(u,'moveBoost'):0);
+  function storePath(path,usesJump=false){
+    if(!path.length)return;const last=path[path.length-1],destKey=key(last.x,last.y),existing=results.get(destKey);const option={path:path.map(p=>({...p})),usesJump};
+    if(!existing||(!usesJump&&existing.usesJump))results.set(destKey,option);
+  }
+  if(t.frog){
+    for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++){
+      if(Math.abs(dx)+Math.abs(dy)!==2)continue;
+      const lx=startX+dx,ly=startY+dy;if(!inBoard(lx,ly)||!cellAt(lx,ly)||isBase(lx,ly)>=0||unitAt(lx,ly))continue;
+      const mids=[];
+      if(Math.abs(dx)===2)mids.push([startX+Math.sign(dx),startY]);
+      else if(Math.abs(dy)===2)mids.push([startX,startY+Math.sign(dy)]);
+      else{mids.push([startX+dx,startY],[startX,startY+dy]);}
+      if(mids.some(([mx,my])=>!cellAt(mx,my)))storePath([{x:lx,y:ly,jump:true}],true);
+    }
+  }
+  function dfs(cx,cy,steps,path,visited){
+    if(steps>=moveLimit)return;
+    for(const [nx,ny] of orth(cx,cy)){const k=key(nx,ny),occ=unitAt(nx,ny);if(!cellAt(nx,ny)||isBase(nx,ny)>=0||visited.has(k))continue;if(occ&&occ.owner!==u.owner)continue;const allyBlocked=!!occ&&occ.owner===u.owner,nextSteps=steps+1,nextPath=path.concat({x:nx,y:ny}),nextVisited=new Set(visited);nextVisited.add(k);
+      if(t.fixed){if(nextSteps===moveLimit){if(!allyBlocked)storePath(nextPath,false);}else dfs(nx,ny,nextSteps,nextPath,nextVisited);}else{if(!allyBlocked)storePath(nextPath,false);if(nextSteps<moveLimit)dfs(nx,ny,nextSteps,nextPath,nextVisited);}
+    }
+  }
+  dfs(startX,startY,0,[],new Set([startKey]));return results;
+}
+function nextMoveCells(){return state.mode==='move'&&state.moveOptions?new Set(state.moveOptions.keys()):new Set();}
+function moveStep(x,y){
+  if(!state.selectedUnit||!state.moveOptions)return;const option=state.moveOptions.get(key(x,y));if(!option)return;const {x:startX,y:startY,u}=state.selectedUnit,plan=state.moveBoostPlan||{useBoost:false,cardIds:[]};
+  if(plan.useBoost&&!payCardIds(u.owner,plan.cardIds)){hint('強化に使う手札が不足しています。');return;}
+  if(plan.useBoost)log(`${UNIT_TYPES[u.type].name}: 手札${plan.cardIds.length}枚で移動+${boostValue(u,'moveBoost')}`);
+  const srcKey=key(startX,startY),dstKey=key(x,y);
+  state.lastMoveSrc.set(u.id,srcKey);state.units.delete(srcKey);state.units.set(dstKey,u);u.actedTurn=state.turn;
+  triggerEffect(u,x,y,()=>afterAction(`PLAYER ${state.active+1}: ${UNIT_TYPES[u.type].name}を移動`));
+}
+
+function endMove(){clearSelection();render();}
+function swapPositionValue(u,k){
+  const [x,y]=k.split(',').map(Number),tile=state.terrain.get(k),p=u.owner,eb=BASES[1-p];let v=0;
+  if(tile?.effect?.type==='score')v+=30+tile.effect.value*8+(u.type==='shield'?14:0);
+  const dbase=Math.abs(x-eb.x)+Math.abs(y-eb.y);v+=Math.max(0,8-dbase)*3;
+  const targets=botScoreTargets(p).filter(t=>t.owner!==p);if(targets.length){const d=Math.min(...targets.map(t=>Math.abs(x-t.pos[0])+Math.abs(y-t.pos[1])));v+=Math.max(0,18-d*2);}
+  return v;
+}
+function bestSwapTarget(u,fromKey){
+  let best=null;
+  for(const [k,ally] of state.units){if(ally===u||ally.owner!==u.owner)continue;const gain=swapPositionValue(u,k)+swapPositionValue(ally,fromKey)-swapPositionValue(u,fromKey)-swapPositionValue(ally,k);if(!best||gain>best.gain)best={key:k,ally,gain};}
+  return best;
+}
+function executeSwap(u,fromKey,targetKey){
+  const ally=state.units.get(targetKey);if(!ally||ally===u||ally.owner!==u.owner)return false;
+  state.units.set(fromKey,ally);state.units.set(targetKey,u);return true;
+}
+function showSwapChoice(u,fromKey,onDone){
+  const allies=[...state.units].filter(([k,a])=>k!==fromKey&&a.owner===u.owner);
+  if(!allies.length||!state.players[u.owner].hand.length){onDone();return;}
+  const m=document.getElementById('modal'),wrap=document.getElementById('modalCards'),btn=document.getElementById('modalBtn');setModalCompact(false);m.classList.remove('hidden');document.getElementById('modalTitle').textContent='位置交換';document.getElementById('modalBody').innerHTML='<p>手札1枚を捨てると、味方1体と位置を入れ替えられます。</p>';wrap.innerHTML='';wrap.style.gridTemplateColumns='repeat(2,1fr)';btn.style.display='none';
+  for(const [targetKey,ally] of allies){const d=document.createElement('div');d.className='mCard';const acted=ally.actedTurn===state.turn?'行動済':'未行動';d.innerHTML=`<b>${UNIT_TYPES[ally.type].name}</b><span class="small">HP ${ally.hp}/${ally.maxHp}｜${acted}</span>`;d.onclick=()=>showSpendCardsOverlay(u.owner,1,'位置交換',`${unitSubject(u)}と${unitSubject(ally)}の位置を交換します。`,ids=>{if(!payCardIds(u.owner,ids)){showSwapChoice(u,fromKey,onDone);return;}const tile=state.terrain.get(fromKey);if(tile)tile.used=true;if(executeSwap(u,fromKey,targetKey))log(`${unitSubject(u)}: 手札1枚で${unitSubject(ally)}と位置交換`);m.classList.add('hidden');render();onDone();},()=>showSwapChoice(u,fromKey,onDone),{confirmLabel:'このカードを捨てる',backLabel:'もどる'});wrap.appendChild(d);}
+  const no=document.createElement('div');no.className='mCard';no.innerHTML='<b>使わない</b><span class="small">位置交換マスを残す</span>';no.onclick=()=>{m.classList.add('hidden');onDone();};wrap.appendChild(no);
+}
+function triggerEffect(u,x,y,onDone=()=>{}){
+  const tile=cellAt(x,y);if(!tile||!tile.effect||tile.effect.type==='score'||tile.used){onDone();return;}
+  const e=tile.effect;
+  if(e.type==='draw'){
+    tile.used=true;draw(u.owner,e.value||1);log(`${unitSubject(u)}: ドロー+${e.value||1}`);onDone();return;
+  }
+  if(e.type==='hpUp'){
+    const n=e.value||1;tile.used=true;u.maxHp+=n;u.hp+=n;log(`${unitSubject(u)}: 最大HP・現在HP +${n}（${u.hp}/${u.maxHp}）`);onDone();return;
+  }
+  if(e.type==='swap'){
+    const fromKey=key(x,y);
+    if(u.owner!==state.humanPlayer){const target=bestSwapTarget(u,fromKey);if(target&&target.gain>7&&state.players[u.owner].hand.length){const ids=botPaymentIds(u.owner,1);if(ids&&payCardIds(u.owner,ids)){tile.used=true;executeSwap(u,fromKey,target.key);log(`${unitSubject(u)}: 手札1枚で${unitSubject(target.ally)}と位置交換`);}}onDone();return;}
+    showSwapChoice(u,fromKey,onDone);return;
+  }
+  if(!['atkBoost','moveBoost','rangeBoost','defBoost'].includes(e.type)){onDone();return;}
+  tile.used=true;u[e.type]=boostValue(u,e.type)+e.value;
+  const label=e.type==='atkBoost'?'攻撃':e.type==='moveBoost'?'移動':e.type==='rangeBoost'?'射程':'防御';
+  log(`${unitSubject(u)}: ${label}強化 +${e.value}（合計+${u[e.type]}）`);onDone();
+}
+function beginAttack(){
+  if(!state.selectedUnit||state.selectedUnit.u.owner!==state.active)return;const {u}=state.selectedUnit;if(u.actedTurn===state.turn){hint('このユニットはこのターンすでに行動済みです。');return;}
+  const open=plan=>{document.getElementById('modal').classList.add('hidden');state.attackBoostPlan=plan;state.mode='attack';setMobilePane('action');render();};
+  const n=boostValue(u,'rangeBoost');
+  if(!(n&&canPayBoost(u.owner,n))){open({useAtk:false,useRange:false,cardIds:[]});return;}
+  const showRangeChoice=()=>showMethodChoice('攻撃射程',[
+    {label:'射程強化',desc:`射程 +${n}`,onChoose:()=>showSpendCardsOverlay(
+      u.owner,n,`${unitSubject(u)}：射程強化`,`${unitSubject(u)}が射程強化+${n}を使います。`,
+      ids=>open({useAtk:false,useRange:true,cardIds:ids}),showRangeChoice,{initialIds:state.attackBoostPlan?.useRange?state.attackBoostPlan.cardIds:[],confirmLabel:'このカードを捨てる',backLabel:'もどる'}
+    )},
+    {label:'通常射程',desc:'強化を使わない',onChoose:()=>open({useAtk:false,useRange:false,cardIds:[]})},
+    {label:'攻撃をやめる',desc:'ユニットの行動選択に戻る',onChoose:()=>cancelUnitAction('attack')}
+  ]);
+  showRangeChoice();
+}
+
+function attackTargetsFor(x,y,u,useRange=false){const out=[],t=UNIT_TYPES[u.type],range=t.range+(useRange?boostValue(u,'rangeBoost'):0);for(const [k,v] of state.units){if(v.owner===u.owner)continue;const [tx,ty]=k.split(',').map(Number);if(Math.abs(tx-x)+Math.abs(ty-y)<=range)out.push({type:'unit',key:k,x:tx,y:ty,u:v});}const bi=1-u.owner,eb=BASES[bi];if(Math.abs(eb.x-x)+Math.abs(eb.y-y)<=range)out.push({type:'base',bi,x:eb.x,y:eb.y});return out;}
+function attackTargets(){const s=new Set();if(!state.selectedUnit)return s;const {x,y,u}=state.selectedUnit,plan=state.attackBoostPlan||{useRange:false};for(const t of attackTargetsFor(x,y,u,plan.useRange))s.add(t.type==='base'?'base:'+t.bi:t.key);return s;}
+function doAttack(x,y){
+  const sel=state.selectedUnit;if(!sel||sel.u.actedTurn===state.turn)return;
+  const targets=attackTargets(),k=key(x,y);if(!targets.has(k)&&!targets.has('base:'+isBase(x,y)))return;
+  const plan=state.attackBoostPlan||{useAtk:false,useRange:false,cardIds:[]};
+  if(targets.has(k)){showBattleDecision({sel,targetKey:k,plan});return;}
+  const bi=isBase(x,y);
+  if(bi>=0&&targets.has('base:'+bi)){showBattleDecision({sel,baseIndex:bi,plan});}
+}
+function botScoreTargets(p){
+  const arr=[];
+  for(const [k,t] of state.terrain){if(t?.effect?.type!=='score')continue;const occ=state.units.get(k),owner=occ?occ.owner:null,value=t.effect.value;let desir=value*5;if(owner===p)desir-=25;else if(owner===1-p)desir+=12;if(t.kind==='island')desir+=8;arr.push({desir,key:k,pos:k.split(',').map(Number),value,owner});}
+  return arr.sort((a,b)=>b.desir-a.desir||b.pos[0]-a.pos[0]||b.pos[1]-a.pos[1]);
+}
+
+function botIslandAttackBonus(p,target,dmg){
+  const profile=botProfile(p),islandMode=profile==='island'||(profile==='standard'&&botDifficulty(p)==='strong');
+  if(!islandMode||target?.type!=='unit'||!target.u)return 0;
+  const e=target.u,[tx,ty]=target.key.split(',').map(Number),islandKeys=new Set(ISLANDS.map(i=>key(i.x,i.y)));
+  let priority=islandKeys.has(target.key)?24:0;
+  const baseOpts=findMoveOptions({x:tx,y:ty,u:e},false);
+  if(ISLANDS.some(i=>baseOpts.has(key(i.x,i.y))))priority=Math.max(priority,20);
+  const moveN=boostValue(e,'moveBoost');
+  if(moveN&&canPayBoost(e.owner,moveN)){
+    const boosted=findMoveOptions({x:tx,y:ty,u:e},true);
+    if(ISLANDS.some(i=>boosted.has(key(i.x,i.y))))priority=Math.max(priority,22);
+  }
+  let rr=UNIT_TYPES[e.type].range,rangeN=boostValue(e,'rangeBoost');
+  if(rangeN&&canPayBoost(e.owner,rangeN))rr+=rangeN;
+  for(const isl of ISLANDS){const holder=state.units.get(key(isl.x,isl.y));if(holder?.owner===p&&Math.abs(tx-isl.x)+Math.abs(ty-isl.y)<=rr){priority=Math.max(priority,28);break;}}
+  return priority>0?priority+(dmg>=e.hp?36:8):0;
+}
+function botRotatedCoords(card,rot){let pts=SHAPES[card.shape].map(([x,y],i)=>({x,y,i}));for(let t=0;t<rot;t++)pts=pts.map(p=>({x:-p.y,y:p.x,i:p.i}));const minX=Math.min(...pts.map(p=>p.x)),minY=Math.min(...pts.map(p=>p.y));return pts.map(p=>({x:p.x-minX,y:p.y-minY,i:p.i}));}
+function botLandCandidates(p,card){
+  const conn=connectedTerrain(p),b=BASES[p],touch=new Set();
+  for(const [x,y] of orth(b.x,b.y)){if(!cellAt(x,y)&&isBase(x,y)<0)touch.add(key(x,y));}
+  for(const k of conn){const [x,y]=k.split(',').map(Number);for(const [nx,ny] of orth(x,y)){if(!cellAt(nx,ny)&&isBase(nx,ny)<0)touch.add(key(nx,ny));}}
+  const out=[],seen=new Set(),rotSeen=new Set();
+  for(let rot=0;rot<4;rot++){
+    const pts=botRotatedCoords(card,rot),rsig=pts.map(p=>`${p.x},${p.y}`).sort().join('|');if(rotSeen.has(rsig))continue;rotSeen.add(rsig);
+    for(const tk of touch){const [tx,ty]=tk.split(',').map(Number);for(const sp of pts){const ax=tx-sp.x,ay=ty-sp.y,cells=pts.map(q=>({x:ax+q.x,y:ay+q.y,i:q.i}));const sig=cells.map(q=>key(q.x,q.y)).sort().join('|');if(seen.has(sig))continue;seen.add(sig);if(cells.some(q=>!inBoard(q.x,q.y)||cellAt(q.x,q.y)||isBase(q.x,q.y)>=0))continue;out.push({rot,ax,ay,cells});}}
+  }
+  return out.length>700?botShuffle(out).slice(0,700):out;
+}
+function botBestLandAction(p,limit=1,strongRank=false,topSearch=false){
+  const pl=state.players[p],idxs=pl.hand.map((c,i)=>c.kind==='land'?i:-1).filter(i=>i>=0);if(!idxs.length)return topSearch?[]:null;
+  const targets=botScoreTargets(p),targetPositions=(targets.filter(t=>t.owner!==p).length?targets.filter(t=>t.owner!==p):targets),eb=BASES[1-p];
+  const own=[...state.terrain].filter(([,t])=>t.kind==='land'&&t.owner===p).map(([k])=>k.split(',').map(Number));const oldDb=own.length?Math.min(...own.map(([x,y])=>Math.abs(x-eb.x)+Math.abs(y-eb.y))):Math.max(W,H);
+  const top=[];
+  for(const i of idxs){const card=pl.hand[i];for(const c of botLandCandidates(p,card)){const coords=c.cells.map(q=>[q.x,q.y]);let value=0;for(const t of targetPositions.slice(0,5)){const [tx,ty]=t.pos,d=Math.min(...coords.map(([x,y])=>Math.abs(x-tx)+Math.abs(y-ty)));value=Math.max(value,75+t.value*6-d*6);if(coords.some(([x,y])=>Math.abs(x-tx)+Math.abs(y-ty)===1))value+=60+t.value*3;}const newDb=Math.min(...coords.map(([x,y])=>Math.abs(x-eb.x)+Math.abs(y-eb.y))),progress=Math.max(0,oldDb-newDb);value+=progress*12;if(newDb<=5)value+=(6-newDb)*8;if(newDb===1)value+=24;const kinds=(card.effects||[]).map(e=>e.effect.type);value+=(card.effects||[]).length*2;if(kinds.includes('score'))value+=16+(card.effects||[]).filter(e=>e.effect.type==='score').reduce((a,e)=>a+e.effect.value,0)*6;value+=kinds.filter(k=>['atkBoost','moveBoost','rangeBoost','defBoost'].includes(k)).length*4;value+=kinds.filter(k=>k==='draw').length*6;value+=kinds.filter(k=>k==='hpUp').length*6;value+=kinds.filter(k=>k==='swap').length*5;value+=botRandom()*2.5;botKeepCandidate(p,top,limit,value,{type:'land',i,rot:c.rot,ax:c.ax,ay:c.ay,cells:c.cells},strongRank);}}
+  return topSearch?top:(top[0]||null);
+}
+function botBestAttackAction(p,limit=1,strongRank=false,topSearch=false){const top=[];for(const [k,u] of state.units){if(u.owner!==p||u.actedTurn===state.turn)continue;const [x,y]=k.split(',').map(Number),atkN=boostValue(u,'atkBoost'),rangeN=boostValue(u,'rangeBoost'),baseRange=UNIT_TYPES[u.type].range;for(const useRange of [false,true]){if(useRange&&(!rangeN||!canPayBoost(p,rangeN)))continue;for(const target of attackTargetsFor(x,y,u,useRange)){for(const useAtk of [false,true]){if(useAtk&&(!atkN||state.players[p].hand.length<(useRange?rangeN:0)+atkN))continue;const cost=(useRange?rangeN:0)+(useAtk?atkN:0);if(state.players[p].hand.length<cost)continue;let value,dmg=UNIT_TYPES[u.type].atk+(useAtk?atkN:0),dist=Math.abs(target.x-x)+Math.abs(target.y-y),rangeUnlock=useRange&&dist>baseRange;if(target.type==='base'){const hp=state.players[1-p].baseHp,lethal=dmg>=hp;value=lethal?190:70+dmg*10+(BASE_HP-hp)*4;if(botProfile(p)==='base')value+=30;if(rangeUnlock)value+=lethal?120:60;}else{const tile=state.terrain.get(target.key),onScore=tile?.effect?.type==='score',kill=dmg>=target.u.hp;value=36+(onScore?58:0)+(kill?30:0)+dmg*3;if(target.u.type==='shield'&&onScore)value+=15;if(state.claimOwner===1-p&&onScore)value+=140;if(rangeUnlock){if(kill)value+=45;if(onScore)value+=60;if(state.claimOwner===1-p&&onScore)value+=100;}value+=botIslandAttackBonus(p,target,dmg);}value-=cost*7;if(!topSearch)value+=botRandom()*2;botKeepCandidate(p,top,limit,value,{type:'attack',src:k,target,useAtk,useRange,cost},strongRank,false,true);}}}}return topSearch?top:(top[0]||null);}
+function botBestMoveAction(p,limit=1,strongRank=false,topSearch=false){const top=[];let targets=botScoreTargets(p);for(const [k,u] of [...state.units]){if(u.owner!==p||u.actedTurn===state.turn)continue;const [x,y]=k.split(',').map(Number),n=boostValue(u,'moveBoost');for(const useBoost of [false,true]){if(useBoost&&(!n||!canPayBoost(p,n)))continue;const opts=findMoveOptions({x,y,u},useBoost);for(const [dk,opt] of opts){const [dx,dy]=dk.split(',').map(Number),tile=state.terrain.get(dk);let value=0;if(tile?.effect?.type==='score'){value+=45+tile.effect.value*14+(u.type==='shield'?18:0);if(state.claimOwner===1-p)value+=120+tile.effect.value*8;}for(const t of targets.slice(0,6)){if(t.owner===p)continue;const d=Math.abs(dx-t.pos[0])+Math.abs(dy-t.pos[1]);value=Math.max(value,30+t.value*5-d*4);}const srcTile=state.terrain.get(k);if(srcTile?.effect?.type==='score')value-=srcTile.effect.value*(u.type==='shield'?20:14);const tr=UNIT_TYPES[u.type].range;for(const [ek,e] of state.units){if(e.owner===p)continue;const [ex,ey]=ek.split(',').map(Number),et=state.terrain.get(ek);if(Math.abs(dx-ex)+Math.abs(dy-ey)<=tr)value+=28+(et?.effect?.type==='score'?25:0);}const eb=BASES[1-p];if(Math.abs(dx-eb.x)+Math.abs(dy-eb.y)<=tr)value+=30;if(state.lastMoveSrc.get(u.id)===dk)value-=120;const boostTile=cellAt(dx,dy);if(boostTile&&!boostTile.used){if(['atkBoost','moveBoost','rangeBoost','defBoost'].includes(boostTile.effect?.type))value+=10*(boostTile.effect.value||1);if(boostTile.effect?.type==='draw')value+=18*(boostTile.effect.value||1);if(boostTile.effect?.type==='hpUp')value+=16*(boostTile.effect.value||1);if(boostTile.effect?.type==='swap'&&state.players[p].hand.length){const fakeFrom=dk,target=bestSwapTarget(u,fakeFrom);if(target&&target.gain>7)value+=target.gain-7;}}value-=(useBoost?n:0)*7;value+=botRandom()*2;botKeepCandidate(p,top,limit,value,{type:'move',src:k,dst:dk,useBoost,option:opt},strongRank,true);}}}return topSearch?top:(top[0]||null);}
+function botBestDeployAction(p){const pl=state.players[p],idxs=pl.hand.map((c,i)=>c.kind==='unit'?i:-1).filter(i=>i>=0),cells=[...validDeployCells(p)];if(!idxs.length||!cells.length)return null;const targets=botScoreTargets(p).filter(t=>t.owner!==p),eb=BASES[1-p];let best=null;for(const i of idxs){const card=pl.hand[i],t=UNIT_TYPES[card.type];for(const k of cells){const [x,y]=k.split(',').map(Number),d=targets.length?Math.min(...targets.map(q=>Math.abs(x-q.pos[0])+Math.abs(y-q.pos[1])-q.value*.35)):0;let value=40-d*3+t.move*3+t.range*2+t.hp*2,db=Math.abs(x-eb.x)+Math.abs(y-eb.y);if(db<=t.range){const dmg=t.atk,hp=state.players[1-p].baseHp;value+=dmg>=hp?95:34+dmg*5;}else if(db<=t.range+2)value+=12;if(card.type==='shield')value+=7;if(state.claimOwner===1-p)value+=20;value+=botRandom()*2;const action={type:'deploy',i,x,y};value+=botSharedWinBonus(p,action);if(!best||value>best.value)best={value,action};}}return best;}
+function botBestExchangeAction(p){
+ const pl=state.players[p];if(!pl.hand.length||(!pl.deck.length&&!pl.discard.length))return null;
+ let best=null;pl.hand.forEach((c,i)=>{const action={type:'exchange',i},value=18-botCardUtility(p,c)+botSharedWinBonus(p,action);if(!best||value>best.value)best={value,action};});return best;
+}
+
+function botIsLethalBaseAttack(p,a){
+  if(a?.type!=='attack'||a.target?.type!=='base')return false;
+  const u=state.units.get(a.src);if(!u)return false;
+  const dmg=UNIT_TYPES[u.type].atk+(a.useAtk?boostValue(u,'atkBoost'):0);
+  return dmg>=state.players[1-p].baseHp;
+}
+function botSharedWinBonus(p,a){
+  let bonus=0;
+  if(a?.type==='attack'&&a.target?.type==='unit'&&state.claimOwner===1-p){
+    const tile=state.terrain.get(a.target.key);
+    if(tile?.effect?.type==='score')bonus+=260+tile.effect.value*20;
+  }
+  if(a?.type==='move'){
+    const u=state.units.get(a.src),src=state.terrain.get(a.src),dst=state.terrain.get(a.dst);
+    if(u){
+      const srcScore=src?.effect?.type==='score'?src.effect.value:0;
+      const dstScore=dst?.effect?.type==='score'?dst.effect.value:0;
+      if(controlledScore(p)-srcScore+dstScore>=WIN_SCORE)bonus+=220;
+    }
+  }
+  return bonus;
+}
+function botOccupiedIslandCount(p){let n=0;for(const isl of ISLANDS){const u=state.units.get(key(isl.x,isl.y));if(u?.owner===p)n++;}return n;}
+function botProfileBonusFor(p,a,profile){
+ if(!a)return 0;
+ const tile=a.type==='move'?state.terrain.get(a.dst):a.type==='attack'?state.terrain.get(a.target.key):null;
+ const cells=a.type==='land'?a.cells:null,eb=BASES[1-p];let bonus=0;
+ if(profile==='island'){
+  if(a.type==='move'){if(tile?.effect?.type==='score'&&tile.kind==='island')bonus+=8;}
+  else if(cells){const d=Math.min(...cells.flatMap(q=>ISLANDS.map(t=>Math.abs(q.x-t.x)+Math.abs(q.y-t.y))));bonus+=Math.max(0,8-d*2);}
+  else if(a.type==='deploy'){const d=Math.min(...ISLANDS.map(t=>Math.abs(a.x-t.x)+Math.abs(a.y-t.y)));bonus+=Math.max(0,6-d);}
+ }else if(profile==='growth'){
+  const islands=botOccupiedIslandCount(p);
+  if(islands<1){
+   if((a.type==='move'||(a.type==='attack'&&a.target.type==='unit'))&&tile?.kind==='island'&&tile.effect?.type==='score')bonus+=24;
+   else if(cells){const d=Math.min(...cells.flatMap(q=>ISLANDS.map(t=>Math.abs(q.x-t.x)+Math.abs(q.y-t.y))));bonus+=Math.max(0,10-d*2);}
+   else if(a.type==='deploy'){const d=Math.min(...ISLANDS.map(t=>Math.abs(a.x-t.x)+Math.abs(a.y-t.y)));bonus+=Math.max(0,8-d);}
+  }else{
+   if(a.type==='move'&&tile?.kind==='land'&&tile.effect?.type==='score')bonus+=30+8*tile.effect.value;
+   else if(cells){const card=state.players[p].hand[a.i];bonus+=(card.effects||[]).filter(e=>e.effect.type==='score').reduce((s,e)=>s+16*e.effect.value,0);}
+  }
+  if(a.type==='move'&&tile&&!tile.used&&(BOT_BOOST_KINDS.includes(tile.effect?.type)||tile.effect?.type==='hpUp'))bonus+=8*tile.effect.value;
+  else if(cells)bonus+=(state.players[p].hand[a.i].effects||[]).filter(e=>BOT_BOOST_KINDS.includes(e.effect.type)||e.effect.type==='hpUp').length*2;
+ }else if(profile==='base'){
+  if(a.type==='attack'&&a.target.type==='base')bonus+=30;
+  else if(a.type==='move'){const [sx,sy]=a.src.split(',').map(Number),[dx,dy]=a.dst.split(',').map(Number),u=state.units.get(a.src);if(u){const before=Math.abs(sx-eb.x)+Math.abs(sy-eb.y),after=Math.abs(dx-eb.x)+Math.abs(dy-eb.y);bonus+=Math.max(0,before-after)*8;if(after<=UNIT_TYPES[u.type].range)bonus+=16;}}
+  else if(a.type==='deploy'){const t=UNIT_TYPES[state.players[p].hand[a.i].type],d=Math.abs(a.x-eb.x)+Math.abs(a.y-eb.y);bonus+=Math.max(0,18-d*3);if(d<=t.range)bonus+=20;}
+  else if(cells){const d=Math.min(...cells.map(q=>Math.abs(q.x-eb.x)+Math.abs(q.y-eb.y)));bonus+=Math.max(0,18-d*3);}
+ }
+ return bonus;
+}
+function botProfileBonus(p,a){
+ const profile=botProfile(p);if(!a)return 0;
+ if(profile==='standard'){
+  if(botDifficulty(p)!=='strong')return 0;
+  return Math.max(0,botProfileBonusFor(p,a,'island'),botProfileBonusFor(p,a,'growth'),botProfileBonusFor(p,a,'base'));
+ }
+ return botProfileBonusFor(p,a,profile);
+}
+
+
+// AI specification: block_monster_runner.py (normal / strong, independent of profile).
+const AI_DIFFICULTY_IDS=['normal','strong'];
+const BOT_BOOST_KINDS=['atkBoost','moveBoost','rangeBoost','defBoost'];
+const BOT_COMBO_GAIN_WEIGHT=.85,BOT_COMBO_MIN_GAIN=8;
+const BOT_COMBO_PAIR_WEIGHTS={'land:deploy':.6,'land:move':.7,'move:attack':1,'move:move':.7,'attack:move':1,'attack:deploy':.7};
+function botProfile(p){return state.aiProfiles?.[p]||state.aiProfile||'standard';}
+function botDifficulty(p){return state.aiDifficulties?.[p]||state.aiDifficulty||'normal';}
+function botRandom(){
+ if(state.botRng===undefined)state.botRng=Math.floor(Math.random()*4294967296)>>>0;
+ state.botRng=(state.botRng+0x6D2B79F5)>>>0;let t=state.botRng;
+ t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;
+}
+function botShuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(botRandom()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function botKeepCandidate(p,top,limit,value,action,strongRank=false,positiveOnly=false,attack=false){
+ value+=botSharedWinBonus(p,action);
+ if(attack&&botIsLethalBaseAttack(p,action))value+=10000;
+ if(positiveOnly&&value<=0)return;
+ if(strongRank)value+=botStrongTacticBonus(p,action);
+ top.push({value,action});top.sort((a,b)=>b.value-a.value);if(top.length>limit)top.pop();
+}
+function botMaxIncomingBaseDamage(p,dst){
+ const [x,y]=dst.split(',').map(Number);let dmg=0,count=0;
+ for(const [k,e] of state.units){if(e.owner===p)continue;const [ex,ey]=k.split(',').map(Number),t=UNIT_TYPES[e.type];if(Math.abs(ex-x)+Math.abs(ey-y)<=t.range){dmg=Math.max(dmg,t.atk);count++;}}
+ return [dmg,count];
+}
+function botStrongTacticParts(p,a){
+ let focus=0,claim=0;if(!a)return [focus,claim];
+ if(a.type==='attack'&&a.target.type==='unit'){
+  const u=state.units.get(a.src),e=state.units.get(a.target.key);
+  if(u&&e){const dmg=UNIT_TYPES[u.type].atk+(a.useAtk?u.atkBoost:0);if(dmg<e.hp){const rem=e.hp-dmg;let best2=0;
+   for(const [k,u2] of state.units){if(k===a.src||u2.owner!==p||u2.actedTurn===state.turn)continue;const [x,y]=k.split(',').map(Number),t=UNIT_TYPES[u2.type];if(Math.abs(x-a.target.x)+Math.abs(y-a.target.y)<=t.range+u2.rangeBoost)best2=Math.max(best2,t.atk+u2.atkBoost);}
+   if(best2>=rem)focus=34+(state.terrain.get(a.target.key)?.effect?.type==='score'?12:0);
+  }}
+ }else if(a.type==='move'){
+  const u=state.units.get(a.src),tile=state.terrain.get(a.dst),src=state.terrain.get(a.src);
+  if(u&&tile?.effect?.type==='score'){
+   const srcScore=src?.effect?.type==='score'?src.effect.value:0;
+   if(controlledScore(p)-srcScore+tile.effect.value>=WIN_SCORE){let hp=u.hp;if(!tile.used&&tile.effect.type==='hpUp')hp+=tile.effect.value;
+    const [maxd,attackers]=botMaxIncomingBaseDamage(p,a.dst);claim=maxd<hp?55+(u.type==='shield'?15:0):-(45+Math.max(0,attackers-1)*10);
+   }
+  }
+ }return [focus,claim];
+}
+function botStrongTacticBonus(p,a){const [f,c]=botStrongTacticParts(p,a);return f+c;}
+function botActionCandidates(p,types=['attack','move','deploy','land','exchange'],includeExchange=true){
+ const fns={attack:botBestAttackAction,move:botBestMoveAction,deploy:botBestDeployAction,land:botBestLandAction,exchange:botBestExchangeAction},out=[];
+ for(const type of types){if(type==='exchange'&&!includeExchange)continue;const item=fns[type](p);if(item)out.push(item);}return out;
+}
+function botAdjustedItemValue(p,item){return item.value+botProfileBonus(p,item.action)+(botDifficulty(p)==='strong'?botStrongTacticBonus(p,item.action):0);}
+function botChooseFromCandidates(p,candidates){
+ if(!candidates.length)return null;const lethal=candidates.filter(i=>botIsLethalBaseAttack(p,i.action));
+ const pool=lethal.length?lethal:candidates;let best=null,bv=-Infinity;
+ for(const item of pool){const v=lethal.length?item.value:botAdjustedItemValue(p,item);if(v>bv){bv=v;best=item.action;}}return best;
+}
+function botActionKey(a){
+ if(a.type==='land')return JSON.stringify([a.type,a.i,[...a.cells].sort((a,b)=>a.x-b.x||a.y-b.y||a.i-b.i)]);
+ if(a.type==='move')return JSON.stringify([a.type,a.src,a.dst,!!a.useBoost]);
+ if(a.type==='attack')return JSON.stringify([a.type,a.src,a.target.type,a.target.type==='unit'?a.target.key:a.target.bi,!!a.useAtk,!!a.useRange]);
+ return JSON.stringify([a.type,a.i,a.x,a.y]);
+}
+function botClonePlan(){
+ // Only counts cross the information boundary: never copy or inspect deck identities.
+ // Python deepcopy gives units new object identities; reversal keys retain the old identities.
+ return {...state,players:state.players.map(pl=>({...pl,hand:structuredClone(pl.hand),discard:structuredClone(pl.discard),deck:Array.from({length:pl.deck.length},()=>({kind:'unknown'}))})),
+  terrain:structuredClone(state.terrain),units:new Map([...state.units].map(([k,u])=>[k,{...structuredClone(u),id:'plan:'+u.id}])),lastMoveSrc:new Map(state.lastMoveSrc)};
+}
+function botWithPlan(plan,fn){const live={...state};try{Object.assign(state,plan);return fn();}finally{Object.assign(plan,state);Object.assign(state,live);}}
+function botAddStrongSetupCandidates(p,candidates){
+ const plan=botClonePlan();return botWithPlan(plan,()=>{
+  const out=[...candidates],seen=new Set(out.map(i=>botActionKey(i.action)));
+  const add=item=>{const k=botActionKey(item.action);if(!seen.has(k)){seen.add(k);out.push(item);}};
+  for(const item of [...botBestLandAction(p,4,false,true),...botBestMoveAction(p,4,false,true)])add(item);
+  for(const ranked of [...botBestMoveAction(p,4,true,true),...botBestAttackAction(p,4,true,true)]){
+   const bonus=botStrongTacticBonus(p,ranked.action);if(bonus>0)add({value:ranked.value-bonus,action:ranked.action});
+  }return out;
+ });
+}
+function botComboSecondTypes(type){return type==='land'?['deploy','move','land','attack']:type==='move'?['attack','move']:type==='attack'?['move','attack','deploy']:[];}
+function botStrongFirstAction(p,candidates){
+ const greedy=botChooseFromCandidates(p,candidates);if(!greedy)return null;
+ const baseline={};for(const item of candidates){const type=item.action.type;baseline[type]=Math.max(baseline[type]??-1e9,botAdjustedItemValue(p,item));}
+ let bestScore=botAdjustedItemValue(p,candidates.find(i=>i.action===greedy)),best=greedy;
+ for(const item of candidates){const first=item.action,firstValue=botAdjustedItemValue(p,item),types=botComboSecondTypes(first.type);if(!types.length)continue;
+  const plan=botClonePlan();botWithPlan(plan,()=>{
+   botSimulateAction(p,first);
+   for(const secondItem of botActionCandidates(p,types,false)){
+    const second=secondItem.action;let score;
+    if(botIsLethalBaseAttack(p,second))score=20000+firstValue;
+    else{const gain=Math.max(0,botAdjustedItemValue(p,secondItem)-(baseline[second.type]??0));let weight=BOT_COMBO_PAIR_WEIGHTS[first.type+':'+second.type]||0;
+     if(weight<=0&&first.type==='attack'&&second.type==='attack')weight=1;
+     if(gain<BOT_COMBO_MIN_GAIN||weight<=0)continue;score=firstValue+BOT_COMBO_GAIN_WEIGHT*weight*gain;
+    }if(score>bestScore){bestScore=score;best=first;}
+   }
+  });
+ }return best;
+}
+function botSimPay(p,n){
+ if(n<=0)return true;const pl=state.players[p];if(pl.hand.length<n)return false;
+ const ranked=pl.hand.map((c,i)=>({i,v:botCardUtility(p,c)+botRandom()*.02})).sort((a,b)=>a.v-b.v||a.i-b.i).slice(0,n).sort((a,b)=>b.i-a.i);
+ for(const {i} of ranked)pl.discard.push(pl.hand.splice(i,1)[0]);return true;
+}
+function botSimDraw(p,n){
+ const pl=state.players[p];for(let i=0;i<n;i++){
+  if(!pl.deck.length&&pl.discard.length){pl.deck=Array.from({length:pl.discard.length},()=>({kind:'unknown'}));pl.discard=[];}
+  if(!pl.deck.length)break;pl.deck.pop();pl.hand.push({kind:'unknown'});
+ }
+}
+function botSimTrigger(u,dst){
+ const tile=state.terrain.get(dst),e=tile?.effect;if(!e||e.type==='score'||tile.used)return;
+ if(e.type==='draw'){tile.used=true;botSimDraw(u.owner,e.value);}
+ else if(e.type==='hpUp'){tile.used=true;u.maxHp+=e.value;u.hp+=e.value;}
+ else if(e.type==='swap'){const target=bestSwapTarget(u,dst);if(target&&target.gain>7&&botSimPay(u.owner,1)){state.units.set(dst,target.ally);state.units.set(target.key,u);tile.used=true;}}
+ else if(BOT_BOOST_KINDS.includes(e.type)){tile.used=true;u[e.type]+=e.value;}
+}
+function botSimulateAction(p,a){
+ const pl=state.players[p];
+ if(a.type==='land'){const card=pl.hand.splice(a.i,1)[0],emap=new Map(card.effects.map(e=>[e.index,e.effect]));for(const q of a.cells)state.terrain.set(key(q.x,q.y),{kind:'land',owner:p,effect:structuredClone(emap.get(q.i)||null),used:false});}
+ else if(a.type==='deploy'){const card=pl.hand.splice(a.i,1)[0],t=UNIT_TYPES[card.type];state.units.set(key(a.x,a.y),{id:'sim:'+state.turn+':'+a.i,owner:p,type:card.type,hp:t.hp,maxHp:t.hp,sourceCard:card,atkBoost:0,moveBoost:0,rangeBoost:0,defBoost:0,actedTurn:state.turn});}
+ else if(a.type==='move'){const u=state.units.get(a.src);if(!botSimPay(p,a.useBoost?u.moveBoost:0))return;state.units.delete(a.src);state.lastMoveSrc.set(u.id,a.src);state.units.set(a.dst,u);u.actedTurn=state.turn;botSimTrigger(u,a.dst);}
+ else if(a.type==='attack'){const u=state.units.get(a.src);if(!botSimPay(p,a.useAtk?u.atkBoost:0)||!botSimPay(p,a.useRange?u.rangeBoost:0))return;let dmg=UNIT_TYPES[u.type].atk+(a.useAtk?u.atkBoost:0);u.actedTurn=state.turn;
+  if(a.target.type==='base')state.players[a.target.bi].baseHp-=dmg;
+  else{const e=state.units.get(a.target.key);if(botShouldUseDefense(a.target.key,e,dmg)&&botSimPay(e.owner,e.defBoost))dmg=Math.max(0,dmg-e.defBoost);e.hp-=dmg;if(e.hp<=0){state.players[e.owner].discard.push(e.sourceCard);state.units.delete(a.target.key);}}
+ }else if(a.type==='exchange'){pl.discard.push(pl.hand.splice(a.i,1)[0]);botSimDraw(p,1);}
+}
+
+function botChooseAction(p,actionsLeft=state.actionsLeft){
+ let candidates=botActionCandidates(p);if(!candidates.length)return null;
+ if(botDifficulty(p)==='strong'&&actionsLeft>=2){candidates=botAddStrongSetupCandidates(p,candidates);return botStrongFirstAction(p,candidates);}
+ return botChooseFromCandidates(p,candidates);
+}
+
+function scheduleBotAction(){if(!isAITurn()||state.aiThinking)return;state.aiThinking=true;setTimeout(()=>{state.aiThinking=false;botTakeAction();},BOT_ACTION_DELAY);}
+function scheduleBotTurnEnd(){if(!isAITurn()||state.aiThinking)return;state.aiThinking=true;setTimeout(()=>{state.aiThinking=false;if(isAITurn()&&state.winner===null)finishTurn();},BOT_TURN_END_DELAY);}
+function botTakeAction(){if(!isAITurn()||state.winner!==null)return;if(state.actionsLeft<=0){scheduleBotTurnEnd();return;}const a=botChooseAction(state.active);if(!a){scheduleBotTurnEnd();return;}if(a.type==='land'){const card=state.players[state.active].hand[a.i];if(!card){scheduleBotAction();return;}card.rot=a.rot;placeLand(a.i,a.ax,a.ay);return;}if(a.type==='deploy'){deployUnit(a.i,a.x,a.y);return;}if(a.type==='exchange'){const pl=state.players[state.active],card=pl.hand[a.i];if(!card){scheduleBotAction();return;}pl.discard.push(pl.hand.splice(a.i,1)[0]);draw(state.active,1);afterAction(`PLAYER ${state.active+1}: 手札を1枚捨てて1枚ドロー`);return;}if(a.type==='move'){const u=state.units.get(a.src);if(!u){scheduleBotAction();return;}const [sx,sy]=a.src.split(',').map(Number),[dx,dy]=a.dst.split(',').map(Number),n=a.useBoost?boostValue(u,'moveBoost'):0,ids=n?botPaymentIds(state.active,n):[];if(n&&!ids){scheduleBotAction();return;}state.selectedUnit={x:sx,y:sy,u};state.moveBoostPlan={useBoost:!!a.useBoost,cardIds:ids||[]};state.moveOptions=findMoveOptions(state.selectedUnit,!!a.useBoost);moveStep(dx,dy);return;}if(a.type==='attack'){const u=state.units.get(a.src);if(!u){scheduleBotAction();return;}const [sx,sy]=a.src.split(',').map(Number),cost=(a.useAtk?boostValue(u,'atkBoost'):0)+(a.useRange?boostValue(u,'rangeBoost'):0),ids=cost?botPaymentIds(state.active,cost):[];if(cost&&!ids){scheduleBotAction();return;}state.selectedUnit={x:sx,y:sy,u};state.attackBoostPlan={useAtk:!!a.useAtk,useRange:!!a.useRange,cardIds:ids||[]};doAttack(a.target.x,a.target.y);}}
+
+function render(){renderBoard();renderHand();updateStats();renderSelection();updateButtons();}
+function renderBoard(){const board=document.getElementById('board');board.innerHTML='';const deploy=state.selectedCard?.kind==='unit'?validDeployCells(state.active):new Set();let landPreview=null;if(state.selectedCard?.kind==='land'&&state.hover){landPreview=validLandPlacement(state.selectedCard,state.hover.x,state.hover.y)}const previewMap=new Map();if(landPreview)for(const p of landPreview.pts)previewMap.set(key(p.x,p.y),{ok:landPreview.ok,i:p.i});
+  const previewFxMap=landPreview?new Map((state.selectedCard.effects||[]).map(f=>[f.index,f.effect])):new Map();
+  const moveNext=state.mode==='move'?nextMoveCells():new Set();const atk=state.mode==='attack'?attackTargets():new Set();
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const k=key(x,y),b=isBase(x,y),tile=cellAt(x,y),u=unitAt(x,y),preview=previewMap.get(k);const el=document.createElement('button');el.className='cell';el.dataset.x=x;el.dataset.y=y;
+    if(tile){el.classList.add('terrain');if(tile.kind==='island')el.classList.add('island');else el.classList.add(tile.owner===0?'land-p1':'land-p2');if(tile.effect&&!tile.used)el.classList.add('fx-'+tile.effect.type);}
+    if(b===0)el.classList.add('base-p1');if(b===1)el.classList.add('base-p2');if(deploy.has(k))el.classList.add('deployable');if(preview)el.classList.add(preview.ok?'preview-good':'preview-bad');if(moveNext.has(k))el.classList.add('move-next');if(atk.has(k)||atk.has('base:'+b))el.classList.add('attackable');
+    const c=document.createElement('span');c.className='coord';c.textContent='';el.appendChild(c);
+    if(b>=0){const s=document.createElement('span');s.className='baseLabel';s.textContent='拠';el.appendChild(s)}
+    if(tile?.kind==='island'&&!tile.used){const s=document.createElement('span');s.className='islandLabel'+(u?' over-unit':'');s.textContent='★'+tile.effect.value;el.appendChild(s)}
+    if(tile?.effect&&!tile.used&&tile.kind!=='island'){const e=document.createElement('span');e.className='effect '+tile.effect.type+((u&&(tile.effect.type==='score'||tile.effect.type==='swap'))?' over-unit':'');e.textContent=effectLabel(tile.effect);el.appendChild(e)}
+    if(preview){const pe=previewFxMap.get(preview.i);if(pe){const e=document.createElement('span');e.className='effect '+pe.type+' preview-effect';e.textContent=effectLabel(pe);el.appendChild(e)}}
+    const moving=state.mode==='move'&&state.moveCtx;
+    const hideOriginal=moving&&k===state.moveCtx.startKey&&state.moveCtx.path.length>1&&u===state.moveCtx.unit;
+    if(u&&!hideOriginal){const s=document.createElement('span');s.className='unit '+(u.owner===0?'p1':'p2')+' type-'+u.type;if(unitHasBoost(u))s.classList.add('boosted');if(state.selectedUnit?.u===u)s.classList.add('selected');if(u.actedTurn===state.turn&&u.owner===state.active)s.classList.add('acted');applyUnitDamageShade(s,u);s.textContent=UNIT_TYPES[u.type].short;el.appendChild(s)}
+    if(moving&&state.moveCtx.x===x&&state.moveCtx.y===y&&(!u||u!==state.moveCtx.unit)){const g=document.createElement('span');g.className='unit '+(state.moveCtx.unit.owner===0?'p1':'p2')+' type-'+state.moveCtx.unit.type+' selected';if(unitHasBoost(state.moveCtx.unit))g.classList.add('boosted');applyUnitDamageShade(g,state.moveCtx.unit);g.textContent=UNIT_TYPES[state.moveCtx.unit.type].short;g.style.opacity='.72';el.appendChild(g)}
+    el.onmouseenter=()=>{if(state.selectedCard?.kind==='land'){state.hover={x,y};updateLandPreview(x,y);}};el.onclick=()=>clickCell(x,y);board.appendChild(el)}
+}
+function updateLandPreview(x,y){
+  document.querySelectorAll('.cell.preview-good,.cell.preview-bad').forEach(el=>el.classList.remove('preview-good','preview-bad'));
+  document.querySelectorAll('.effect.preview-effect').forEach(el=>el.remove());
+  if(!(state.selectedCard?.kind==='land'))return;
+  const chk=validLandPlacement(state.selectedCard,x,y),fxMap=new Map((state.selectedCard.effects||[]).map(f=>[f.index,f.effect]));
+  for(const p of chk.pts){
+    if(!inBoard(p.x,p.y))continue;
+    const el=document.querySelector(`.cell[data-x="${p.x}"][data-y="${p.y}"]`);
+    if(!el)continue;
+    el.classList.add(chk.ok?'preview-good':'preview-bad');
+    const pe=fxMap.get(p.i);
+    if(pe){const e=document.createElement('span');e.className='effect '+pe.type+' preview-effect';e.textContent=effectLabel(pe);el.appendChild(e);}
+  }
+}
+function clickCell(x,y){if(performance.now()<landDragSuppressClickUntil)return;if(state.phase!=='play'||isAITurn())return;
+  if(state.mode==='move'){moveStep(x,y);return;}if(state.mode==='attack'){doAttack(x,y);return;}
+  if(state.selectedCard){
+    const pl=state.players[state.active],idx=pl.hand.findIndex(c=>c.id===state.selectedCard.id);if(idx<0)return;
+    if(state.selectedCard.kind==='land'){
+      if(usesMobileLandConfirm()){
+        const card=state.selectedCard;
+        state.hover={x,y};
+        const chk=validLandPlacement(card,x,y);
+        state.landTapConfirm={cardId:card.id,x,y,rot:card.rot||0};
+        render();
+        hint(chk.ok?'位置を調整して「決定」':'設置できません。位置を調整してください');
+        return;
+      }
+      placeLand(idx,x,y);
+    }else deployUnit(idx,x,y);
+    return;
+  }
+  const u=unitAt(x,y);if(u){state.selectedUnit={x,y,u};state.selectedCard=null;state.landTapConfirm=null;state.moveBoostPlan=null;state.attackBoostPlan=null;state.mode=null;setMobilePane('action');render();return;}
+  clearSelection();setMobilePane('hand');render();
+}
+function confirmLandPlacement(){
+  if(isAITurn()||state.phase!=='play'||!usesMobileLandConfirm()||state.selectedCard?.kind!=='land'||!state.landTapConfirm)return;
+  const pl=state.players[state.active],idx=pl.hand.findIndex(c=>c.id===state.selectedCard.id);if(idx<0)return;
+  const {x,y}=state.landTapConfirm,chk=validLandPlacement(state.selectedCard,x,y);
+  if(!chk.ok){hint('設置できません。位置を調整してください');updateButtons();return;}
+  placeLand(idx,x,y);
+}
+function cardVisualHtml(c){const left=c.kind==='land'?miniShape(c):`<div class="unitMini type-${c.type}">${UNIT_TYPES[c.type].short}</div>`;return `<div>${left}</div><div><div class="title">${cardTitle(c)}</div><div class="desc">${cardDesc(c)}</div></div>`;}
+function renderHand(){const h=document.getElementById('hand');h.innerHTML='';if(state.phase!=='play'&&state.phase!=='discard')return;if(isAITurn()){h.innerHTML='<div class="small">AIが思考中です。</div>';return;}const pl=state.players[state.active];pl.hand.forEach(c=>{const d=document.createElement('div');d.className='card'+(state.selectedCard?.id===c.id?' selected':'');d.onclick=()=>{if(isAITurn()||state.mode==='move'||state.mode==='attack')return;state.selectedCard=c;state.selectedUnit=null;state.mode=null;state.hover=null;state.landTapConfirm=null;state.moveBoostPlan=null;state.attackBoostPlan=null;setMobilePane('action');render();};d.innerHTML=cardVisualHtml(c);h.appendChild(d)});
+}
+function miniShape(c){const pts=rotatedCoords(c),set=new Map(pts.map(p=>[key(p.x,p.y),p.i])),fxMap=new Map((c.effects||[]).map(f=>[f.index,f.effect]));let s='<div class="mini">';for(let y=0;y<4;y++)for(let x=0;x<4;x++){const i=set.get(key(x,y));if(i===undefined)s+='<i></i>';else{const fx=fxMap.get(i);let cls=fx?' class="fx-'+fx.type+'"':'';s+=`<span${cls}></span>`;}}return s+'</div>';}
+function cardTitle(c){return c.kind==='land'?`${c.shape}型`:UNIT_TYPES[c.type].name}
+function cardDesc(c){if(c.kind==='unit'){const t=UNIT_TYPES[c.type];let ex=`攻${t.atk}｜HP${t.hp}｜移${t.move}｜射${t.range}`;if(t.fixed)ex+='｜移動3固定';if(t.frog)ex+='｜跳躍';return ex;}const fxs=(c.effects||[]).map(f=>effectLong(f.effect));return fxs.length?fxs.join('・'):'効果なし';}
+function effectLabel(e){return e.type==='score'?`★${e.value}`:e.type==='atkBoost'?'攻':e.type==='moveBoost'?'移':e.type==='rangeBoost'?'射':e.type==='defBoost'?'防':e.type==='draw'?'引':e.type==='hpUp'?'HP':e.type==='swap'?'換':''}
+function effectLong(e){return e.type==='score'?`占領${e.value}点`:e.type==='atkBoost'?`攻撃+${e.value}`:e.type==='moveBoost'?`移動+${e.value}`:e.type==='rangeBoost'?`射程+${e.value}`:e.type==='defBoost'?`防御+${e.value}`:e.type==='draw'?`${e.value}枚ドロー`:e.type==='hpUp'?`HP+${e.value}`:e.type==='swap'?'位置交換':''}
+function unitInfoText(u){
+  const t=UNIT_TYPES[u.type],buffs=[];
+  if(boostValue(u,'atkBoost'))buffs.push(`ATK+${boostValue(u,'atkBoost')}`);
+  if(boostValue(u,'moveBoost'))buffs.push(`MOV+${boostValue(u,'moveBoost')}`);
+  if(boostValue(u,'rangeBoost'))buffs.push(`RNG+${boostValue(u,'rangeBoost')}`);
+  if(boostValue(u,'defBoost'))buffs.push(`DEF+${boostValue(u,'defBoost')}`);
+  return `${u.owner===state.humanPlayer?'自軍':'敵'} ${t.name} HP${u.hp}/${u.maxHp}｜攻${t.atk}｜移${t.move}｜射${t.range}${buffs.length?`｜${buffs.join('/')}`:''}`;
+}
+function renderSelection(){const el=document.getElementById('selectionInfo');if(state.selectedCard){el.innerHTML=`<span class="tag">カード</span><b>${cardTitle(state.selectedCard)}</b><br>${cardDesc(state.selectedCard)}${state.selectedCard.kind==='land'?`<br>回転: ${state.selectedCard.rot*90}°`:''}`;return;}if(state.selectedUnit){const u=state.selectedUnit.u,t=UNIT_TYPES[u.type],buffs=[];if(boostValue(u,'atkBoost'))buffs.push(`攻撃強化+${boostValue(u,'atkBoost')}`);if(boostValue(u,'moveBoost'))buffs.push(`移動強化+${boostValue(u,'moveBoost')}`);if(boostValue(u,'rangeBoost'))buffs.push(`射程強化+${boostValue(u,'rangeBoost')}`);if(boostValue(u,'defBoost'))buffs.push(`防御強化+${boostValue(u,'defBoost')}`);el.innerHTML=`<span class="tag">${u.owner===state.humanPlayer?'自軍':'敵'}</span><b>${t.name}</b>${u.owner===state.active&&u.actedTurn===state.turn?' <span class="tag">行動済</span>':''}<br>HP ${u.hp}/${u.maxHp} / 攻撃 ${t.atk} / 移動 ${t.move} / 射程 ${t.range}${buffs.length?`<br>${buffs.join(' / ')}`:''}`;return;}el.textContent='なし';}
+function updateButtons(){
+  const blocked=isAITurn(),playing=state.phase==='play'&&!blocked;
+  const moveBtn=document.getElementById('moveBtn'),attackBtn=document.getElementById('attackBtn'),exchangeBtn=document.getElementById('exchangeBtn'),finishMoveBtn=document.getElementById('finishMoveBtn'),passBtn=document.getElementById('passBtn'),rotateBtn=document.getElementById('rotateBtn'),cancelBtn=document.getElementById('cancelBtn'),confirmLandBtn=document.getElementById('confirmLandBtn');
+  const context=document.getElementById('actionContext'),actionPanel=document.getElementById('actionPanel'),side=document.querySelector('.side');
+  const dpadBtns=[document.getElementById('landUpBtn'),document.getElementById('landLeftBtn'),document.getElementById('landRightBtn'),document.getElementById('landDownBtn')];
+  const buttons=[moveBtn,attackBtn,exchangeBtn,finishMoveBtn,passBtn,rotateBtn,cancelBtn,confirmLandBtn];
+  const hideBtn=b=>{b.classList.remove('mobile-visible','mobile-wide');b.style.visibility='hidden';b.style.pointerEvents='none';b.disabled=true;};
+  const showBtn=(b,wide=false)=>{b.classList.add('mobile-visible');b.classList.toggle('mobile-wide',wide);b.style.visibility='visible';b.style.pointerEvents='';b.disabled=false;};
+  for(const b of buttons)hideBtn(b);
+
+  let layout='idle',kind='none';
+  let txt=blocked?'AI行動中':'カードかユニットを選択';
+  let ctx='';
+
+  if(state.mobilePane==='hand'){
+    layout='hand';
+  }else if(playing){
+    if(state.mode==='move'){
+      layout='move';kind='unit';
+      const u=state.selectedUnit?.u;
+      if(u)ctx=unitInfoText(u);
+      finishMoveBtn.textContent='強化変更';
+      showBtn(cancelBtn,true);
+      if(u&&boostValue(u,'moveBoost')&&canPayBoost(u.owner,boostValue(u,'moveBoost'))){cancelBtn.classList.remove('mobile-wide');showBtn(finishMoveBtn);}
+      txt=state.moveBoostPlan?.useBoost?'移動強化を使用中｜移動先を選択':'移動先を選択';
+    }else if(state.mode==='attack'){
+      layout='attack';kind='unit';
+      const u=state.selectedUnit?.u;
+      if(u)ctx=unitInfoText(u);
+      finishMoveBtn.textContent='強化変更';
+      showBtn(cancelBtn,true);
+      if(u&&boostValue(u,'rangeBoost')&&canPayBoost(u.owner,boostValue(u,'rangeBoost'))){cancelBtn.classList.remove('mobile-wide');showBtn(finishMoveBtn);}
+      txt=state.attackBoostPlan?.useRange?'射程強化を使用中｜攻撃対象を選択':'攻撃対象を選択';
+    }else if(state.selectedUnit){
+      const u=state.selectedUnit.u;
+      kind='unit';
+      ctx=unitInfoText(u)+(u.owner===state.active&&u.actedTurn===state.turn?'｜行動済':'');
+      if(u.owner===state.humanPlayer){
+        layout='own';
+        if(u.owner===state.active&&u.actedTurn!==state.turn){
+          showBtn(moveBtn);showBtn(attackBtn);showBtn(cancelBtn,true);
+          txt='移動か攻撃を選択';
+        }else{
+          showBtn(cancelBtn,true);
+          txt='このユニットは行動できません';
+        }
+      }else{
+        layout='enemy';
+        showBtn(cancelBtn,true);
+        txt='敵ユニット情報';
+      }
+    }else if(state.selectedCard){
+      layout='card';
+      ctx=`${cardTitle(state.selectedCard)}｜${cardDesc(state.selectedCard)}`;
+      showBtn(exchangeBtn);showBtn(cancelBtn);
+      if(state.selectedCard.kind==='land'){
+        kind='land';
+        showBtn(rotateBtn);
+        txt=usesMobileLandConfirm()?(state.landTapConfirm?'十字キーで微調整して「決定」':'盤面に仮置きしてください'):'自分の拠点か自分の土地につながる位置に設置';
+        if(usesMobileLandConfirm()&&state.landTapConfirm&&state.landTapConfirm.cardId===state.selectedCard.id){
+          const chk=validLandPlacement(state.selectedCard,state.landTapConfirm.x,state.landTapConfirm.y);
+          if(chk.ok)showBtn(confirmLandBtn);
+        }
+      }else{
+        kind='card';
+        cancelBtn.classList.add('mobile-wide');
+        txt='緑枠の自分の通常土地に配置（特殊マスは不可）';
+      }
+    }else{
+      layout='idle';kind='none';
+      showBtn(passBtn,true);
+    }
+  }else{
+    layout=state.mobilePane==='hand'?'hand':'idle';
+  }
+
+  if(context)context.textContent=ctx;
+  if(actionPanel)actionPanel.dataset.kind=kind;
+  if(side)side.setAttribute('data-mobile-layout',layout);
+  const dpadEnabled=kind==='land'&&!!state.landTapConfirm;
+  for(const b of dpadBtns)if(b)b.disabled=!dpadEnabled;
+  hint(txt);
+}
+function hint(t){document.getElementById('hint').textContent=t}
+function updateStats(){
+  for(let p=0;p<2;p++){
+    document.getElementById('p'+(p+1)+'hp').textContent=state.players[p].baseHp;
+    const ps=state.players[p].permanentScore||0;
+    document.getElementById('p'+(p+1)+'score').textContent=controlledScore(p)+(ps?` (+${ps})`:'');
+    document.getElementById('p'+(p+1)+'Panel').classList.toggle('active',state.phase==='play'&&state.active===p);
+    document.getElementById('p'+(p+1)+'claim').classList.toggle('on',state.claimOwner===p);
+  }
+  document.getElementById('p2hand').textContent=state.players[1].hand.length;
+  const playing=state.phase==='play',left=playing?Math.max(0,Math.min(2,state.actionsLeft)):0,dots='●'.repeat(left)+'○'.repeat(2-left);
+  document.getElementById('turnNo').textContent=playing?`TURN ${state.turn}`:'準備中';
+  const actionLabel=`行動 ${dots}`;
+  document.getElementById('actionTitle').textContent=actionLabel;
+  document.getElementById('actionTabBtn').textContent=actionLabel;
+  const human=state.players[state.humanPlayer],handLabel=`手札 ${human.hand.length}｜山札 ${human.deck.length}`;
+  document.getElementById('handTitle').textContent=handLabel;
+  document.getElementById('handTabBtn').textContent=`手札${human.hand.length}・山${human.deck.length}`;
+}
+
+document.getElementById('moveBtn').onclick=()=>{if(!isAITurn())beginMove();};document.getElementById('attackBtn').onclick=()=>{if(!isAITurn())beginAttack();};document.getElementById('exchangeBtn').onclick=()=>{if(!isAITurn())exchangeSelectedCard();};document.getElementById('finishMoveBtn').onclick=()=>{if(isAITurn())return;if(state.mode==='move')beginMove();else if(state.mode==='attack')beginAttack();};document.getElementById('rotateBtn').onclick=()=>{if(!isAITurn()&&state.selectedCard?.kind==='land'){state.selectedCard.rot=(state.selectedCard.rot+1)%4;if(state.landTapConfirm&&state.landTapConfirm.cardId===state.selectedCard.id)state.landTapConfirm.rot=state.selectedCard.rot;render();}};document.getElementById('cancelBtn').onclick=()=>{if(!isAITurn()){clearSelection();setMobilePane('hand');render();}};document.getElementById('confirmLandBtn').onclick=()=>confirmLandPlacement();document.getElementById('passBtn').onclick=()=>{if(!isAITurn())finishTurn();};
+document.getElementById('landUpBtn').onclick=()=>nudgeMobileLand(0,-1);
+document.getElementById('landLeftBtn').onclick=()=>nudgeMobileLand(-1,0);
+document.getElementById('landRightBtn').onclick=()=>nudgeMobileLand(1,0);
+document.getElementById('landDownBtn').onclick=()=>nudgeMobileLand(0,1);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('rulesModal').classList.contains('hidden')){closeRules();return;}if(isAITurn())return;if((e.key==='r'||e.key==='R')&&state.selectedCard?.kind==='land'){state.selectedCard.rot=(state.selectedCard.rot+1)%4;if(state.landTapConfirm&&state.landTapConfirm.cardId===state.selectedCard.id)state.landTapConfirm.rot=state.selectedCard.rot;render();}if(e.key==='Escape'){clearSelection();setMobilePane('hand');render();}});
+document.getElementById('handTabBtn').onclick=()=>{setMobilePane('hand');updateButtons();};
+document.getElementById('actionTabBtn').onclick=()=>{setMobilePane('action');updateButtons();};
+document.getElementById('rulesBtn').onclick=e=>{e.stopPropagation();openRules();};
+document.getElementById('rulesCloseBtn').onclick=()=>closeRules();
+document.getElementById('rulesBasicTab').onclick=()=>setRulesTab('basic');
+document.getElementById('rulesDataTab').onclick=()=>setRulesTab('data');
+document.getElementById('rulesModal').onclick=e=>{if(e.target===e.currentTarget)closeRules();};
+setMobilePane('hand');
+initMobileLandDrag();
+
+start();
+})();
+</script>
+</body>
+</html>
