@@ -42,10 +42,10 @@
 .symbols{padding:13px 16px;min-height:0}
 .symbols .mid-head{margin-bottom:5px}
 .symbols h2{font-size:12px;color:var(--muted)}
-.sequence-center{display:flex;justify-content:space-between;gap:15px;align-items:center}
-.big-seq{margin:0;min-height:57px;gap:7px}
+.sequence-center{display:block;min-width:0}
+.big-seq{margin:0;min-height:57px;gap:7px;flex-wrap:wrap;overflow:visible;min-width:0;justify-content:flex-start}
 .symbol-tile{flex-basis:46px;height:51px;font-size:27px;border-radius:9px}
-.turn-status{background:transparent;border:0;border-radius:0;padding:0;color:var(--gold);font-size:13px;font-weight:760;text-align:right}
+.turn-status{background:transparent;border:0;border-radius:0;padding:3px 0 0;color:var(--gold);font-size:12px;font-weight:760;text-align:left;max-width:none}
 .latest-event{margin-top:10px;border-top:1px solid #395255;padding-top:9px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:12px}
 .latest-event:empty{display:none}
 .last-action-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
@@ -99,7 +99,7 @@
  .page-head{padding:13px 11px 10px;gap:10px}
  .brand h1{font-size:24px}
  .brand-symbols{font-size:12px}
- .top-actions{display:grid;grid-template-columns:minmax(0,1fr) auto auto;width:100%;gap:6px}
+ .top-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;width:100%;gap:6px}
  .top-actions .mode{width:100%;min-width:0;font-size:12px;padding:9px 16px 9px 8px}
  .top-actions .outline{font-size:11px;padding:9px 8px}
  .game{padding:0 10px 18px}
@@ -109,7 +109,7 @@
  .symbols{padding:12px}
  .symbol-tile{flex-basis:43px;height:48px;font-size:27px}
  .big-seq{min-height:50px}
- .turn-status{font-size:11px;max-width:140px}
+ .turn-status{font-size:11px;max-width:none}
  .latest-event{gap:5px 7px;margin-top:7px}
  .last-action-symbols{font-size:14px}
  .last-action-effect{font-size:11px}
@@ -124,12 +124,36 @@
  .confirm-row .context{display:none}
 }
 @media(max-width:360px){.brand-symbols{display:none}.action-card .action-pattern{font-size:13px}.action-card .action-effect{font-size:11px}}
+
+/* 対戦画面：現在の2記号と今回の出目を常時確認できる */
+.symbols .big-seq{padding:4px 0;gap:9px}
+.symbols .symbol-tile{flex:0 0 54px;height:60px;font-size:34px}
+.symbols .symbol-tile.phantom{opacity:.78}
+.dice-head{flex-wrap:wrap;gap:8px}
+.dice-head-options{display:flex;align-items:center;gap:10px;margin-left:auto}
+.dice-head-options .outline{font-size:12px;padding:6px 10px}
+.roll-summary{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;padding:8px 10px;background:#1b3137;border:1px solid #39565d;border-radius:9px;min-width:0}
+.roll-summary[hidden]{display:none}
+.roll-label{font-size:11px;font-weight:750;color:var(--muted);white-space:nowrap}
+.roll-faces{display:flex;flex-wrap:wrap;gap:5px}
+.roll-face{display:grid;place-items:center;flex:0 0 31px;height:32px;background:#294249;border:1px solid #56757a;border-radius:6px;font-size:23px;font-weight:800;line-height:1}
+.roll-held{font-size:11px;color:#d4c6a2;white-space:nowrap}
+.roll-held b{font-size:19px;vertical-align:middle}
+.roll-star{font-size:11px;color:#ffd488;font-weight:800;white-space:nowrap}
+@media(max-width:650px){
+ .symbols .symbol-tile{flex-basis:53px;height:60px;font-size:35px}
+ .symbols .big-seq{min-height:66px;overflow:visible}
+ .dice-head-options{gap:7px}
+ .dice-head-options .outline{font-size:11px;padding:6px 8px}
+ .roll-summary{margin-top:8px;padding:7px 9px;gap:6px}
+ .roll-face{flex-basis:29px;height:30px;font-size:21px}
+}
 </style>
 </head>
 <body>
 <header class="page-head">
  <div class="brand"><h1>記号召喚</h1><div class="brand-symbols" aria-hidden="true"><span class="s-circle">○</span><span class="s-triangle">△</span><span class="s-cross">×</span><span class="s-star">☆</span></div></div>
- <div class="top-actions"><select id="mode" class="mode" aria-label="対戦モード"><option value="first">Bot戦・先攻</option><option value="second">Bot戦・後攻</option><option value="local">2人対戦</option></select><button id="rulesButton" class="outline" type="button">効果一覧</button><button id="restartButton" class="outline" type="button">新しい対戦</button></div>
+ <div class="top-actions"><select id="mode" class="mode" aria-label="対戦モード"><option value="first">CPU戦・先攻</option><option value="second">CPU戦・後攻</option><option value="local">2人対戦</option></select><button id="restartButton" class="outline" type="button">新しい対戦</button></div>
 </header>
 <main class="game">
  <div class="main-field">
@@ -141,7 +165,8 @@
   </section>
   <section id="selfPanel" class="glass combatant" aria-label="下側のプレイヤー"></section>
   <section class="glass dice-panel" id="dicePanel">
-   <div class="dice-head"><h2 id="diceTitle">選べる行動</h2><span id="diceMeta" class="muted tiny"></span></div>
+   <div class="dice-head"><h2 id="diceTitle">選べる行動</h2><div class="dice-head-options"><span id="diceMeta" class="muted tiny"></span><button id="rulesButton" class="outline" type="button">効果一覧</button></div></div>
+   <div id="rollSummary" class="roll-summary" aria-live="polite"></div>
    <div id="diceList" class="action-list" role="group" aria-label="現在選べる行動"></div>
    <div id="selectedActionPanel" class="selection-detail" hidden><div id="previewContent" class="view" aria-live="polite"></div></div>
    <div class="confirm-row"><button class="primary" id="confirmButton" type="button" disabled>行動を選択</button><span id="controlHint" class="context"></span></div>
@@ -176,7 +201,7 @@ let game,chosen=[],targetA='',targetB='',keepChoice='',effectChoice='',filter='a
 function newPlayer(){return {hp:30,units:[],held:null,diceDelta:0,extra:false}}
 function randomSymbol(){return SYMBOLS[Math.floor(Math.random()*3)]}
 function fresh(){clearTimeout(aiTimer);visualPulse=null;game={players:[newPlayer(),newPlayer()],turn:0,turnNo:0,seq:[],dice:[],required:1,log:[],winner:null,mode:$('mode').value,idSeed:1,lastSummary:'',lastEffect:'',lastAction:null};chosen=[];targetA='';targetB='';keepChoice='';effectChoice='';filter='all';lock=false;closeEnd();beginTurn()}
-function nameOf(p){return game.mode==='local'?`プレイヤー${p+1}`:(game.mode==='first'?(p===0?'あなた':'Bot'):(p===0?'Bot':'あなた'))}
+function nameOf(p){return game.mode==='local'?`プレイヤー${p+1}`:(game.mode==='first'?(p===0?'あなた':'CPU'):(p===0?'CPU':'あなた'))}
 function bot(p){return game.mode!=='local'&&(game.mode==='first'?p===1:p===0)}
 function canHuman(){return game&&game.winner===null&&!bot(game.turn)&&!lock}
 function message(msg,major=false){game.log.unshift({msg,major});if(game.log.length>100)game.log.length=100}
@@ -321,7 +346,7 @@ function pickAI(){
 
  if(!best)return;const sim=simulate(game,best.c,best.opts);applyTurn(game,sim,best.c,nameOf(game.turn))}
 function scheduleBot(){clearTimeout(aiTimer);if(game.winner!==null||showingRules||!bot(game.turn))return;aiTimer=setTimeout(pickAI,630)}
-function renderPlayer(p,element){let player=game.players[p],fx=visualPulse?.[p]||{};element.classList.toggle('active',game.turn===p&&game.winner===null);element.classList.toggle('impact-hit',!!(fx.hp==='hit'||fx.hit));element.classList.toggle('impact-heal',fx.hp==='heal');const effects=[player.held?`キープ ${player.held}`:null,player.extra?'次の手番２記号配置':null,player.diceDelta>0?'次の手番４ダイス':null,player.diceDelta<0?'次の手番２ダイス':null].filter(Boolean);const who=`${nameOf(p)}`;let s=`<div class="combatant-head"><div><div class="identity"><strong>${safe(who)}</strong><span class="seat">${p===0?'先攻':'後攻'}</span>${bot(p)?'<span class="tag warn">BOT</span>':''}${game.turn===p&&game.winner===null?'<span class="tag">手番</span>':''}</div><div class="conditions">${effects.map(e=>`<span class="condition">${safe(e)}</span>`).join('')}</div></div><div class="vitals"><div class="hp-numbers"><span class="muted tiny">HP</span><b>${Math.max(0,player.hp)}</b><span class="muted tiny">/ 30</span></div><div class="hpbar"><span style="width:${Math.max(0,player.hp)/30*100}%"></span></div></div></div><div class="unit-strip">`;
+function renderPlayer(p,element){let player=game.players[p],fx=visualPulse?.[p]||{};element.classList.toggle('active',game.turn===p&&game.winner===null);element.classList.toggle('impact-hit',!!(fx.hp==='hit'||fx.hit));element.classList.toggle('impact-heal',fx.hp==='heal');const effects=[player.held?`キープ ${player.held}`:null,player.extra?'次の手番２記号配置':null,player.diceDelta>0?'次の手番４ダイス':null,player.diceDelta<0?'次の手番２ダイス':null].filter(Boolean);const who=`${nameOf(p)}`;let s=`<div class="combatant-head"><div><div class="identity"><strong>${safe(who)}</strong><span class="seat">${p===0?'先攻':'後攻'}</span>${bot(p)?'<span class="tag warn">CPU</span>':''}${game.turn===p&&game.winner===null?'<span class="tag">手番</span>':''}</div><div class="conditions">${effects.map(e=>`<span class="condition">${safe(e)}</span>`).join('')}</div></div><div class="vitals"><div class="hp-numbers"><span class="muted tiny">HP</span><b>${Math.max(0,player.hp)}</b><span class="muted tiny">/ 30</span></div><div class="hpbar"><span style="width:${Math.max(0,player.hp)/30*100}%"></span></div></div></div><div class="unit-strip">`;
  if(!player.units.length)s+='<div class="empty-units">ユニットなし</div>';
  player.units.forEach((u,i)=>{const st=UNITS[u.type],boost=u.attack-st.attack;s+=`<div class="unit-card ${fx.hitUnits?.includes(u.id)?'impact-hit':fx.healUnits?.includes(u.id)?'impact-heal':fx.spawn?.includes(u.id)?'impact-spawn':''}" data-type="${u.type}"><div class="unit-name"><span class="unit-emblem">${st.icon}</span>${st.name}</div><div class="statline">攻 <strong>${u.attack}</strong>${boost?` <span class="boost">(+${boost})</span>`:''}</div><div class="unit-hp"><span style="width:${100*u.hp/u.max}%"></span></div><div class="unit-footer">HP ${u.hp} / ${u.max}</div>${u.born===game.turnNo?'<span class="newborn">待機</span>':''}</div>`});s+='</div>';element.innerHTML=s}
 function renderSeq(){
@@ -386,12 +411,23 @@ function unavailableEffect(action){
  if(e==='keep'&&own.held&&!action.usesHeld)return 'キープ中';
  return '';
 }
+// Show physical rolls, not the virtual ☆ alternative or a clickable duplicate of action choices.
+function renderRollSummary(){
+ const panel=$('rollSummary');
+ if(game.winner!==null||!canHuman()) {panel.innerHTML='';panel.hidden=true;return}
+ panel.hidden=false;
+ const rolled=game.dice.filter(d=>!d.virtual&&!d.held);
+ const held=game.dice.find(d=>d.held);
+ const star=game.dice.some(d=>d.virtual);
+ panel.innerHTML=`<span class="roll-label">出目</span><div class="roll-faces">${rolled.map(d=>`<span class="roll-face ${symClass(d.s)}" aria-label="出目 ${d.s}">${d.s}</span>`).join('')}</div>${held?`<span class="roll-held">キープ <b class="${symClass(held.s)}">${held.s}</b></span>`:''}${star?'<span class="roll-star">☆も選択可</span>':''}`;
+}
 function renderDice(){
+ renderRollSummary();
  const d=$('diceList'),human=canHuman();
  $('diceTitle').textContent=game.winner!==null?'対戦終了':human?'行動を選ぶ':'相手の手番';
  $('diceMeta').textContent=game.winner!==null?'':`${game.required===2?'2記号': '1記号'}${game.dice.some(d=>d.virtual)?' · ☆':''}`;
  if(game.winner!==null){d.innerHTML='<div class="muted">新しい対戦を開始できます。</div>';$('controlHint').textContent='';$('confirmButton').disabled=true;$('confirmButton').textContent='対戦終了';return}
- if(!human){d.innerHTML='<div class="muted">Botが行動を選んでいます…</div>';$('confirmButton').disabled=true;$('confirmButton').textContent='相手の番';$('controlHint').textContent='';return}
+ if(!human){d.innerHTML='<div class="muted">CPUが行動を選んでいます…</div>';$('confirmButton').disabled=true;$('confirmButton').textContent='相手の番';$('controlHint').textContent='';return}
  const actions=availableActions(),selectedKey=chosen.join('|')+'|'+effectChoice;
  d.innerHTML=actions.map((action,i)=>{
   const selected=selectedKey===action.ids.join('|')+'|'+action.code;
