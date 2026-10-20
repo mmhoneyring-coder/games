@@ -111,16 +111,38 @@ h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.04em;line-height:1.2;margin:0
 
 /* サムネイル未設定の作品は画像領域を空枠のまま保持 */
 .preview--placeholder{background:#f2f4f3;border-right:1px solid #e0e4e5}
+
+/* 推理ローグライトのサムネイル（左画像・右説明の既存レイアウトを維持） */
+.preview--mystery{background:radial-gradient(circle at 70% 38%,#315654 0%,#142932 65%,#101c26 100%)}
+.mystery-grid{position:absolute;inset:-30%;opacity:.22;transform:rotate(-14deg);background:linear-gradient(90deg,transparent 96%,#a6c9be 97%,transparent 100%),linear-gradient(transparent 96%,#a6c9be 97%,transparent 100%);background-size:35px 35px}
+.mystery-file{position:absolute;left:26%;top:17%;width:49%;height:65%;display:flex;align-items:center;justify-content:center;border:2px solid #c6b78f;border-radius:7px;background:linear-gradient(150deg,#efe1bb,#cab58b);color:#3a3834;font:700 clamp(30px,6vw,52px)/1 Georgia,serif;transform:rotate(-8deg);box-shadow:8px 11px 0 #0004,0 0 15px #e6ca9240}
+.mystery-file span{position:absolute;bottom:9%;font:800 clamp(7px,1.4vw,11px)/1.1 system-ui;letter-spacing:.12em;color:#79674c}
+.mystery-dots{position:absolute;right:12%;bottom:13%;display:flex;gap:5px;transform:rotate(-8deg)}
+.mystery-dots i{display:block;width:8px;height:8px;border-radius:50%;background:#91c6ba;border:1px solid #bdded4;box-shadow:0 0 8px #a9e6d86b}
+
 </style>
 </head>
 <body>
 <main>
   <header>
-    <p class="eyebrow">BROWSER GAMES · 9 TITLES</p>
+    <p class="eyebrow">BROWSER GAMES · 10 TITLES</p>
     <h1>ゲーム一覧</h1>
     <p class="intro">気になるゲームを選ぶと、そのままブラウザで遊べます。</p>
   </header>
   <section class="games" aria-label="ゲーム一覧">
+<a class="game" href="./suiri-roguelite/">
+  <div class="preview preview--mystery" aria-hidden="true">
+    <div class="mystery-grid"></div>
+    <div class="mystery-file">?<span>CASE 01</span></div>
+    <div class="mystery-dots"><i></i><i></i><i></i></div>
+  </div>
+  <div class="info">
+    <div class="meta"><span class="tag">推理</span><span class="tag status">調査デモ v0.1</span></div>
+    <h2 class="game-title">推理ローグライト</h2>
+    <p class="game-desc">限られた情報を調べて、犯人・殺害方法・犯行現場を推理する短編ミステリー。全14パターンを収録。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
+</a>
 <a class="game" href="./kyokudai-magic/">
   <div class="preview preview--placeholder" aria-hidden="true"></div>
   <div class="info">
