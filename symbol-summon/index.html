@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#101b20"/>
+<title>記号召喚</title>
+<style>
+:root{color-scheme:dark;--bg:#101b20;--panel:#17262c;--panel2:#1e3339;--raised:#263e43;--line:#365158;--line2:#446168;--text:#edf1eb;--muted:#9cb1ae;--dim:#748f90;--gold:#f2c985;--cyan:#a7e2dc;--red:#edaaa2;--blue:#c2cfeb;--ok:#a9d8a3;--shadow:0 16px 50px #030c1180}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);background:radial-gradient(ellipse 110% 70% at 50% -10%,#27474d 0%,var(--bg) 62%);min-height:100vh;font:14px/1.5 system-ui,-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif}button,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.43}button:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button{transition:background .15s,transform .15s}button:active:not(:disabled){transform:translateY(1px)}.muted{color:var(--muted)}.tiny{font-size:11px}.label{font-weight:800;letter-spacing:.12em;font-size:11px;color:var(--muted)}.glass{background:linear-gradient(145deg,#1b3034,#17252b);border:1px solid var(--line);border-radius:15px;box-shadow:0 6px 25px #06101730}.page-head{max-width:1220px;margin:auto;padding:22px 17px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand .overline{font-size:10px;letter-spacing:.25em;font-weight:850;color:var(--gold)}h1{font-size:30px;line-height:1.15;letter-spacing:.10em;margin:4px 0 6px}.subtitle{font-size:12px;color:var(--muted)}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.outline{background:#24393d;color:#e4eee9;border:1px solid #527078;border-radius:8px;padding:9px 12px;font-weight:700}.outline:hover:not(:disabled){background:#315056}.primary{background:var(--gold);color:#1a2829;border:1px solid #ebcb94;border-radius:9px;padding:13px 19px;font-weight:860;letter-spacing:.03em}.primary:hover:not(:disabled){background:#ffe1a8}.game{max-width:1220px;padding:3px 17px 26px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) 265px;gap:14px}.main-field{min-width:0;display:flex;flex-direction:column;gap:12px}.side{display:flex;flex-direction:column;gap:12px;min-width:0}.combatant{padding:15px 17px;position:relative}.combatant.active{border-color:#d0b076;box-shadow:inset 0 0 0 1px #a78e61,0 6px 30px #0b131960}.combatant-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.identity{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.identity strong{font-size:17px;letter-spacing:.02em}.seat{color:var(--muted);font-size:11px}.tag{font-size:10px;padding:3px 6px;border-radius:5px;background:#385558;color:#beece6;font-weight:800}.tag.warn{background:#665136;color:#f2d39b}.vitals{min-width:145px;text-align:right}.hp-numbers{display:flex;align-items:baseline;justify-content:flex-end;gap:6px}.hp-numbers b{font-size:20px}.hpbar{background:#594044;border-radius:9px;height:7px;margin-top:6px;overflow:hidden;min-width:100px}.hpbar span{display:block;height:100%;background:linear-gradient(90deg,#cd7c70,#efb5a2);transition:width .3s}.conditions{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0 0;min-height:16px;font-size:11px;color:#d9cda7}.condition{background:#4a4530aa;border-radius:5px;padding:2px 6px}.unit-strip{display:flex;min-height:92px;gap:9px;overflow-x:auto;padding:11px 1px 3px;scrollbar-width:thin}.unit-card{position:relative;flex:0 0 118px;min-width:0;border:1px solid #4c666c;border-radius:10px;background:linear-gradient(165deg,#2b4247,#1e3036);padding:8px 10px;user-select:none}.unit-card[data-type="shield"]{border-color:#af9869}.unit-card[data-type="archer"]{border-color:#7399ad}.unit-card[data-type="dragon"]{border-color:#d7ac70;background:linear-gradient(160deg,#584533,#322f32)}.unit-name{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:790}.unit-emblem{font-size:15px;color:var(--gold)}.statline{font-size:11px;color:#d6dfda;margin:6px 0 3px}.statline strong{color:var(--text);font-size:12px}.unit-hp{height:5px;background:#4b6665;border-radius:4px;overflow:hidden;margin:5px 0}.unit-hp span{display:block;height:100%;background:#a0d7b6}.unit-card .unit-footer{font-size:10px;color:#b2cbc4}.unit-card .boost{color:var(--gold)}.newborn{position:absolute;right:4px;top:-7px;padding:1px 4px;font-size:9px;border-radius:4px;background:#527081}.empty-units{flex:1;min-width:140px;text-align:center;border:1px dashed #3a565c;border-radius:9px;color:var(--dim);padding:24px 8px;font-size:12px}.order{font-size:10px;color:var(--muted);text-align:right;margin-top:3px}.middle{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:12px}.symbols,.forecast{padding:17px;min-width:0;min-height:245px}.middle h2,.dice-panel h2,.side h2{font-size:15px;margin:0;color:var(--text)}.mid-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.big-seq{display:flex;align-items:center;justify-content:flex-start;gap:7px;margin:15px 0;min-height:71px;overflow-x:auto;padding:4px 0}.symbol-tile{display:grid;place-items:center;flex:0 0 55px;height:63px;background:#294248;border-radius:11px;border:1px solid #496369;font-size:33px;line-height:1}.symbol-tile.recent{background:#383f39;border-color:#c0a46b;box-shadow:inset 0 0 0 1px #826a43}.symbol-tile.phantom{background:#354b52;border:1px dashed #c7c6a3;opacity:.75}.s-circle{color:var(--cyan)}.s-triangle{color:var(--gold)}.s-cross{color:var(--red)}.s-star{color:#ffd488;text-shadow:0 0 13px #ffd17f77}.die.star-option{border:1px solid #e1b65c;background:linear-gradient(150deg,#665438,#3e3b32)}.star-note{font-size:11px;color:#f2d08e;margin:4px 0 10px}.ellipsis{color:#708b90;padding-right:4px}.turn-status{background:#244047;border-left:3px solid var(--gold);padding:9px 11px;border-radius:5px;font-size:12px;color:#d8e4df}.subhead{color:var(--muted);font-size:11px;letter-spacing:.04em;font-weight:750;margin-top:11px}.mini-outcomes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}.mini-outcome{border:1px solid #3f595e;border-radius:8px;padding:6px;font-size:10px;color:#bed0cd;display:flex;flex-direction:column;min-width:0;gap:3px}.mini-outcome b{font-size:18px;line-height:1}.mini-outcome span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.forecast{border-color:#627067;background:linear-gradient(155deg,#283b39,#1e3035)}.forecast .view{margin-top:11px;display:flex;flex-direction:column;gap:8px}.forecast .effect-title{font-size:18px;font-weight:850;color:#f2dbab;line-height:1.35}.forecast .explain{color:#c8d5d0;font-size:12px}.forecast .note{background:#233b3b;border:1px solid #436261;border-radius:8px;font-size:12px;padding:8px}.select-label{display:block;font-size:11px;color:var(--muted);margin:10px 0 5px;font-weight:700}.target-select{width:100%;border:1px solid #668080;border-radius:8px;background:#263e43;padding:8px;color:var(--text)}.forecast ul{margin:3px 0;padding-left:17px;color:#cbdad5;font-size:11px}.forecast li{margin:3px 0}.dice-panel{padding:17px}.dice-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.dice-list{display:flex;flex-wrap:wrap;gap:10px;margin:13px 0}.die{width:77px;height:85px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:linear-gradient(150deg,#304e53,#22383e);border:1px solid #66828a;border-radius:12px;position:relative}.die:hover:not(:disabled){background:#3c5a60}.die.selected{border:2px solid var(--gold);background:linear-gradient(140deg,#575342,#33484a);box-shadow:0 0 0 2px #a98a4450}.die .ch{font-size:37px;line-height:1;font-weight:700}.die .die-caption{font-size:10px;color:#c1d2cb}.die.held:after{content:'KEEP';position:absolute;top:-8px;right:-6px;padding:2px 4px;background:#7f6940;border:1px solid #ddba7b;border-radius:4px;color:#fff;font-weight:900;font-size:9px}.die:disabled{opacity:.55}.die .order-label{position:absolute;top:4px;left:5px;font-size:10px;color:var(--gold)}.confirm-row{display:flex;align-items:center;gap:13px;flex-wrap:wrap}.confirm-row .primary{min-width:200px}.context{color:var(--muted);font-size:12px;flex:1}.side-box{padding:16px}.side .summary{font-size:12px;line-height:1.65;color:#d2e0db}.side .summary strong{color:var(--gold)}.events{margin-top:11px;max-height:390px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;scrollbar-width:thin}.event{background:#24383e;border-left:3px solid #6c9396;padding:7px 9px;border-radius:4px;font-size:11px}.event.major{border-left-color:var(--gold)}.mode{background:#23393e;border:1px solid #547077;border-radius:8px;color:var(--text);padding:9px;width:100%;margin-top:9px}.foot{max-width:1200px;margin:0 auto;color:#718c8a;padding:6px 20px 30px;text-align:center;font-size:11px}.modal-layer{display:none;position:fixed;inset:0;z-index:100;background:#050d12d9;align-items:center;justify-content:center;padding:15px;backdrop-filter:blur(4px)}.modal-layer.open{display:flex}.dialog{width:min(790px,100%);max-height:90dvh;overflow:auto;background:#1c3034;border:1px solid #58767a;border-radius:16px;padding:20px;box-shadow:var(--shadow)}.dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.dialog h2{margin:0;font-size:21px}.filters{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.filter{padding:7px 11px;border:1px solid #4c6b6d;border-radius:7px;background:#284246;color:#d7e5de}.filter.active{background:#65573d;border-color:#cda969;color:#fff}.table-container{overflow:auto;max-height:52dvh;border:1px solid #38565b;border-radius:8px}table{width:100%;border-collapse:collapse;font-size:12px}thead th{position:sticky;top:0;background:#2d454b;color:#d1e4de;text-align:left;z-index:1}td,th{padding:8px 9px;border-bottom:1px solid #355158}td:first-child{min-width:94px;white-space:nowrap;font-size:17px;font-weight:750;letter-spacing:.1em;color:#f5d7a4}tr.disabled td{opacity:.46}tr.relevant{background:#44503d}tr:last-child td{border-bottom:0}.message{border:1px solid #a08a54;background:#3d3627;border-radius:10px;padding:16px}.message h2{margin:0 0 8px}.hint-legend{border-top:1px solid #39595d;margin-top:12px;padding-top:12px;color:#c0cecb;font-size:11px;line-height:1.7}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.hidden{display:none!important}
+@media(max-width:1020px){.game{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.events{max-height:190px}.page-head{padding-top:14px}}
+@media(max-width:650px){.page-head{align-items:flex-start;gap:7px;flex-direction:column;padding:12px 12px 10px}h1{font-size:23px}.subtitle{font-size:11px}.top-actions{width:100%;justify-content:flex-start}.outline{padding:7px 10px;font-size:12px}.game{padding:3px 10px 15px;gap:10px}.main-field{gap:9px}.combatant{padding:11px}.vitals{min-width:98px}.hpbar{min-width:90px}.hp-numbers b{font-size:17px}.identity strong{font-size:14px}.unit-strip{min-height:88px;padding-top:10px}.unit-card{flex-basis:103px;padding:7px 8px}.middle{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:8px}.symbols,.forecast{padding:10px;min-height:250px}.middle h2{font-size:12px}.big-seq{gap:4px;margin:9px 0;min-height:50px}.symbol-tile{flex-basis:36px;height:42px;font-size:24px;border-radius:7px}.turn-status{font-size:11px;padding:7px}.forecast .effect-title{font-size:14px}.forecast .view{margin-top:7px;gap:6px}.forecast .note{font-size:11px;padding:6px}.mini-outcomes{gap:3px}.mini-outcome{padding:4px}.mini-outcome b{font-size:15px}.mini-outcome span{font-size:9px}.dice-panel{padding:11px}.dice-list{gap:8px}.die{width:65px;height:76px}.die .ch{font-size:32px}.confirm-row .primary{flex:1;min-width:0}.side{grid-template-columns:1fr}.side-box{padding:12px}.dialog{padding:13px}.table-container{max-height:55dvh}}
+@media(max-width:360px){.symbol-tile{flex-basis:29px;height:37px;font-size:21px}.middle{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}.forecast .effect-title{font-size:12px}.die{width:60px}}
+
+/* v0.4: the dice are still rolled internally; only actionable outcomes are selectable. */
+.action-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:9px;margin:13px 0;max-height:410px;overflow:auto;padding:2px;scrollbar-width:thin}
+.action-card{min-width:0;text-align:left;border:1px solid #496a70;border-radius:10px;background:linear-gradient(145deg,#274249,#1d3439);color:var(--text);padding:11px 12px;display:flex;flex-direction:column;gap:5px;min-height:90px}
+.action-card:hover:not(:disabled){border-color:#a0c2bf;background:#304f55}
+.action-card.selected{border:2px solid var(--gold);padding:10px 11px;background:linear-gradient(145deg,#514a34,#2a4143);box-shadow:0 0 0 2px #bfa06f40}
+.action-card .action-pattern{font-size:20px;font-weight:800;display:flex;gap:4px;align-items:center;flex-wrap:wrap;line-height:1.15}
+.action-card .action-pattern .arrow{font-size:13px;color:var(--muted);padding:0 3px}
+.action-card .action-effect{font-size:12px;line-height:1.45;font-weight:700}
+.action-card .action-note{font-size:10px;color:var(--muted)}
+@media(max-width:640px){.middle{grid-template-columns:1fr}.symbols,.forecast{min-height:unset;padding:14px}.big-seq{margin:8px 0;min-height:58px}.symbol-tile{flex-basis:48px;height:53px;font-size:28px}.action-list{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));max-height:350px}.action-card{padding:10px;min-height:94px}.action-card .action-pattern{font-size:17px}}
+
+/* v0.5 — game-first compact layout. Help and history are opt-in. */
+.page-head{max-width:960px;padding:18px 14px 12px}
+.brand{display:flex;align-items:baseline;gap:13px}
+.brand h1{margin:0;font-size:29px;letter-spacing:.11em}
+.brand-symbols{display:flex;gap:8px;font-size:16px;opacity:.7}
+.top-actions{gap:7px}
+.top-actions .mode{width:auto;margin:0;min-width:134px;padding:9px 30px 9px 10px;background:#23393e}
+.top-actions .outline{padding:9px 12px}
+.game{max-width:960px;display:block;padding:0 14px 24px}
+.main-field{gap:10px}
+.combatant{padding:12px 16px}
+.conditions:empty{display:none}
+.unit-strip{min-height:0;padding:8px 0 0;gap:8px}
+.unit-card{flex-basis:105px;padding:7px 9px}
+.empty-units{padding:8px 12px;border:0;background:#20353a66;min-width:0;text-align:left;font-size:11px}
+.order{display:none}
+.symbols{padding:13px 16px;min-height:0}
+.symbols .mid-head{margin-bottom:5px}
+.symbols h2{font-size:12px;color:var(--muted)}
+.sequence-center{display:flex;justify-content:space-between;gap:15px;align-items:center}
+.big-seq{margin:0;min-height:57px;gap:7px}
+.symbol-tile{flex-basis:46px;height:51px;font-size:27px;border-radius:9px}
+.turn-status{background:transparent;border:0;border-radius:0;padding:0;color:var(--gold);font-size:13px;font-weight:760;text-align:right}
+.latest-event{margin-top:10px;border-top:1px solid #395255;padding-top:9px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:12px}
+.latest-event:empty{display:none}
+.last-action-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
+.last-action-who{font-size:11px;color:var(--muted);font-weight:750}
+.last-action-symbols{font-weight:850;font-size:16px;letter-spacing:.05em}
+.last-action-effect{font-weight:800;color:var(--gold)}
+.last-action-changes{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.result-chip{background:#31494b;border:1px solid #527073;border-radius:5px;padding:2px 7px;color:#d2dfda;font-size:11px;white-space:nowrap}
+.result-chip.loss{border-color:#865d57;background:#4a3434;color:#f7c1b6}
+.result-chip.gain{border-color:#588071;color:#c6e8cf}
+.result-chip.neutral{border-color:#706b50;color:#e3d8ad}
+.action-card.no-target{border-color:#726256}
+.action-card .action-unavailable{font-size:10px;color:#edc0a3;font-weight:730}
+.combatant.impact-hit{animation:impact-hit .78s ease-out}
+.combatant.impact-heal{animation:impact-heal .88s ease-out}
+.unit-card.impact-hit{animation:unit-hit .78s ease-out}
+.unit-card.impact-heal,.unit-card.impact-spawn{animation:impact-heal .88s ease-out}
+@keyframes impact-hit{0%{box-shadow:0 0 0 2px #e59a81;filter:brightness(1.45)}100%{filter:brightness(1)}}
+@keyframes impact-heal{0%{box-shadow:0 0 0 2px #9bd5a7;filter:brightness(1.30)}100%{filter:brightness(1)}}
+@keyframes unit-hit{0%{background:#835044;transform:translateX(2px)}45%{transform:translateX(-2px)}100%{transform:none}}
+@media(prefers-reduced-motion:reduce){.combatant.impact-hit,.combatant.impact-heal,.unit-card.impact-hit,.unit-card.impact-heal,.unit-card.impact-spawn{animation:none;box-shadow:inset 0 0 0 2px #c28a77}}
+
+.dice-panel{padding:15px 16px}
+.dice-panel h2{font-size:16px}
+.action-list{grid-template-columns:repeat(auto-fit,minmax(185px,1fr));max-height:420px;margin:11px 0 12px;gap:9px}
+.action-card{min-height:82px;padding:12px 13px;gap:7px;border-radius:11px;justify-content:center}
+.action-card.selected{padding:11px 12px}
+.action-card .action-effect{font-size:14px;font-weight:800;line-height:1.3}
+.action-card .action-pattern{font-size:17px;opacity:.95}
+.action-card .action-note{font-size:10px;line-height:1.25}
+.action-card .action-pattern .arrow{font-size:12px}
+.selection-detail[hidden]{display:none}
+.selection-detail{margin:8px 0 12px;background:#243b3c;border:1px solid #57716d;border-radius:10px;padding:11px 13px}
+.selection-detail .view{display:flex;flex-direction:column;gap:7px}
+.selection-detail .effect-title{color:#f1d49d;font-weight:800;font-size:14px}
+.selection-detail .explain{display:none}
+.selection-detail .note{border:0;background:transparent;padding:0;font-size:11px;color:#b9cdc6}
+.selection-detail .note strong{display:none}
+.selection-detail .note ul{margin:0;padding-left:16px}
+.selection-detail .note li:nth-child(n+4){display:none}
+.select-label{margin:7px 0 3px}
+.target-select{max-width:380px;padding:7px}
+.confirm-row{gap:8px}
+.confirm-row .primary{min-width:188px;padding:11px 15px}
+.confirm-row .context{font-size:11px}
+.log-collapsible{padding:0 14px;border-color:#2e4a4f;background:#172b3080}
+.log-collapsible summary{cursor:pointer;font-size:12px;color:var(--muted);padding:10px 0;user-select:none;list-style-position:inside}
+.log-collapsible .events{margin:0 0 12px;max-height:250px}
+.log-collapsible:not([open]) .events{display:none}
+@media(max-width:650px){
+ .page-head{padding:13px 11px 10px;gap:10px}
+ .brand h1{font-size:24px}
+ .brand-symbols{font-size:12px}
+ .top-actions{display:grid;grid-template-columns:minmax(0,1fr) auto auto;width:100%;gap:6px}
+ .top-actions .mode{width:100%;min-width:0;font-size:12px;padding:9px 16px 9px 8px}
+ .top-actions .outline{font-size:11px;padding:9px 8px}
+ .game{padding:0 10px 18px}
+ .combatant{padding:11px 12px}
+ .unit-strip{padding-top:6px}
+ .unit-card{flex-basis:98px}
+ .symbols{padding:12px}
+ .symbol-tile{flex-basis:43px;height:48px;font-size:27px}
+ .big-seq{min-height:50px}
+ .turn-status{font-size:11px;max-width:140px}
+ .latest-event{gap:5px 7px;margin-top:7px}
+ .last-action-symbols{font-size:14px}
+ .last-action-effect{font-size:11px}
+ .result-chip{font-size:10px;padding:2px 5px}
+ .dice-panel{padding:12px}
+ .action-list{grid-template-columns:repeat(2,minmax(0,1fr));max-height:48vh;gap:7px}
+ .action-card{padding:11px;min-height:82px}
+ .action-card.selected{padding:10px}
+ .action-card .action-effect{font-size:12px}
+ .action-card .action-pattern{font-size:15px;gap:2px}
+ .confirm-row .primary{width:100%}
+ .confirm-row .context{display:none}
+}
+@media(max-width:360px){.brand-symbols{display:none}.action-card .action-pattern{font-size:13px}.action-card .action-effect{font-size:11px}}
+</style>
+</head>
+<body>
+<header class="page-head">
+ <div class="brand"><h1>記号召喚</h1><div class="brand-symbols" aria-hidden="true"><span class="s-circle">○</span><span class="s-triangle">△</span><span class="s-cross">×</span><span class="s-star">☆</span></div></div>
+ <div class="top-actions"><select id="mode" class="mode" aria-label="対戦モード"><option value="first">Bot戦・先攻</option><option value="second">Bot戦・後攻</option><option value="local">2人対戦</option></select><button id="rulesButton" class="outline" type="button">効果一覧</button><button id="restartButton" class="outline" type="button">新しい対戦</button></div>
+</header>
+<main class="game">
+ <div class="main-field">
+  <section id="enemyPanel" class="glass combatant" aria-label="上側のプレイヤー"></section>
+  <section class="glass symbols" aria-label="現在の記号">
+   <div class="mid-head"><h2>記号列</h2><span id="turnNumber" class="muted tiny"></span></div>
+   <div class="sequence-center"><div id="sequence" class="big-seq"></div><div id="turnStatus" class="turn-status" aria-live="polite"></div></div>
+   <div id="latestEvent" class="latest-event" aria-live="polite"></div>
+  </section>
+  <section id="selfPanel" class="glass combatant" aria-label="下側のプレイヤー"></section>
+  <section class="glass dice-panel" id="dicePanel">
+   <div class="dice-head"><h2 id="diceTitle">選べる行動</h2><span id="diceMeta" class="muted tiny"></span></div>
+   <div id="diceList" class="action-list" role="group" aria-label="現在選べる行動"></div>
+   <div id="selectedActionPanel" class="selection-detail" hidden><div id="previewContent" class="view" aria-live="polite"></div></div>
+   <div class="confirm-row"><button class="primary" id="confirmButton" type="button" disabled>行動を選択</button><span id="controlHint" class="context"></span></div>
+  </section>
+  <details class="glass log-collapsible"><summary>対戦ログ</summary><div id="eventLog" class="events" aria-live="polite"></div></details>
+ </div>
+</main>
+<div id="rulesModal" class="modal-layer" role="dialog" aria-modal="true" aria-label="記号と効果一覧" aria-hidden="true">
+ <div class="dialog"><div class="dialog-head"><div><h2>記号と効果一覧</h2><div class="muted tiny" id="rulesHint"></div><div class="star-note">☆：3個一致で出現／末尾はドラゴン／それ以外は万能記号</div></div><button class="outline" id="closeRules" type="button">✕ 閉じる</button></div><div id="ruleFilters" class="filters"></div><div class="table-container"><table><thead><tr><th>組み合わせ</th><th>発動する効果</th></tr></thead><tbody id="ruleRows"></tbody></table></div></div>
+</div>
+<div id="endModal" class="modal-layer" role="dialog" aria-modal="true" aria-label="対戦結果" aria-hidden="true"><div class="dialog" style="max-width:420px"><div class="message"><h2 id="endTitle"></h2><p id="endDetails"></p><button id="endRestart" class="primary" type="button">もう一度対戦</button></div></div></div>
+<script>
+'use strict';
+const SYMBOLS=['○','△','×'];
+const EFFECTS={
+ '○○○':['none','効果なし'],'○○△':['buffAll','味方全体の攻撃力を永続的に＋3'],'○○×':['face6','相手プレイヤーに6ダメージ'],
+ '○△○':['soldier','兵士を１体召喚'],'○△△':['buff1','味方１体の攻撃力を永続的に＋3'],'○△×':['none','効果なし'],
+ '○×○':['shield','盾兵を１体召喚'],'○×△':['none','効果なし'],'○××':['healFace','自分のHPを9回復'],
+ '△○○':['shield','盾兵を１体召喚'],'△○△':['healAll','味方全体のHPを3回復'],'△○×':['none','効果なし'],
+ '△△○':['archer','弓兵を１体召喚'],'△△△':['none','効果なし'],'△△×':['keep','残りのダイス１個を使用するまでキープ'],
+ '△×○':['none','効果なし'],'△×△':['swap','味方ユニット２体の位置を交換'],'△××':['double','次の自分の手番に２記号配置'],
+ '×○○':['archer','弓兵を１体召喚'],'×○△':['none','効果なし'],'×○×':['dicePlus','次の自分の手番は４ダイス'],
+ '×△○':['none','効果なし'],'×△△':['hit9','敵ユニット１体に9ダメージ'],'×△×':['diceMinus','相手の次の手番は２ダイス'],
+ '××○':['soldier','兵士を１体召喚'],'××△':['hit6','敵ユニット１体に6ダメージ'],'×××':['none','効果なし']
+};
+const UNITS={soldier:{name:'兵士',attack:6,max:10,icon:'⚔'},shield:{name:'盾兵',attack:3,max:18,icon:'▣'},archer:{name:'弓兵',attack:5,max:10,icon:'⌁'},dragon:{name:'ドラゴン',attack:8,max:22,icon:'★'}};
+const $=id=>document.getElementById(id);
+const safe=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+function symClass(s){return s==='○'?'s-circle':s==='△'?'s-triangle':s==='☆'?'s-star':'s-cross'}
+function symsText(s){return [...s].map(ch=>`<span class="${symClass(ch)}">${ch}</span>`).join('')}
+let game,chosen=[],targetA='',targetB='',keepChoice='',effectChoice='',filter='all',aiTimer=null,showingRules=false,lock=false,visualPulse=null;
+function newPlayer(){return {hp:30,units:[],held:null,diceDelta:0,extra:false}}
+function randomSymbol(){return SYMBOLS[Math.floor(Math.random()*3)]}
+function fresh(){clearTimeout(aiTimer);visualPulse=null;game={players:[newPlayer(),newPlayer()],turn:0,turnNo:0,seq:[],dice:[],required:1,log:[],winner:null,mode:$('mode').value,idSeed:1,lastSummary:'',lastEffect:'',lastAction:null};chosen=[];targetA='';targetB='';keepChoice='';effectChoice='';filter='all';lock=false;closeEnd();beginTurn()}
+function nameOf(p){return game.mode==='local'?`プレイヤー${p+1}`:(game.mode==='first'?(p===0?'あなた':'Bot'):(p===0?'Bot':'あなた'))}
+function bot(p){return game.mode!=='local'&&(game.mode==='first'?p===1:p===0)}
+function canHuman(){return game&&game.winner===null&&!bot(game.turn)&&!lock}
+function message(msg,major=false){game.log.unshift({msg,major});if(game.log.length>100)game.log.length=100}
+function beginTurn(){
+ if(game.winner!==null)return;
+ const p=game.players[game.turn],count=Math.max(2,Math.min(4,3+p.diceDelta));
+ p.diceDelta=0;game.required=p.extra?2:1;p.extra=false;
+ const rolled=[];game.dice=p.held?[{id:'held',s:p.held,held:true}]:[];
+ for(let i=game.dice.length;i<count;i++){const die={id:'n'+i,s:randomSymbol(),held:false};game.dice.push(die);rolled.push(die)}
+ // ☆は、保持を除いて「その手番に振ったダイス」のうち３個以上一致したときのみ選べる。
+ // 実体のダイスを１つ置き換える選択肢であり、追加の４個目／５個目のダイスではない。
+ if(count>=3&&rolled.length>=3){
+   const match=SYMBOLS.find(x=>rolled.filter(d=>d.s===x).length>=3);
+   if(match){const source=rolled.find(d=>d.s===match);game.dice.push({id:'star',s:'☆',virtual:true,source:source.id,base:match})}
+ }
+ chosen=[];targetA='';targetB='';keepChoice='';effectChoice='';render();scheduleBot();
+}
+function expectedPattern(seqAdd){const a=game.seq.concat(seqAdd);return a.length>=3?a.slice(-3).join(''):''}
+function selIndices(){return chosen.map(i=>game.dice.find(d=>d.id===i)).filter(Boolean)}
+function chosenSymbols(){return selIndices().map(d=>d.s)}
+function bestTargetIndex(own,type){if(!own.length)return -1;if(type==='buff1')return own.map((u,i)=>({i,v:u.hp/u.max*(u.attack+3)})).sort((a,b)=>b.v-a.v)[0].i;return 0}
+function outcomeOptions(base,arr){
+ const seq=base.seq.concat(arr.map(d=>d.s));
+ if(seq.length<3)return [{code:'',effect:'none',description:'効果判定前'}];
+ const raw=seq.slice(-3);
+ if(raw[2]==='☆')return [{code:'☆',effect:'dragon',description:'ドラゴンを１体召喚'}];
+ let codes=[''];
+ for(const sym of raw){codes=codes.flatMap(part=>(sym==='☆'?SYMBOLS:[sym]).map(x=>part+x))}
+ return [...new Set(codes)].map(code=>({code,effect:EFFECTS[code][0],description:EFFECTS[code][1]}));
+}
+function selectionOutcome(base,arr,code){const options=outcomeOptions(base,arr);return options.find(o=>o.code===code)||options[0]}
+function previewOptions(arr){
+ const raw=expectedPattern(arr.map(x=>x.s)),out=selectionOutcome(game,arr,effectChoice);
+ return {raw,code:out.code,effect:out.effect,description:raw?out.description:`あと${Math.max(0,3-game.seq.length-arr.length)}記号で発動`};
+}
+function availableTarget(){const e=previewOptions(selIndices()).effect,p=game.players[game.turn],enemy=game.players[1-game.turn];if(e==='buff1')return p.units.map((u,i)=>({v:String(i),text:`${i+1}. ${UNITS[u.type].name}　攻${u.attack} / HP${u.hp}`}));if(e==='hit9'||e==='hit6')return enemy.units.map((u,i)=>({v:String(i),text:`${i+1}. ${UNITS[u.type].name}　HP${u.hp}`}));if(e==='swap')return p.units.map((u,i)=>({v:String(i),text:`${i+1}. ${UNITS[u.type].name}　HP${u.hp} / 攻${u.attack}`}));return []}
+function getOptions(){let units=availableTarget();const a=units.length?Number(targetA===''?units[0].v:targetA):0;let b=units.length>1?Number(targetB===''?(a===0?'1':'0'):targetB):1;if(units.length>1&&b===a)b=(a+1)%units.length;return {a,b,keep:keepChoice,code:effectChoice}}
+function copyState(){return JSON.parse(JSON.stringify(game))}
+function dealFace(g,owner,damage,log){const defender=1-owner,target=g.players[defender],shield=target.units.findIndex(u=>u.type==='shield');if(shield>=0){const u=target.units[shield];const before=u.hp;u.hp-=damage;log.push(`${UNITS[u.type].name}がプレイヤーへの${damage}ダメージを防ぐ（HP ${Math.max(0,u.hp)}）`);if(u.hp<=0){target.units.splice(shield,1);log.push('盾兵が倒れた')}return {isShield:true,applied:Math.min(before,damage)}}target.hp=Math.max(0,target.hp-damage);log.push(`${owner===0?'先攻':'後攻'}の攻撃：相手プレイヤーに${damage}ダメージ（残りHP ${target.hp}）`);return {isShield:false,applied:damage}}
+function dealUnit(units,i,damage,log){if(i<0||i>=units.length){log.push('対象がいないため不発');return}let u=units[i];u.hp-=damage;log.push(`${UNITS[u.type].name}に${damage}ダメージ（残りHP ${Math.max(0,u.hp)}）`);if(u.hp<=0){log.push(`${UNITS[u.type].name}が倒れた`);units.splice(i,1)}}
+function effectApply(g,active,e,opt,remaining,log){const self=g.players[active],enemy=g.players[1-active];let u;
+ switch(e){
+ case 'none':log.push('効果なし');break;
+ case 'soldier':case 'shield':case 'archer':case 'dragon':self.units.push({id:g.idSeed++,type:e,attack:UNITS[e].attack,hp:UNITS[e].max,max:UNITS[e].max,born:g.turnNo});log.push(`${UNITS[e].name}を召喚（この手番は攻撃しない）`);break;
+ case 'buffAll':if(!self.units.length)log.push('味方がいないため強化は不発');else{self.units.forEach(u=>u.attack+=3);log.push(`味方${self.units.length}体の攻撃力が永続的に＋3`)}break;
+ case 'buff1':if(!self.units.length)log.push('味方がいないため強化は不発');else{const i=Math.min(self.units.length-1,Math.max(0,opt.a));u=self.units[i];u.attack+=3;log.push(`${i+1}番目の${UNITS[u.type].name}の攻撃力を永続的に＋3（攻${u.attack}）`)}break;
+ case 'healAll':{let n=0;self.units.forEach(u=>{const h=Math.min(3,u.max-u.hp);u.hp+=h;n+=h});log.push(n?`味方ユニットのHPを合計${n}回復`:'回復が必要な味方ユニットなし');break}
+ case 'face6':dealFace(g,active,6,log);break;
+ case 'healFace':{const h=Math.min(9,30-self.hp);self.hp+=h;log.push(h?`自分のHPを${h}回復（残り${self.hp}）`:'HP満タンのため回復なし');break}
+ case 'hit6':case 'hit9':dealUnit(enemy.units,Math.min(enemy.units.length-1,Math.max(0,opt.a)),e==='hit9'?9:6,log);break;
+ case 'swap':if(self.units.length<2){log.push('味方が２体未満のため位置交換は不発');break}let a=Math.min(self.units.length-1,Math.max(0,opt.a)),b=Math.min(self.units.length-1,Math.max(0,opt.b));if(a===b){b=(a+1)%self.units.length}let temp=self.units[a];self.units[a]=self.units[b];self.units[b]=temp;log.push(`味方${a+1}番と${b+1}番の位置を交換`);break;
+ case 'keep':{if(self.held){log.push('既にキープ中のため追加できない');break}let candidate=remaining.find(d=>d.id===opt.keep)||remaining[0];if(candidate){self.held=candidate.s;log.push(`ダイス ${candidate.s} をキープ（使用まで維持）`)}else log.push('残りのダイスがなくキープ不発');break}
+ case 'double':self.extra=true;log.push('次の自分の手番は２記号配置');break;
+ case 'dicePlus':self.diceDelta+=1;log.push('次の自分の手番は４ダイス');break;
+ case 'diceMinus':enemy.diceDelta-=1;log.push('相手の次の手番は２ダイス');break;
+ }
+}
+function simulate(base,chosenDice,opt){
+ const g=JSON.parse(JSON.stringify(base)),active=g.turn,logs=[];
+ const symbols=chosenDice.map(d=>d.s);
+ const spent=new Set(chosenDice.map(d=>d.virtual?d.source:d.id));
+ const remaining=g.dice.filter(d=>!d.virtual&&!spent.has(d.id));
+ if(chosenDice.some(d=>d.held))g.players[active].held=null;
+ g.seq.push(...symbols);
+ const pattern=g.seq.length>=3?g.seq.slice(-3).join(''):'';
+ const result=selectionOutcome(base,chosenDice,opt?.code);
+ const e=pattern?result.effect:'none';
+ if(pattern){logs.push(`記号 ${pattern}${result.code!=='☆'&&result.code!==pattern?'（'+result.code+'として判定）':''}：${result.description}`);effectApply(g,active,e,opt,remaining,logs)}
+ else logs.push(`${symbols.join(' → ')}を配置（３記号未満のため効果なし）`);
+
+ if(g.players[1-active].hp>0){const troops=g.players[active].units.slice();for(let u of troops){if(u.born===g.turnNo)continue;if(!g.players[active].units.some(v=>v.id===u.id))continue;if(g.players[1-active].hp<=0)break;const enemy=g.players[1-active];if(u.type!=='archer'&&enemy.units.length){logs.push(`${UNITS[u.type].name}（攻${u.attack}）が攻撃`);dealUnit(enemy.units,0,u.attack,logs)}else{logs.push(`${UNITS[u.type].name}（攻${u.attack}）が攻撃`);dealFace(g,active,u.attack,logs)}}}
+ if(g.players[0].hp<=0||g.players[1].hp<=0)g.winner=g.players[0].hp<=0?1:0;
+ g.turnNo++;g.turn=1-active;return {state:g,logs,pattern,effect:e,choiceCode:result.code,description:result.description};}
+function describeForecast(){const selected=selIndices(),p=game.players[game.turn];if(!selected.length)return {lines:[],title:'行動を選んでください',detail:'下の候補から配置と効果を選ぶと、自動攻撃までの結果を確認できます。'};
+ if(selected.length<game.required){const xs=chosenSymbols().join(' → ');return {lines:[],title:`選択中：${xs}`,detail:`２記号配置です。あと${game.required-selected.length}個のダイスを選ぶと最終効果を表示します。途中では効果を発動しません。`}}
+ const sim=simulate(game,selected,getOptions());return {lines:sim.logs,title:sim.pattern?`${sim.pattern} ｜ ${sim.description}`:'記号を配置（効果なし）',detail:sim.state.winner!==null?'この行動で決着します。':'「決定」までは盤面・ダイスは変化しません。',future:sim.state,code:sim.pattern,effect:sim.effect};}
+function resetTarget(){targetA='';targetB='';keepChoice='';effectChoice=''}
+function compatibleDice(a,b){return a&&b&&a.id!==b.id&&!(a.virtual&&a.source===b.id)&&!(b.virtual&&b.source===a.id)}
+function chooseDie(id){
+ if(!canHuman()||showingRules)return;
+ const die=game.dice.find(d=>d.id===id);if(!die)return;
+ let i=chosen.indexOf(id);
+ if(i>=0)chosen.splice(i,1);
+ else{
+  if(chosen.length>=game.required)return;
+  if(chosen.some(key=>!compatibleDice(game.dice.find(d=>d.id===key),die)))return;
+  chosen.push(id);
+ }
+ resetTarget();render();
+}
+// 表示用の差分。戦闘処理やBotの判断には一切使わない。
+function reportTurn(before,sim,dice){
+ const actor=before.turn,after=sim.state,own=after.players[actor],prevOwn=before.players[actor];
+ const changes=[],pulse=[{},{}],add=(label,kind='neutral')=>changes.push({label,kind});
+ const beforeUnits=before.players.map(p=>new Map(p.units.map(u=>[u.id,u])));
+ for(let p=0;p<2;p++){
+  const old=before.players[p],now=after.players[p],diff=now.hp-old.hp;
+  if(diff!==0){add(`${nameOf(p)} HP ${diff>0?'+':''}${diff}`,diff<0?'loss':'gain');pulse[p].hp=diff<0?'hit':'heal'}
+  const currentIds=new Set(now.units.map(u=>u.id)),oldMap=beforeUnits[p];
+  const defeated=old.units.filter(u=>!currentIds.has(u.id));
+  for(const u of defeated){add(`${UNITS[u.type].name}撃破`,'loss');pulse[p].hit=true}
+  for(const u of now.units){
+   const prior=oldMap.get(u.id);
+   if(!prior){pulse[p].spawn=(pulse[p].spawn||[]).concat(u.id);continue}
+   const loss=prior.hp-u.hp;
+   if(loss>0){add(`${UNITS[u.type].name} HP -${loss}`,'loss');(pulse[p].hitUnits??=[]).push(u.id)}
+   else if(loss<0){add(`${UNITS[u.type].name} HP +${-loss}`,'gain');(pulse[p].healUnits??=[]).push(u.id)}
+  }
+ }
+ if(sim.logs.some(line=>/不発|回復なし|回復が必要な味方ユニットなし|満タン/.test(line))){add('効果不発','neutral')}
+ const code=sim.choiceCode&&sim.choiceCode!==sim.pattern&&sim.choiceCode!=='☆'?` → ${sim.choiceCode}`:'';
+ return {lastAction:{who:nameOf(actor),symbols:dice.map(d=>d.s).join(' '),interpretation:code,effect:sim.pattern?shortEffect(sim.effect,sim.description):'記号を配置',changes},pulse};
+}
+function applyTurn(before,sim,dice,who){
+ const view=reportTurn(before,sim,dice);
+ game=sim.state;game.lastAction=view.lastAction;visualPulse=view.pulse;
+ message(`${who}：${dice.map(d=>d.s).join(' → ')} を配置`,true);
+ for(const line of sim.logs)message(line,line.includes('召喚')||line.includes('次の')||line.includes('倒れた'));
+ game.lastSummary=sim.logs.join(' / ');game.lastEffect=sim.pattern;
+ chosen=[];resetTarget();
+ if(game.winner!==null){render();showEnd()}else beginTurn();
+}
+function commit(){if(!canHuman()||chosen.length!==game.required||showingRules)return;const picked=selIndices(),sim=simulate(game,picked,getOptions());applyTurn(game,sim,picked,nameOf(game.turn))}
+function scoreBoard(g,p){const own=g.players[p],opp=g.players[1-p];const total=(player)=>player.hp*1.7+player.units.reduce((v,u)=>v+u.hp*.65+u.attack*1.6+(u.type==='shield'?5:0)+(u.type==='archer'?2:0)+(u.type==='dragon'?9:0),0)+(player.held?2.4:0)+player.diceDelta*2+(player.extra?7:0);return total(own)-total(opp)}
+function suggestedOpt(g,pick,choice){const out=selectionOutcome(g,pick,choice),e=out.effect,own=g.players[g.turn],enemy=g.players[1-g.turn];const opts={a:0,b:1,keep:'',code:out.code};if(e==='buff1'&&own.units.length)opts.a=own.units.map((u,i)=>({i,x:u.attack+u.hp*.25})).sort((a,b)=>b.x-a.x)[0].i;if((e==='hit6'||e==='hit9')&&enemy.units.length){const dmg=e==='hit6'?6:9;opts.a=enemy.units.map((u,i)=>({i,x:(u.hp<=dmg?8:0)+(u.type==='shield'?6:0)-u.hp*.2})).sort((a,b)=>b.x-a.x)[0].i}if(e==='keep'){const spent=new Set(pick.map(z=>z.virtual?z.source:z.id));const rest=g.dice.filter(d=>!d.virtual&&!spent.has(d.id));const last=g.seq.concat(pick.map(d=>d.s)).slice(-2);opts.keep=(rest.find(d=>last.length===2&&outcomeOptions({seq:last},[d]).some(o=>o.effect!=='none'))||rest[0]||{}).id||''}if(e==='swap'&&own.units.length>1){opts.a=0;opts.b=own.units.length-1}return opts}
+function pickAI(){
+ if(!game||game.winner!==null||!bot(game.turn)||showingRules)return;
+ const p=game.turn,ds=game.dice,need=game.required;
+ const combos=need===1?ds.map(d=>[d]):ds.flatMap(a=>ds.filter(b=>compatibleDice(a,b)).map(b=>[a,b]));
+ let best=null;
+ for(const c of combos)for(const choice of outcomeOptions(game,c)){
+  const opts=suggestedOpt(game,c,choice.code),sim=simulate(game,c,opts);
+  let val=scoreBoard(sim.state,p);if(sim.state.winner===p)val+=900;
+  const future=sim.state.seq.slice(-2);
+  if(future.length===2){
+   const risks=SYMBOLS.flatMap(x=>outcomeOptions({seq:future},[{s:x}]).map(o=>({'soldier':7,'shield':7,'archer':8,'dragon':15,'face6':9,'buffAll':6,'buff1':5,'hit9':7,'hit6':5,'double':8,'dicePlus':5,'diceMinus':4,'keep':3,'healFace':4,'healAll':2}[o.effect]||0)));
+   val-=Math.max(0,...risks)*.32;
+  }
+  val+=Math.random()*.3;
+  if(best===null||val>best.v)best={v:val,c,opts};
+ }
+
+ if(!best)return;const sim=simulate(game,best.c,best.opts);applyTurn(game,sim,best.c,nameOf(game.turn))}
+function scheduleBot(){clearTimeout(aiTimer);if(game.winner!==null||showingRules||!bot(game.turn))return;aiTimer=setTimeout(pickAI,630)}
+function renderPlayer(p,element){let player=game.players[p],fx=visualPulse?.[p]||{};element.classList.toggle('active',game.turn===p&&game.winner===null);element.classList.toggle('impact-hit',!!(fx.hp==='hit'||fx.hit));element.classList.toggle('impact-heal',fx.hp==='heal');const effects=[player.held?`キープ ${player.held}`:null,player.extra?'次の手番２記号配置':null,player.diceDelta>0?'次の手番４ダイス':null,player.diceDelta<0?'次の手番２ダイス':null].filter(Boolean);const who=`${nameOf(p)}`;let s=`<div class="combatant-head"><div><div class="identity"><strong>${safe(who)}</strong><span class="seat">${p===0?'先攻':'後攻'}</span>${bot(p)?'<span class="tag warn">BOT</span>':''}${game.turn===p&&game.winner===null?'<span class="tag">手番</span>':''}</div><div class="conditions">${effects.map(e=>`<span class="condition">${safe(e)}</span>`).join('')}</div></div><div class="vitals"><div class="hp-numbers"><span class="muted tiny">HP</span><b>${Math.max(0,player.hp)}</b><span class="muted tiny">/ 30</span></div><div class="hpbar"><span style="width:${Math.max(0,player.hp)/30*100}%"></span></div></div></div><div class="unit-strip">`;
+ if(!player.units.length)s+='<div class="empty-units">ユニットなし</div>';
+ player.units.forEach((u,i)=>{const st=UNITS[u.type],boost=u.attack-st.attack;s+=`<div class="unit-card ${fx.hitUnits?.includes(u.id)?'impact-hit':fx.healUnits?.includes(u.id)?'impact-heal':fx.spawn?.includes(u.id)?'impact-spawn':''}" data-type="${u.type}"><div class="unit-name"><span class="unit-emblem">${st.icon}</span>${st.name}</div><div class="statline">攻 <strong>${u.attack}</strong>${boost?` <span class="boost">(+${boost})</span>`:''}</div><div class="unit-hp"><span style="width:${100*u.hp/u.max}%"></span></div><div class="unit-footer">HP ${u.hp} / ${u.max}</div>${u.born===game.turnNo?'<span class="newborn">待機</span>':''}</div>`});s+='</div>';element.innerHTML=s}
+function renderSeq(){
+ // Only the last two symbols affect the next single placement. Keep full history in game.seq for rules/logs.
+ const display=game.seq.slice(-2),a=$('sequence');let html='';
+ if(!display.length)html='<span class="muted tiny">まだ記号がありません</span>';
+ else display.forEach(s=>{html+=`<span class="symbol-tile ${symClass(s)} recent">${s}</span>`});
+ if(chosen.length)html+=chosenSymbols().map(s=>`<span class="symbol-tile phantom ${symClass(s)}">${s}</span>`).join('');
+ a.innerHTML=html;$('turnNumber').textContent=`${game.turnNo+1}手目`;
+ const status=game.winner!==null?'対戦終了':`${nameOf(game.turn)}の番${game.required===2?' · 2記号':''}`;
+ $('turnStatus').textContent=status;
+ const latest=$('latestEvent'),last=game.lastAction;
+ if(!last){latest.innerHTML='';return}
+ const all=last.changes||[],max=4;
+ const chips=all.slice(0,max).map(x=>`<span class="result-chip ${x.kind}">${safe(x.label)}</span>`).join('');
+ latest.innerHTML=`<div class="last-action-head"><span class="last-action-who">${safe(last.who)}</span><span class="last-action-symbols">${symsText(last.symbols.replaceAll(' ',''))}</span><span class="last-action-effect">${safe(last.effect)}</span></div>${chips?`<div class="last-action-changes">${chips}${all.length>max?`<span class="result-chip">ほか${all.length-max}件</span>`:''}</div>`:''}`;
+ latest.title='直前の行動結果';
+}
+function renderForecast(){const container=$('previewContent'),panel=$('selectedActionPanel');
+ panel.hidden=game.winner!==null||bot(game.turn)||chosen.length!==game.required;
+ if(panel.hidden){container.innerHTML='';return}
+ let f=describeForecast(),html=`<div class="effect-title">${safe(f.title)}</div>`;
+ if(chosen.length===game.required){
+  const e=f.effect,opts=availableTarget(),p=game.players[game.turn];if(opts.length&&['buff1','hit6','hit9'].includes(e)){const caption=e==='buff1'?'強化する味方を選択':'攻撃する敵を選択';html+=`<label class="select-label" for="targetA">${caption}</label><select class="target-select" id="targetA">${opts.map(o=>`<option value="${o.v}" ${String(targetA||opts[0].v)===o.v?'selected':''}>${safe(o.text)}</option>`).join('')}</select>`}
+ if(e==='swap'&&opts.length>1){html+=`<label class="select-label" for="targetA">交換する１体目</label><select class="target-select" id="targetA">${opts.map(o=>`<option value="${o.v}" ${String(targetA||opts[0].v)===o.v?'selected':''}>${safe(o.text)}</option>`).join('')}</select><label class="select-label" for="targetB">交換する２体目</label><select class="target-select" id="targetB">${opts.map(o=>`<option value="${o.v}" ${String(getOptions().b)===o.v?'selected':''}>${safe(o.text)}</option>`).join('')}</select>`}
+ if(e==='keep'&&!p.held || e==='keep'&&selIndices().some(d=>d.held)){const unused=game.dice.filter(d=>!chosen.includes(d.id));if(unused.length)html+=`<label class="select-label" for="keepPick">キープする残りダイス</label><select class="target-select" id="keepPick">${unused.map((x,i)=>`<option value="${x.id}" ${keepChoice===x.id?'selected':''}>${x.s} ${x.held?'（保持中）':'（未使用）'}</option>`).join('')}</select>`}
+ if(f.lines.length){html+=`<div class="note"><ul>${f.lines.slice(0,3).map(s=>`<li>${safe(s)}</li>`).join('')}</ul></div>`}}
+ container.innerHTML=html;for(let [id,fn] of [['targetA',v=>targetA=v],['targetB',v=>targetB=v],['keepPick',v=>keepChoice=v]]){const el=$(id);if(el)el.onchange=e=>{fn(e.target.value);if(id==='targetA'&&targetB===targetA)targetB='';renderForecast()}}
+}
+// Build one action for each genuinely different playable sequence and effect.
+// Repeated physical dice with the same face are merged; using a held die stays a distinct choice.
+function availableActions(){
+ const ds=game.dice,needs=game.required;
+ const combos=needs===1?ds.map(d=>[d]):ds.flatMap(a=>ds.filter(b=>compatibleDice(a,b)).map(b=>[a,b]));
+ const actions=[],seen=new Set();
+ for(const dice of combos){
+  for(const result of outcomeOptions(game,dice)){
+   const symbols=dice.map(d=>d.s).join('');
+   const usesHeld=dice.some(d=>d.held);
+   const key=`${symbols}|${result.effect}|${usesHeld?'held':'normal'}`;
+   if(seen.has(key))continue;
+   seen.add(key);
+   actions.push({ids:dice.map(d=>d.id),symbols,usesHeld,code:result.code,effect:result.effect,description:result.description,
+     raw:game.seq.concat(dice.map(d=>d.s)).slice(-3).join('')});
+  }
+ }
+ return actions;
+}
+function chooseAction(index){
+ if(!canHuman()||showingRules)return;
+ const action=availableActions()[index];if(!action)return;
+ resetTarget();chosen=[...action.ids];effectChoice=action.code;render();
+}
+function shortEffect(e,desc){const names={none:'効果なし',soldier:'兵士を召喚',shield:'盾兵を召喚',archer:'弓兵を召喚',dragon:'ドラゴン召喚',buffAll:'味方全体 攻撃+3',buff1:'味方1体 攻撃+3',face6:'相手に6ダメージ',healFace:'自分HP+9',healAll:'味方全体 HP+3',keep:'ダイスをキープ',swap:'味方の配置を交換',double:'次回2記号配置',dicePlus:'次回4ダイス',diceMinus:'相手を2ダイス',hit9:'敵1体に9ダメージ',hit6:'敵1体に6ダメージ'};return names[e]||desc;}
+function unavailableEffect(action){
+ const own=game.players[game.turn],enemy=game.players[1-game.turn],e=action.effect;
+ if(['hit9','hit6'].includes(e)&&!enemy.units.length)return '対象なし';
+ if(['buffAll','buff1'].includes(e)&&!own.units.length)return '対象なし';
+ if(e==='swap'&&own.units.length<2)return '交換対象なし';
+ if(e==='healAll'&&!own.units.some(u=>u.hp<u.max))return '回復対象なし';
+ if(e==='healFace'&&own.hp>=30)return 'HP満タン';
+ if(e==='keep'&&own.held&&!action.usesHeld)return 'キープ中';
+ return '';
+}
+function renderDice(){
+ const d=$('diceList'),human=canHuman();
+ $('diceTitle').textContent=game.winner!==null?'対戦終了':human?'行動を選ぶ':'相手の手番';
+ $('diceMeta').textContent=game.winner!==null?'':`${game.required===2?'2記号': '1記号'}${game.dice.some(d=>d.virtual)?' · ☆':''}`;
+ if(game.winner!==null){d.innerHTML='<div class="muted">新しい対戦を開始できます。</div>';$('controlHint').textContent='';$('confirmButton').disabled=true;$('confirmButton').textContent='対戦終了';return}
+ if(!human){d.innerHTML='<div class="muted">Botが行動を選んでいます…</div>';$('confirmButton').disabled=true;$('confirmButton').textContent='相手の番';$('controlHint').textContent='';return}
+ const actions=availableActions(),selectedKey=chosen.join('|')+'|'+effectChoice;
+ d.innerHTML=actions.map((action,i)=>{
+  const selected=selectedKey===action.ids.join('|')+'|'+action.code;
+  const displayed=action.raw||action.symbols;
+  const interpretation=action.code&&action.code!=='☆'&&action.code!==action.raw?`<span class="arrow">→</span>${symsText(action.code)}`:'';
+  const note=[action.usesHeld?'キープ使用':null].filter(Boolean).join(' · ');
+  const label=action.raw.length<3?'記号を配置':shortEffect(action.effect,action.description);
+  const inert=unavailableEffect(action);
+  return `<button type="button" class="action-card ${selected?'selected':''} ${inert?'no-target':''}" data-action="${i}" aria-pressed="${selected}" aria-label="${safe(displayed)}、${safe(label)}${inert?'、'+inert:''}"><span class="action-effect">${safe(label)}</span><span class="action-pattern">${symsText(displayed)}${interpretation}</span>${inert?`<span class="action-unavailable">${safe(inert)}（配置は可能）</span>`:note?`<span class="action-note">${safe(note)}</span>`:''}</button>`;
+ }).join('');
+ d.querySelectorAll('button[data-action]').forEach(x=>x.onclick=()=>chooseAction(Number(x.dataset.action)));
+ const can=chosen.length===game.required;
+ $('confirmButton').disabled=!can;
+ $('confirmButton').textContent=can?'決定':'行動を選択';
+ $('controlHint').textContent='';
+}
+function renderLog(){$('eventLog').innerHTML=game.log.slice(0,46).map(x=>`<div class="event ${x.major?'major':''}">${safe(x.msg)}</div>`).join('')||'<div class="muted tiny">対戦を開始しました。</div>'}
+function render(){if(!game)return;const bottom=game.mode==='second'?1:0;renderPlayer(1-bottom,$('enemyPanel'));renderPlayer(bottom,$('selfPanel'));renderSeq();renderForecast();renderDice();renderLog();visualPulse=null;}
+function renderRules(){let r=Object.entries(EFFECTS).filter(([code,e])=>filter==='all'||code.endsWith(filter));let last=game.seq.slice(-2).join('');$('ruleRows').innerHTML=r.map(([code,e])=>`<tr class="${e[0]==='none'?'disabled':''} ${last.length===2&&code.startsWith(last)?'relevant':''}"><td>${symsText(code)}</td><td>${safe(e[1])}</td></tr>`).join('');$('ruleFilters').innerHTML=[['all','すべて'],['○','○で終わる'],['△','△で終わる'],['×','×で終わる']].map(([v,l])=>`<button class="filter ${filter===v?'active':''}" data-filter="${v}" type="button">${l}</button>`).join('');$('ruleFilters').querySelectorAll('button').forEach(x=>x.onclick=()=>{filter=x.dataset.filter;renderRules()});$('rulesHint').textContent=last.length===2?`現在の末尾：${last}　（☆は自由に○△×へ置換）`:'直近3記号で発動'}
+function openRules(){clearTimeout(aiTimer);showingRules=true;renderRules();$('rulesModal').classList.add('open');$('rulesModal').setAttribute('aria-hidden','false');$('closeRules').focus()}
+function closeRules(){showingRules=false;$('rulesModal').classList.remove('open');$('rulesModal').setAttribute('aria-hidden','true');scheduleBot()}
+function showEnd(){clearTimeout(aiTimer);$('endTitle').textContent=`${nameOf(game.winner)}の勝利`;$('endDetails').textContent=`${game.turnNo}手で決着`;$('endModal').classList.add('open');$('endModal').setAttribute('aria-hidden','false')}
+function closeEnd(){$('endModal').classList.remove('open');$('endModal').setAttribute('aria-hidden','true')}
+$('rulesButton').onclick=openRules;$('closeRules').onclick=closeRules;$('rulesModal').onclick=e=>{if(e.target===$('rulesModal'))closeRules()};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&showingRules)closeRules()});$('confirmButton').onclick=commit;$('restartButton').onclick=fresh;$('endRestart').onclick=fresh;$('mode').onchange=fresh;
+// Debug hooks exposed read-only for the in-browser smoke tests.
+window.__gameDebug={actions:()=>availableActions().map(x=>({...x})),selectAction:(i)=>chooseAction(i),get:()=>JSON.parse(JSON.stringify(game)),getSelection:()=>[...chosen],effects:()=>JSON.parse(JSON.stringify(EFFECTS)),outcomes:(symbols)=>outcomeOptions(game,symbols.map(s=>({s}))),setState:(state)=>{game=JSON.parse(JSON.stringify(state));chosen=[];resetTarget();render()},chooseEffect:(code)=>{effectChoice=code;renderForecast()}};
+fresh();
+</script>
+</body>
+</html>
