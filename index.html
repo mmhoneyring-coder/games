@@ -120,16 +120,41 @@ h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.04em;line-height:1.2;margin:0
 .mystery-dots{position:absolute;right:12%;bottom:13%;display:flex;gap:5px;transform:rotate(-8deg)}
 .mystery-dots i{display:block;width:8px;height:8px;border-radius:50%;background:#91c6ba;border:1px solid #bdded4;box-shadow:0 0 8px #a9e6d86b}
 
+
+/* 記号召喚：既存の左サムネイル・右説明のレイアウトを踏襲 */
+.preview--symbol{background:radial-gradient(ellipse at 48% 40%,#345960 0%,#172e37 65%,#101e29 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.symbol-display{display:flex;align-items:center;justify-content:center;gap:8px;transform:rotate(-5deg)}
+.symbol-display span{display:grid;place-items:center;background:#29434a;border:1px solid #759092;border-radius:9px;width:clamp(30px,3vw,42px);height:clamp(37px,4vw,52px);font-size:clamp(23px,2.7vw,34px);font-weight:800;box-shadow:0 4px 8px #0004}
+.symbol-display span:nth-child(1){color:#a7e2dc}
+.symbol-display span:nth-child(2){color:#f2c985;transform:translateY(-7px)}
+.symbol-display span:nth-child(3){color:#edaaa2}
+.symbol-display span:nth-child(4){color:#ffd488;background:#5c4b37;transform:translateY(-9px);border-color:#c0a36c}
+.symbol-hint{font:700 9px/1 system-ui;letter-spacing:.18em;color:#b4c6bf}
+@media(max-width:440px){.symbol-display{gap:3px}.symbol-display span{width:26px;height:35px;font-size:21px;border-radius:6px}.symbol-hint{font-size:7px;letter-spacing:.1em}}
+
 </style>
 </head>
 <body>
 <main>
   <header>
-    <p class="eyebrow">BROWSER GAMES · 10 TITLES</p>
+    <p class="eyebrow">BROWSER GAMES · 11 TITLES</p>
     <h1>ゲーム一覧</h1>
     <p class="intro">気になるゲームを選ぶと、そのままブラウザで遊べます。</p>
   </header>
   <section class="games" aria-label="ゲーム一覧">
+<a class="game" href="./symbol-summon/">
+  <div class="preview preview--symbol" aria-hidden="true">
+    <div class="symbol-display"><span>○</span><span>△</span><span>×</span><span>☆</span></div>
+    <div class="symbol-hint">SYMBOL SUMMON</div>
+  </div>
+  <div class="info">
+    <div class="meta"><span class="tag">対戦・戦略</span><span class="tag status">ダイス版</span></div>
+    <h2 class="game-title">記号召喚</h2>
+    <p class="game-desc">○△×をつなげて兵士・盾兵・弓兵を召喚。直近3記号の組み合わせで戦う対戦ゲーム。☆からはドラゴンも登場。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
+</a>
+
 <a class="game" href="./suiri-roguelite/">
   <div class="preview preview--mystery" aria-hidden="true">
     <div class="mystery-grid"></div>
