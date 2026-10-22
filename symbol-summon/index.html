@@ -13,6 +13,20 @@
 @media(max-width:770px){.board{display:block}.main{gap:6px}}
 @media(max-width:570px){.wrap{padding:7px 7px 14px}.head{display:flex;align-items:center;flex-direction:row;gap:6px;flex-wrap:nowrap}.head h1{font-size:17px;white-space:nowrap}.head .right{flex-wrap:nowrap;gap:4px}.head .right button{padding:5px 6px;font-size:11px;white-space:nowrap}.panel{padding:7px 8px}.army{padding:7px 8px 5px}.fighter h2{font-size:13px}.units{padding-top:5px}.unit{flex-basis:115px}.sequence-dice{gap:8px}.symbol.big{min-width:34px;height:39px;font-size:23px}.seq{gap:3px}.die{flex-basis:40px;min-width:40px;min-height:40px;font-size:23px}.option{min-height:40px}.option .pattern{font-size:13px}.outcome{font-size:11px}.control-panel{padding:7px 8px}}
 @media(max-width:360px){.head .right .small{display:none}.sequence-dice{gap:5px}.symbol.big{min-width:31px;height:37px;font-size:22px}.die{flex-basis:38px;min-width:38px;min-height:39px}}
+/* ユニットの固有能力は一覧で常時表示し、タップで詳細表示 */
+.unit.unit-detail{display:block;text-align:left;font:inherit;color:var(--ink);cursor:pointer;white-space:normal;line-height:1.3}
+.unit.unit-detail:hover{border-color:var(--gold)}
+.unit.unit-detail:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.unit .unit-title{display:block;font-size:11px;font-weight:850;line-height:1.3}
+.unit .unit-special{display:block;margin-top:4px;font-size:10px;line-height:1.3;color:var(--gold);font-weight:700;white-space:normal}
+.unit .unit-special.sealed{color:#e8aca3}
+.unit .tags{margin-top:3px}
+.unit-dialog{width:min(440px,100%)}
+.unit-dialog .unit-detail-stats{font-size:12px;color:var(--muted);margin:3px 0 10px}
+.unit-detail-ability{border-top:1px solid var(--line);padding:10px 0}
+.unit-detail-ability strong{color:var(--gold);font-size:14px}
+.unit-detail-ability p{margin:4px 0 0;line-height:1.6;font-size:13px;color:var(--ink)}
+.unit-detail-note{font-size:12px;color:var(--muted)}
 </style></head>
 <body><div class="wrap"><header class="head"><h1>記号召喚</h1><div class="right"><span class="sub small" id="modeLabel"></span><button id="helpBtn" type="button">効果表</button><button id="homeBtn" type="button">タイトル</button></div></header><div class="board"><main class="main">
 <section class="panel army" id="foeArmy"><div class="fighter" id="foeFighter"><div class="player-name"><span class="flag" id="foeFlag">待機</span><h2 id="foeName">プレイヤー2</h2></div><div class="hp-wrap"><div class="hp-label"><span>HP</span><strong id="foeHP">40 / 40</strong></div><div class="hp"><i id="foeBar"></i></div></div></div><div class="units" id="foeUnits"></div></section>
@@ -21,6 +35,7 @@
 <details class="log-disclosure"><summary>行動履歴</summary><div class="log" id="log"></div></details>
 </main></div></div>
 <div class="rules-modal" id="rulesModal" hidden><div class="rules-dialog"><div class="rule-head"><strong>ルール・効果表</strong><button id="closeRulesBtn" type="button">閉じる</button></div><div id="rulesText"></div><div class="rule-table" id="ruleTable"></div></div></div>
+<div class="rules-modal" id="unitModal" hidden role="dialog" aria-modal="true" aria-label="ユニットの能力詳細"><div class="rules-dialog unit-dialog"><div class="rule-head"><strong id="unitModalTitle">ユニットの詳細</strong><button type="button" id="closeUnitBtn">閉じる</button></div><div id="unitInfo"></div></div></div>
 <section class="screen" id="startScreen"><div class="start-card"><div class="emblem">○ × △ □ ☆</div><h2>記号召喚</h2><p>3つのダイスから記号を選び、並びを完成させて<br>ユニットを召喚する対戦ゲーム</p><button type="button" id="twoPlayer" class="mode-btn"><span class="glyph">♟</span><span><strong>2人対戦</strong><small>この端末で2人が交互に操作</small></span></button><button type="button" id="cpuGame" class="mode-btn"><span class="glyph">◆</span><span><strong>CPU戦</strong><small>コンピューターと対戦</small></span></button><div class="sidechoice"><label><input name="mySide" type="radio" value="0" checked> CPU戦：先攻で遊ぶ</label><label><input name="mySide" type="radio" value="1"> 後攻で遊ぶ</label></div><p class="note">各手番で1記号ずつ配置。3記号が揃うと効果を発動します。</p></div></section>
 <section class="screen end" id="endScreen" hidden><div class="start-card"><div class="emblem">☆</div><h2 id="endTitle"></h2><p id="endDetail"></p><div class="buttons"><button type="button" class="primary" id="againBtn">もう一度遊ぶ</button><button type="button" id="toStartBtn">タイトルへ</button></div></div></section>
 <script>
@@ -47,7 +62,7 @@ const $=id=>document.getElementById(id);const randint=n=>Math.floor(Math.random(
 let g=null,picked=[],chosenCode='',chosenTarget='',secondTarget='',keepTarget='',rerollMarked=new Set(),cpuTimer=null,pausedRules=false;
 function pl(i){return g.players[i]}
 function sideName(i){return g.mode==='cpu'?(i===g.human?'あなた':'CPU'):`プレイヤー${i+1}`}
-function play(mode){clearTimeout(cpuTimer);g={mode,human:mode==='cpu'?Number(document.querySelector('input[name=mySide]:checked').value):0,players:[0,1].map(()=>({hp:40,units:[],held:null,delta:0,extra:false,reroll:false,wild:false})),seq:[],turn:0,step:0,round:0,uid:0,winner:null,logs:[],last:'',dice:[],need:1,rolled:[],lastCode:'',rerolls:0};$('startScreen').hidden=true;$('endScreen').hidden=true;begin()}
+function play(mode){clearTimeout(cpuTimer);g={mode,human:mode==='cpu'?Number(document.querySelector('input[name=mySide]:checked').value):0,players:[0,1].map(()=>({hp:40,units:[],held:null,delta:0,extra:false,reroll:false,wild:false})),seq:[],turn:0,step:0,round:0,uid:0,winner:null,logs:[],last:'',dice:[],need:1,rolled:[],lastCode:'',rerolls:0};$('startScreen').hidden=true;$('endScreen').hidden=true;$('unitModal').hidden=true;begin()}
 function note(s){g.logs.unshift(s);g.logs=g.logs.slice(0,70)}
 function active(){return g&&g.winner===null&&!(g.mode==='cpu'&&g.turn!==g.human)}
 function current(){return pl(g.turn)}
@@ -66,6 +81,42 @@ if(name==='ユニット攻撃'||name==='攻撃デバフ'||name==='バインド')
 else if(name==='ユニット回復'||name==='攻撃バフ'){if(lv===2){team=own;desc='味方ユニット'}}
 }else if(cat==='o'){if(name==='レベルアップ'&&lv===2){team=own;filtered=u=>u.type!=='ドラゴン'&&u.lv<3;desc='レベルアップ対象'}else if(name==='浄化'){team=own;desc='浄化対象'}else if(name==='敵位置変更'){team=enemy;twice=true;desc='位置を交換する敵'}}
 if(!team)return null;return {items:team.map((u,i)=>({i,u})).filter(x=>!filtered||filtered(x.u)),twice,desc}}
+function unitSkills(u,side){
+ const soldierCount=g.players[side].units.filter(x=>x.type==='兵士').length;
+ if(u.type==='兵士'){
+   if(u.lv===2)return [{short:soldierCount>=2?'連帯 攻+2':'連帯（条件未達）',name:'連帯',description:'ほかに味方兵士が1体以上いれば、自身の攻撃力が2増加します。'}];
+   if(u.lv===3)return [{short:`集団戦 攻+${soldierCount}`,name:'集団戦',description:`味方兵士の人数（自身を含む）だけ、自身の攻撃力が増加します。現在の味方兵士：${soldierCount}体。Lv2の連帯とは重複しません。`}];
+ }
+ if(u.type==='盾兵'){
+   const a=[];
+   if(u.lv>=2)a.push({short:'かばう',name:'かばう',description:'味方プレイヤーへの直接攻撃を肩代わりして受けます。能力封印中は発動しません。'});
+   if(u.lv>=3)a.push({short:'頑丈付与',name:'頑丈付与',description:'召喚またはLv3への昇格時、直前（左隣）の味方ユニットに一度だけ頑丈を付与します。頑丈は致命ダメージを1回だけ耐えてHP1で残る効果です。'});
+   return a;
+ }
+ if(u.type==='弓兵'){
+   const a=[];
+   if(u.lv>=2)a.push({short:'狙撃',name:'狙撃',description:'ユニットではなく敵プレイヤーを直接攻撃します。盾兵の「かばう」が有効な場合はその盾兵が攻撃を受けます。'});
+   if(u.lv>=3)a.push({short:'全体2',name:'斉射',description:'狙撃と同時に、敵ユニット全体へ2ダメージを与えます。'});
+   return a;
+ }
+ if(u.type==='騎兵'){
+   const a=[];
+   if(u.lv>=2)a.push({short:'HP最少狙い',name:'弱点狙い',description:'敵ユニットのうち現在HPが最も少ない1体を攻撃します。同値なら左側を優先します。'});
+   if(u.lv>=3)a.push({short:'追撃',name:'追撃',description:'通常攻撃で敵ユニットを倒したとき、追加で1回だけ攻撃します。連続追撃はできません。'});
+   return a;
+ }
+ if(u.type==='ドラゴン')return [{short:'召喚時 全体4',name:'召喚時攻撃',description:'召喚したときに敵ユニット全体へ4ダメージを与えます。召喚した手番には通常攻撃しません。'}];
+ return [];
+}
+function unitSkillBrief(u,side){const skills=unitSkills(u,side);return skills.map(x=>x.short).join(' / ')}
+function showUnitDetails(side,id){
+ if(!g)return;const unit=g.players[side].units.find(x=>x.id===id);if(!unit)return;
+ const skills=unitSkills(unit,side);
+ $('unitModalTitle').textContent=`${unit.type}${unit.lv?' Lv'+unit.lv:''}`;
+ const status=[unit.sturdy?'頑丈':null,unit.bound?'バインド':null,unit.mute?'能力封印中':null,unit.debuff?'攻撃低下':null].filter(Boolean).join(' / ');
+ $('unitInfo').innerHTML=`<div class="unit-detail-stats">攻撃 ${unit.atk} ・ HP ${unit.hp} / ${unit.max}${status?' ・ '+esc(status):''}</div>${skills.length?skills.map(x=>`<div class="unit-detail-ability"><strong>${esc(x.name)}</strong><p>${esc(x.description)}</p></div>`).join(''):'<p class="unit-detail-note">このレベルには特殊能力がありません。通常攻撃を行います。</p>'}${unit.mute?'<p class="unit-detail-note">現在は能力封印中です。</p>':''}`;
+ $('unitModal').hidden=false;
+}
 function labelUnit(u){return `${u.type}${u.lv?' Lv'+u.lv:''}（HP${u.hp} / 攻${u.atk}）`}
 function targetIndex(e,arr,turn,sel){const t=targets(e,turn,{players:arr});if(!t||!t.items.length)return -1;if(t.items.some(x=>String(x.i)===String(sel)))return Number(sel);return t.items[0].i}
 function addUnit(state,side,name,lv,log){const [atk,hp]=STATS[name][name==='ドラゴン'?0:lv-1];const u={id:++state.uid,type:name,lv,hp,max:hp,atk,born:state.step,sturdy:false,bound:0,mute:0,debuff:0};state.players[side].units.push(u);if(name==='盾兵'&&lv===3)grantSturdy(state.players[side].units,u,log);if(name==='ドラゴン'){const arr=state.players[1-side].units;for(let i=arr.length-1;i>=0;i--)damageUnit(arr,i,4,log);log.push('ドラゴン召喚時：敵ユニット全体に4ダメージ')}log.push(`${name}${lv?' Lv'+lv:''}召喚（攻${atk} / HP${hp}）`)}
@@ -104,7 +155,7 @@ function execute(state,side,drawn,out,sel,sourceDice){const log=[];const spent=n
 function controlsFor(out,drawn){const t=targets(out.eff);const spent=new Set(drawn.map(x=>x.virtual?x.source:x.id));const remains=g.dice.filter(x=>!x.virtual&&!spent.has(x.id));const isKeep=out.eff[1]==='ダイスキープ';let html='';if(t){const opt=t.items.map(({i,u})=>`<option value="${i}">${i+1}. ${esc(labelUnit(u))}</option>`).join('');html+=`<div class="target-control"><label>${esc(t.desc)}</label><select id="targetA">${opt}</select>${t.twice?`<label>交換先</label><select id="targetB">${opt}</select>`:''}</div>`}if(isKeep){html+=`<div class="target-control"><label>キープするダイス</label><select id="targetKeep">${remains.map(x=>`<option value="${x.id}">${esc(x.s)}</option>`).join('')}</select></div>`}return html}
 function getSelection(){const out=chosenOutcome();if(!out)return null;const t=targets(out.eff);const a=t&&t.items.length?(t.items.some(x=>String(x.i)===chosenTarget)?Number(chosenTarget):t.items[0].i):-1;let b=-1;if(t&&t.twice){b=t.items.some(x=>String(x.i)===secondTarget)?Number(secondTarget):(t.items.length>1?t.items[1].i:-1);if(b===a&&t.items.length>1)b=t.items.find(x=>x.i!==a).i}return {a,b,keep:keepTarget,code:out.code}}
 function refreshOutcome(){const o=chosenOutcome();if(!o){$('outcome').textContent='記号を選んでください';return}$('outcome').textContent=`${o.raw} ${o.code&&o.code!==o.raw?'→ '+o.code+' と解釈':''}：${showLabel(o.eff)} ／ ${explain(o.eff)}`}
-function render(){if(!g)return;const my=g.human,enemy=1-my;const display=g.mode==='cpu'?my:0,foe=1-display;for(const [pref,side] of [['own',display],['foe',foe]]){const p=pl(side);$(pref+'Name').textContent=sideName(side);$(pref+'Flag').textContent=side===g.turn?'行動中':'待機';$(pref+'HP').textContent=`${p.hp} / 40`;$(pref+'Bar').style.width=`${Math.max(0,100*p.hp/40)}%`;$(pref+'Fighter').classList.toggle('isTurn',side===g.turn);$(pref+'Units').innerHTML=p.units.length?p.units.map((u,i)=>`<article class="unit"><div class="index">${i+1}</div><label>${esc(u.type)}${u.lv?' Lv'+u.lv:''}</label><div class="line"><span>攻 <b>${u.atk}</b></span><span>HP <b>${u.hp}/${u.max}</b></span></div><div class="tags">${u.sturdy?'<span class="tag">頑丈</span>':''}${u.bound?'<span class="tag">バインド</span>':''}${u.mute?'<span class="tag">能力封印</span>':''}${u.debuff?'<span class="tag">攻撃低下</span>':''}</div></article>`).join(''):'<div class="units-empty">ユニットなし</div>'}
+function render(){if(!g)return;const my=g.human,enemy=1-my;const display=g.mode==='cpu'?my:0,foe=1-display;for(const [pref,side] of [['own',display],['foe',foe]]){const p=pl(side);$(pref+'Name').textContent=sideName(side);$(pref+'Flag').textContent=side===g.turn?'行動中':'待機';$(pref+'HP').textContent=`${p.hp} / 40`;$(pref+'Bar').style.width=`${Math.max(0,100*p.hp/40)}%`;$(pref+'Fighter').classList.toggle('isTurn',side===g.turn);$(pref+'Units').innerHTML=p.units.length?p.units.map((u,i)=>`<button type="button" class="unit unit-detail" data-unit-side="${side}" data-unit-id="${u.id}" aria-label="${esc(u.type)} Lv${u.lv||0}、攻撃${u.atk}、HP${u.hp}。詳細を見る"><span class="index">${i+1}</span><span class="unit-title">${esc(u.type)}${u.lv?' Lv'+u.lv:''}</span><span class="line"><span>攻 <b>${u.atk}</b></span><span>HP <b>${u.hp}/${u.max}</b></span></span>${unitSkillBrief(u,side)?`<span class="unit-special ${u.mute?'sealed':''}">${esc(unitSkillBrief(u,side))}${u.mute?' [封印中]':''}</span>`:''}<span class="tags">${u.sturdy?'<span class="tag">頑丈</span>':''}${u.bound?'<span class="tag">バインド</span>':''}${u.mute?'<span class="tag">能力封印</span>':''}${u.debuff?'<span class="tag">攻撃低下</span>':''}</span></button>`).join(''):'<div class="units-empty">ユニットなし</div>'}
 $('modeLabel').textContent=g.mode==='cpu'?'CPU戦':'2人対戦';$('seq').innerHTML=Array.from({length:3},(_,i)=>{const t=g.seq.slice(-3);const s=t[i]||'·';return `<span class="symbol big ${s==='·'?'empty':''}" data-sym="${s}">${s}</span>`}).join('');$('turnStatus').textContent=`${sideName(g.turn)}の番 · ${g.step+1}手番目${g.need===2?'（2記号配置）':''}`;$('lastEffect').textContent=g.last?'直前：'+g.last:'';
 const yours=active();$('dice').innerHTML=g.dice.map(d=>{const chk=picked.includes(d.id),spent=selected().some(x=>(x.virtual?x.source:x.id)===(d.virtual?d.source:d.id));return `<button type="button" class="die ${chk?'checked':''} ${d.virtual?'star':''}" data-die="${d.id}" ${!yours||(!chk&&(picked.length>=g.need||spent))?'disabled':''}><span class="symbol" data-sym="${d.s}">${d.s}</span><small>${d.held?'キープ':d.virtual?'特殊記号':chk?String(picked.indexOf(d.id)+1)+'個目':''}</small></button>`}).join('');document.querySelectorAll('[data-die]').forEach(b=>b.onclick=()=>choose(b.dataset.die));$('diceHelp').textContent=g.mode==='cpu'&&!yours?'CPUの手番':g.need===2?'2記号を順に選択':'';
 $('diceUtility').innerHTML=g.rerolls&&yours?`<span class="small">振り直す新規ダイスを選択（キープ不可）</span>${g.dice.filter(x=>!x.virtual&&!x.held).map(x=>`<label class="small"><input type="checkbox" data-reroll="${x.id}" ${rerollMarked.has(x.id)?'checked':''}> ${x.s}</label>`).join('')}<button id="doReroll">選択したダイスを振り直す</button>`:'';document.querySelectorAll('[data-reroll]').forEach(c=>c.onchange=()=>{c.checked?rerollMarked.add(c.dataset.reroll):rerollMarked.delete(c.dataset.reroll)});if($('doReroll'))$('doReroll').onclick=()=>{if(!active()||!g.rerolls)return;for(const id of rerollMarked){const d=g.dice.find(x=>x.id===id);if(d&&!d.held&&!d.virtual)d.s=rollFace()}g.rerolls=0;picked=[];chosenCode='';rerollMarked.clear();updateStar();render()};
@@ -120,6 +171,10 @@ for(const sel of sels){const tmp=deep(g),log=execute(tmp,side,draw,out,sel,g.dic
 return best}
 function cpuMove(){if(!g||g.winner!==null||g.mode!=='cpu'||g.turn===g.human)return;const p=current();if(g.rerolls){const baseline=cpuPick();const newly=g.dice.filter(x=>!x.virtual&&!x.held);const before=deep(g.dice);for(const d of newly)d.s=rollFace();updateStar();const after=cpuPick();if(after&&baseline&&after.v<baseline.v){g.dice=before;updateStar()}g.rerolls=0}const pick=cpuPick();if(!pick){note('CPUの行動候補がありません');return}const drawn=pick.draw.map(x=>g.dice.find(d=>d.id===x.id)).filter(Boolean);const log=execute(g,g.turn,drawn,pick.out,pick.sel,g.dice);for(let i=log.length-1;i>=0;i--)note(log[i]);if(g.winner!==null){render();showEnd()}else begin()}
 function renderRules(){const summary=`<p>各ターン、6面ダイス（○○××△□）3個から1記号を選び、共有の記号列に追加します。直近3記号で効果を判定。開始時も先後交互に1記号ずつ置き、先攻3手番目から発動します。</p><p>同一記号3連続は効果なし。キープ中を含む手元のダイス3個以上が同じ出目の場合、1個の代わりに☆を選べます。キープを☆に置き換えて使った場合はキープを消費します。☆が最後ならドラゴン召喚、1・2記号目ならワイルドカードです。</p><p>ユニットは召喚順に左から攻撃（召喚した手番は攻撃しません）。通常は敵の左端を攻撃し、敵がいなければプレイヤーを攻撃します。プレイヤーHPは40。記号効果による全体攻撃は3ダメージと5ダメージの2段階です。バインドLv1は敵左端1体、Lv2は指定敵1体、Lv3は敵ユニット全体を1手番行動・能力封印します。Lv3は頑丈も解除します。</p><p>兵士Lv2：味方兵士が他にいれば攻撃+2。Lv3：味方兵士の人数だけ攻撃追加。盾兵Lv2：プレイヤーへの攻撃をかばう。Lv3：左隣に一度だけ頑丈を付与。弓兵Lv2：プレイヤーを直接狙撃。Lv3：加えて敵全体に2ダメージ。騎兵Lv2：残りHPの少ない敵を攻撃。Lv3：撃破時に1回追撃。ドラゴン：攻10/HP30、召喚時に敵全体へ4ダメージ。</p><p>暫定処理：盾兵Lv3の頑丈は召喚・昇格時に付与、騎兵の追撃は各手番1回、デバフは攻撃0を下限としています。先後のダイス補正は未採用です。</p>`;$('rulesText').innerHTML=summary;const entries=Object.entries(T).sort(([a],[b])=>{const score=s=>2*('△□'.includes(s[0]))+1*('△□'.includes(s[1]))+4*('△□'.includes(s[2]));return score(a)-score(b)||a.localeCompare(b)});$('ruleTable').innerHTML='<table><thead><tr><th>記号</th><th>点</th><th>効果</th></tr></thead><tbody>'+entries.map(([code,e])=>`<tr><td>${code}</td><td>${2*('△□'.includes(code[0]))+1*('△□'.includes(code[1]))+4*('△□'.includes(code[2]))}</td><td>${esc(showLabel(e))}</td></tr>`).join('')+'</tbody></table>'}
+for(const panelId of ['ownUnits','foeUnits'])$(panelId).addEventListener('click',e=>{const card=e.target.closest('[data-unit-id]');if(card)showUnitDetails(Number(card.dataset.unitSide),Number(card.dataset.unitId))});
+$('closeUnitBtn').onclick=()=>{$('unitModal').hidden=true};
+$('unitModal').onclick=e=>{if(e.target===$('unitModal'))$('unitModal').hidden=true};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('unitModal').hidden)$('unitModal').hidden=true});
 $('twoPlayer').onclick=()=>play('local');$('cpuGame').onclick=()=>play('cpu');$('confirmBtn').onclick=commit;$('againBtn').onclick=()=>play(g.mode);$('toStartBtn').onclick=()=>{$('endScreen').hidden=true;$('startScreen').hidden=false};$('homeBtn').onclick=()=>{if(g&&g.winner===null&&!confirm('対戦を終了してタイトルに戻りますか？'))return;clearTimeout(cpuTimer);$('startScreen').hidden=false};$('helpBtn').onclick=()=>{$('rulesModal').hidden=false};$('closeRulesBtn').onclick=()=>{$('rulesModal').hidden=true};$('rulesModal').onclick=e=>{if(e.target===$('rulesModal'))$('rulesModal').hidden=true};document.addEventListener('keydown',e=>{if(e.key==='Escape')$('rulesModal').hidden=true});renderRules();
 // 診断用（ゲーム動作に影響しない）
 window.symbolSummonDebug=()=>g?deep(g):null;
