@@ -132,12 +132,16 @@ h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.04em;line-height:1.2;margin:0
 .symbol-hint{font:700 9px/1 system-ui;letter-spacing:.18em;color:#b4c6bf}
 @media(max-width:440px){.symbol-display{gap:3px}.symbol-display span{width:26px;height:35px;font-size:21px;border-radius:6px}.symbol-hint{font-size:7px;letter-spacing:.1em}}
 
+
+/* ItemHex 通常版：保存済みサムネイル */
+.preview--itemhex{background:#1b1f24}
+.preview--itemhex img{display:block;width:100%;height:100%;object-fit:contain}
 </style>
 </head>
 <body>
 <main>
   <header>
-    <p class="eyebrow">BROWSER GAMES · 11 TITLES</p>
+    <p class="eyebrow">BROWSER GAMES · 12 TITLES</p>
     <h1>ゲーム一覧</h1>
     <p class="intro">気になるゲームを選ぶと、そのままブラウザで遊べます。</p>
   </header>
@@ -228,6 +232,15 @@ h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.04em;line-height:1.2;margin:0
     <div class="meta"><span class="tag">探索</span><span class="tag status">試作版</span></div>
     <h2 class="game-title">探索ロボ</h2>
     <p class="game-desc">廃品を集めて帰還。パーツを交換してロボを強化する探索ゲーム。</p>
+    <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
+  </div>
+</a>
+<a class="game" href="./itemhex-normal/">
+  <div class="preview preview--itemhex" aria-hidden="true"><img src="./itemhex-normal/thumbnail.png" alt="" loading="lazy"></div>
+  <div class="info">
+    <div class="meta"><span class="tag">探索・戦略</span><span class="tag status">通常版・30ターン</span></div>
+    <h2 class="game-title">ItemHex 通常版</h2>
+    <p class="game-desc">六角形のマップを30ターン探索。アイテムやレリックを集め、最後のボスに挑むローグライト。</p>
     <span class="game-open">ゲームを開く <span aria-hidden="true">↗</span></span>
   </div>
 </a>

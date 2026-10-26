@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>ItemHex 通常版</title>
+<style>
+:root{
+  --bg:#0d1015;--panel:#1a1f27;--panel2:#202630;--panel3:#151a22;--text:#f2f4f7;--muted:#9aa3b2;
+  --line:#343c49;--line2:#2a313c;--accent:#f2c14e;--danger:#ea7077;--ok:#73cc84;
+  --hex:#303744;--unknown:#12161c;--visited:#555f6d;--current:#f2c14e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit}
+button{color:inherit}
+button:disabled{cursor:not-allowed}
+.app{width:min(100%,760px);margin:0 auto}
+.card{background:var(--panel);border:1px solid var(--line2);border-radius:16px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:7px;min-width:0}.brandName{font-size:1.24rem;font-weight:850;letter-spacing:.01em}.liteBadge{background:var(--accent);color:#1b1708;font-size:.68rem;font-weight:900;letter-spacing:.14em;padding:6px 10px;border-radius:999px}.mainRelicBadge{border:1px solid #596575;background:#27303a;color:#dfe6ef;border-radius:999px;padding:5px 8px;font-size:.66rem;font-weight:850;white-space:nowrap}
+.ghostBtn{border:1px solid #46505f;background:#242b35;border-radius:12px;padding:.65rem .86rem;font-weight:750;white-space:nowrap}
+.hudLabel{font-size:.72rem;color:var(--muted);line-height:1.1}.hudValue{font-size:1rem;font-weight:800;margin-top:2px;line-height:1.1}
+.remainCell{text-align:left;display:flex;flex-direction:column;justify-content:center}.remainCell.danger .hudLabel,.remainCell.danger .hudValue,.remainCell.danger .turnUnit{color:var(--danger)}.remainValueRow{display:flex;align-items:flex-end;justify-content:flex-start;gap:3px}.remainCell .hudValue{font-size:1.16rem}.turnUnit{font-size:.58rem;color:var(--muted);line-height:1.15;padding-bottom:1px;white-space:nowrap}
+.hpTop,.xpTop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.hpTop .hudValue{font-size:1.04rem}.subValue{font-size:.72rem;color:var(--muted)}
+.bar{height:7px;background:#252d38;border-radius:999px;overflow:hidden;margin-top:7px}.bar>div{height:100%;transition:.2s width}.hpFill{background:var(--ok)}.xpFill{background:#60728d}.hpHudBar{height:5px;margin-top:5px}
+
+.gameFrame{position:relative;width:100%;overflow:hidden;background:radial-gradient(circle at 50% 48%,#1d242e,#11151b 76%);border-radius:16px;border:1px solid var(--line2)}
+#mapViewport{position:absolute;inset:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:none}#mapViewport::-webkit-scrollbar{display:none}
+#map{position:relative;margin:0 auto}
+.layerBadge{position:absolute;z-index:15;left:12px;top:11px;background:rgba(14,18,24,.76);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(4px);border-radius:10px;padding:6px 9px;font-size:.8rem;font-weight:800;pointer-events:none}
+.hex{position:absolute;width:74px;height:64px;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:.69rem;font-weight:760;line-height:1.05;padding:7px;color:#fff;transition:.12s transform,.12s filter,.12s opacity;user-select:none;border:0;z-index:6;background:var(--hex)}
+.hex:disabled{opacity:.38;cursor:not-allowed}
+.hex>span{position:relative;z-index:1}.tileLayer{position:absolute!important;left:17px;top:14px;font-size:.56rem;font-weight:900;line-height:1;padding:0;background:none;color:#fff;pointer-events:none;white-space:nowrap}
+.hex.visible{background:var(--hex)}.hex.visible.layer1:not(.current){color:#e3ebff}.hex.visible.layer2:not(.current){color:#ffd27d}.hex.visible.layer3:not(.current){color:#ff9f9f}.hex.unknown{background:var(--unknown);color:#4e5662;pointer-events:none;z-index:2}.hex.visited{background:var(--visited);color:#eef1f5}.hex.current{background:var(--current);color:#201a0b;z-index:7;transform:scale(1.08)}
+.hex.moveable{outline:2px solid rgba(255,255,255,.24);outline-offset:-4px}.hex.moveable:hover{transform:scale(1.07);filter:brightness(1.14)}.hex.visible.terrainBlocked{background:#30343a;box-shadow:inset 0 0 0 3px #17191d}.hex.visible.terrainBlocked.moveable{outline-color:#d7c26f}
+.hex.rulerTourFocus{z-index:19!important;outline:4px solid var(--accent)!important;outline-offset:-3px;filter:brightness(1.42);animation:rulerTourPulse .55s ease-in-out infinite alternate}@keyframes rulerTourPulse{from{filter:brightness(1.15)}to{filter:brightness(1.7)}}#mapViewport.rulerTourMode #map{pointer-events:none}#rulerTourFade{position:absolute;inset:0;z-index:30;background:#05070a;opacity:0;pointer-events:none;transition:opacity .12s ease}#rulerTourFade.show{opacity:1;pointer-events:auto}
+.hex.normal{box-shadow:inset 0 0 0 3px #6c8cff}.hex.elite{box-shadow:inset 0 0 0 3px #ff6b6b}.hex.event{box-shadow:inset 0 0 0 3px #bc8cff}.hex.shop{box-shadow:inset 0 0 0 3px #66d6c8}.hex.station{box-shadow:inset 0 0 0 3px #69b8ff;background:#29445a}.hex.upgrade{box-shadow:inset 0 0 0 3px #f2c14e}.hex.start{box-shadow:inset 0 0 0 3px #fff}
+.boardOverlay{position:absolute;inset:0;z-index:20;display:none;background:linear-gradient(180deg,#171c23,#11161c);padding:14px;overflow:auto}.boardOverlay.show{display:block}
+.overlayHead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:10px}.overlayTitle{font-size:1.05rem;font-weight:850}.overlayHint{font-size:.72rem;color:var(--muted);padding-top:2px;white-space:nowrap}
+#combatOverlay.show{display:flex;flex-direction:column}.playerCombat{background:#181e27;border:1px solid #3b4552;border-radius:11px;padding:10px 11px;margin-top:auto;margin-bottom:0}.playerCombatTop{display:flex;justify-content:space-between;gap:8px;align-items:center}.playerCombatTop strong{font-size:1.03rem}.incoming{font-size:.74rem;color:#f1999e}.playerHpBar{position:relative;height:7px;background:#25302a;border-radius:999px;overflow:hidden;margin-top:7px}.playerHpBar .combatHpCurrent{position:absolute;inset:0 auto 0 0;height:100%;background:var(--ok);transition:.2s width}.playerHpBar .incomingPreview{position:absolute;top:0;height:100%;background:#e85d66;opacity:.82;animation:incomingBlink 1.8s ease-in-out infinite;transition:.2s left,.2s width}@keyframes incomingBlink{0%,100%{opacity:.38}50%{opacity:.96}}.combatMeta{font-size:.72rem;color:var(--muted);margin-top:5px}.combatStatusRow{display:flex;flex-wrap:wrap;gap:4px;min-height:18px;margin-top:5px}.statusBadge{display:inline-flex;align-items:center;border:1px solid #46515f;background:#222a34;border-radius:999px;padding:2px 6px;font-size:.62rem;font-weight:800;line-height:1.2;white-space:nowrap;color:#dce3ec}.statusBadge.poison{border-color:#6e5a88;background:#2b2435;color:#d9c5f2}.statusBadge.debuff{border-color:#80525d;background:#32242a;color:#efbbc4}.statusBadge.buff{border-color:#556c7e;background:#222d37;color:#c7d9e8}.enemy .combatStatusRow{margin-top:4px;min-height:17px}.enemy .statusBadge{font-size:.58rem;padding:2px 5px}
+.enemyList{display:grid;gap:8px;margin-bottom:22px}.enemy{background:#171d25;border:1px solid #3a4451;border-radius:11px;padding:10px;transition:.12s border-color,.12s transform}.enemy.dead{opacity:.34}.enemy.selectable{border-color:#f2c14e;box-shadow:0 0 0 1px rgba(242,193,78,.26);cursor:pointer}.enemy.selectable:active{transform:scale(.99)}.enemyTop{display:flex;justify-content:space-between;gap:8px}.enemyAtk{color:#ef9197;font-size:.77rem}.enemyHp{font-size:1rem;margin-top:5px}.enemyBar{height:6px;background:#302126;border-radius:999px;overflow:hidden;margin-top:6px}.enemyBar>div{height:100%;background:#e86e76}.enemyHpPreview{color:#f2d98a;font-weight:850}.enemyKillPreview{color:#ef9197;font-size:.7rem;font-weight:850;margin-left:5px}
+.itemsCard{padding:7px 9px}.sectionTitle{font-size:.95rem;font-weight:850;margin:0 0 5px}.itemGrid{display:grid}.itemSlot{position:relative;background:var(--panel2);border:1px solid #3a4451;border-radius:12px;display:flex;flex-direction:column;text-align:left;transition:.12s background,.12s border-color,.12s opacity,.12s transform,.12s filter}.itemSlot.clickable{cursor:pointer;background:#28303b;border-color:#596575}.itemSlot.clickable:hover{filter:brightness(1.08)}.itemSlot.clickable:active{transform:scale(.985)}.itemSlot.selected{border-color:#f2c14e;box-shadow:0 0 0 1px rgba(242,193,78,.28);background:#303746}.itemSlot.disabled{opacity:.38;filter:saturate(.65);cursor:not-allowed}.slotTop{display:flex;justify-content:space-between}.slotName{font-weight:820}.slotCount{font-weight:820;white-space:nowrap}.slotEffect{color:var(--muted)}
+.logCard{overflow:hidden;display:flex;flex-direction:column}.logCard[open]{height:180px}.logCard:not([open]){height:auto}.logCard summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:.95rem;font-weight:850;flex:0 0 auto}.logCard summary::-webkit-details-marker{display:none}.logBody{padding:0 14px 12px;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}.logline{font-size:.72rem;color:#c5ccd6;padding:5px 0;border-top:1px dashed #2b333e}
+.bottomControls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bottomControls button{min-height:48px;border:1px solid #46505f;background:#252c36;border-radius:12px}.bottomControls button.secondary{background:#171c23}
+.overlayChoiceGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.choiceBtn{border:1px solid #3b4654;background:#202732;color:var(--text);border-radius:11px;padding:10px;min-height:84px;text-align:left}.choiceBtn:disabled{opacity:.35}.choiceBtn strong{display:block;font-size:.84rem}.choiceBtn small{display:block;color:var(--muted);font-size:.68rem;margin-top:5px;line-height:1.35}.overlayFooterBtn{width:100%;margin-top:9px;border:1px solid #46505f;background:#242b35;border-radius:10px;padding:.65rem}#choiceOverlay.shopMode #choiceBody{height:calc(100% - 46px);display:flex;flex-direction:column;align-items:center}#choiceOverlay.shopMode .overlayChoiceGrid{width:88%;height:52%;align-items:stretch}#choiceOverlay.shopMode .choiceBtn{height:100%}#choiceOverlay.shopMode .overlayFooterBtn{width:90%;margin-top:8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;padding:14px;z-index:100}.modal.show{display:flex}.modalCard{width:min(640px,100%);overflow:auto;background:#1b2028;border:1px solid #3a4451;border-radius:16px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.45)}.infoModalCard{width:min(430px,100%);cursor:pointer}.modalCard.infoModalCard h2{font-size:1.08rem}.infoModalText{margin:12px 0 10px;font-size:.88rem;line-height:1.7}.infoModalHint{text-align:center;color:var(--muted);font-size:.66rem;margin-top:2px}.flowModalCard{width:min(520px,100%)}.flowModalCard .overlayHead{margin-bottom:12px}.flowModalBody .overlayChoiceGrid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.flowModalBody .choiceBtn{min-height:86px}.flowModalCard.resultMode{width:min(430px,100%);cursor:pointer}.flowModalCard.resultMode .overlayHead{margin-bottom:8px}.flowTapHint{text-align:center;color:var(--muted);font-size:.66rem;margin-top:10px}.modalTitleRow{display:flex;justify-content:space-between;gap:12px;align-items:center}.modalCard h2{margin:0;font-size:1.18rem}.closeX{border:0;background:transparent;color:var(--muted);font-size:1.4rem;padding:4px 8px}.howtoLead{color:#d4d9e0;font-size:.84rem;line-height:1.7;margin:12px 0}.howtoGrid{display:grid;gap:8px}.howtoItem{background:#151a21;border-radius:10px;padding:10px}.howtoItem b{display:block;font-size:.82rem;margin-bottom:3px}.howtoItem span{color:var(--muted);font-size:.74rem;line-height:1.5}.howtoTabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:12px 0}.howtoTab{min-width:0;border:1px solid #3c4653;background:#171c23;color:var(--muted);border-radius:9px;padding:8px 5px;font-size:.7rem;font-weight:850;white-space:nowrap}.howtoTab.active{background:#2c3440;border-color:#6b788a;color:var(--text)}.howtoPanel[hidden]{display:none}.guideSection{margin-top:13px}.guideSection:first-child{margin-top:0}.guideSectionTitle{margin:0 0 6px;font-size:.78rem;color:#d9dee6}.guideGrid{display:grid;gap:6px}.guideItem{background:#151a21;border:1px solid #252d37;border-radius:9px;padding:9px 10px}.guideItemTop{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.guideItemName{font-size:.8rem;font-weight:850}.guideItemMeta{font-size:.61rem;color:#b6bfcb;white-space:nowrap}.guideItemDesc{display:block;color:var(--muted);font-size:.7rem;line-height:1.45;margin-top:3px}.detailsBox{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}.detailsBox summary{cursor:pointer;font-weight:800;font-size:.82rem}.seedRow{display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:8px}.seedRow input{min-width:0;background:#11161c;border:1px solid #3d4653;border-radius:9px;color:var(--text);padding:.55rem}.seedRow button{border:1px solid #46505f;background:#242b35;border-radius:9px;padding:.55rem .7rem}.resultBox{background:#151a21;border-radius:10px;padding:11px;margin-top:10px;font-size:.8rem;line-height:1.65}.endButtons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.endButtons button{border:1px solid #46505f;background:#242b35;border-radius:10px;padding:.7rem}
+
+@media(max-width:620px){
+  .header{border-radius:14px}.ghostBtn{font-size:.76rem;padding:.55rem .7rem}.brand{gap:5px}.header .liteBadge{display:none}.header .mainRelicBadge{font-size:.56rem;padding:4px 6px}.headerActions{gap:4px}.headerActions .ghostBtn{font-size:.66rem;padding:6px 7px}
+  .hud{border-radius:14px}.hudLabel{font-size:.6rem}.hudValue{font-size:.84rem}.remainCell .hudValue{font-size:1rem}.subValue{font-size:.59rem}.bar{height:6px;margin-top:6px}
+  .gameFrame{border-radius:14px}.layerBadge{left:9px;top:8px;font-size:.68rem;padding:5px 7px;border-radius:8px}.boardOverlay{padding:10px}.overlayTitle{font-size:.92rem}.overlayHint{font-size:.64rem}.playerCombat{padding:8px 9px}.playerCombatTop strong{font-size:.92rem}.enemy{padding:8px}.enemyHp{font-size:.9rem}
+  .itemsCard{padding:6px 8px;border-radius:14px}.sectionTitle{font-size:.84rem;margin-bottom:4px}.itemSlot{border-radius:10px}
+  .overlayChoiceGrid{gap:6px}.choiceBtn{min-height:78px;padding:8px}.choiceBtn strong{font-size:.75rem}.choiceBtn small{font-size:.61rem}
+  .howtoTabs{gap:4px}.howtoTab{font-size:.62rem;padding:7px 3px}.guideItem{padding:8px}.guideItemDesc{font-size:.66rem}
+}
+@media(max-width:390px){.hudLabel{font-size:.56rem}}
+
+/* Normal layout: fixed viewport shell and game-specific surfaces. */
+html,body{height:100%;min-height:0;overflow:hidden;overscroll-behavior:none}
+body{height:100dvh}.headerActions{display:flex;gap:6px}.headerActions .ghostBtn{font-size:.72rem;padding:7px 9px}.header .mainRelicBadge{font-size:.61rem;padding:4px 7px}
+.app{height:100dvh;min-height:0;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:48px 62px minmax(160px,1fr) 160px 27px 44px;gap:7px;padding:8px 8px max(8px,env(safe-area-inset-bottom));max-width:760px}
+.header,.hud,.gameFrame,.itemsCard,.logCard,.bottomControls{margin:0;min-height:0}.header{min-height:0;padding:6px 10px}.brandName{font-size:1.05rem}.liteBadge{font-size:.55rem;padding:4px 6px}.gameFrame{aspect-ratio:auto;height:100%}.itemsCard{display:flex;flex-direction:column;overflow:hidden}.itemGrid{overflow-y:auto;overscroll-behavior:contain;align-content:start;flex:1;min-height:0}.slotTop{gap:3px}.slotName{overflow-wrap:anywhere}.bottomControls{padding:4px 6px}.bottomControls button{min-height:30px;font-size:.73rem}.logCard,.logCard[open]{height:27px;position:relative}.logCard summary{padding:4px 10px;font-size:.73rem}.logCard[open]{position:fixed;left:8px;right:8px;bottom:58px;height:180px;z-index:45;background:var(--panel);box-shadow:0 0 0 100vmax #0005}.logBody{padding-bottom:8px}.boardOverlay{overscroll-behavior:contain}.enemyList{gap:6px;margin-bottom:8px}.enemy{text-align:left;color:var(--text);width:100%;padding:8px}.enemy:disabled{cursor:default;opacity:1}.enemy.dead:disabled{opacity:.34}.enemyHp{font-size:.83rem;margin-top:3px}.enemyTop strong{font-size:.78rem}.enemyAtk{font-size:.65rem}.enemy .combatMeta{font-size:.6rem;min-height:.65rem;margin-top:2px}.enemyBar{margin-top:3px}.overlayHead{margin-bottom:7px;padding-bottom:7px}.overlayHint{white-space:normal;text-align:right}.playerCombat{flex-shrink:0}.noticeText{white-space:pre-line;font-size:.82rem;line-height:1.65}.mainRelics{grid-template-columns:1fr 1fr}.mainRelics .choiceBtn{min-height:125px}.hex.relic{background:#796039}.hex.ruler{background:#663746}.hex.unknown.moveable{pointer-events:auto}
+#moveBar{position:absolute;bottom:8px;left:8px;right:8px;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;border:1px solid #46505f;background:#171c23ed;border-radius:10px;font-size:.66rem}#moveBar[hidden]{display:none}.layerBadge{pointer-events:none}.modalCard{max-height:88dvh}.overlayFooterBtn{min-height:40px}#relicBody{margin-top:12px}.enemyList{flex:1;min-height:0;overflow:auto}.playerCombat{margin-top:0}#mapViewport{overscroll-behavior:contain;touch-action:pan-x pan-y}#map{touch-action:pan-x pan-y}
+@media(min-width:900px){.app{width:100%;max-width:1280px;grid-template-columns:minmax(0,1fr) minmax(320px,34%);grid-template-rows:58px 118px minmax(0,1fr) 190px;gap:10px;padding:12px;align-items:start;justify-content:center}.header{grid-column:1/-1;grid-row:1}.hud{grid-column:2;grid-row:2;grid-template-rows:auto auto;align-self:start}.gameFrame{grid-column:1;grid-row:2/4}.itemsCard{grid-column:1;grid-row:4;align-self:stretch}.logCard,.logCard[open]{position:static;grid-column:2;grid-row:3;height:100%;max-height:none;box-shadow:none}.logCard{align-self:start}.logCard:not([open]){height:30px}.logCard summary{padding:10px}.logBody{max-height:100%;overflow-x:hidden}.bottomControls{grid-column:2;grid-row:4;align-self:end;height:58px}.bottomControls button{font-size:.84rem}.enemy{padding:12px}.enemyTop strong{font-size:.92rem}.enemyHp{font-size:1rem}}
+@media(max-height:650px) and (max-width:899px){.app{grid-template-rows:40px 54px minmax(120px,1fr) 116px 24px 36px;gap:4px;padding-top:4px}.header{padding:4px 8px}.itemSlot{min-height:54px}.brandName{font-size:.9rem}.playerCombat{padding:6px}.boardOverlay{padding:7px}}
+
+/* Normal HUD: remaining turns at left; player stats in two rows at right. */
+.hud{display:grid;grid-template-columns:minmax(68px,.72fr) minmax(0,4.2fr);align-items:stretch;overflow:hidden}
+.hud>.remainCell{grid-column:1;grid-row:1;border-right:1px solid var(--line);padding:7px 8px;align-items:flex-start}
+.hudRows{grid-column:2;grid-row:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.hudRow{display:grid;min-width:0;min-height:0}
+.hudPrimary{grid-template-columns:minmax(0,1.28fr) minmax(0,1.28fr) minmax(56px,.66fr);flex:1 1 54%;border-bottom:1px solid var(--line)}
+.hudSecondary{grid-template-columns:repeat(2,minmax(0,1fr));flex:1 1 46%}
+.hud .hudCell{grid-column:auto;grid-row:auto;border-bottom:0;border-right:1px solid var(--line);padding:5px 8px;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.hudRow>.hudCell:last-child{border-right:0}
+.hudStat{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.hudStat .hudValue{font-size:1rem;margin-top:0;white-space:nowrap}
+.hudMini{min-width:0;border:0;border-right:1px solid var(--line);border-radius:0;background:transparent;color:var(--text);padding:3px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.05}
+.hudMini:last-child{border-right:0}.hudMini>span{font-size:.56rem;color:var(--muted);white-space:nowrap}.hudMini>b{font-size:.82rem;font-weight:850;white-space:nowrap}.goldMini>b{font-size:.86rem}
+.levelHud .xpTop{gap:5px}.levelHud .bar{margin-top:3px;height:5px}
+@media(max-width:620px){.hud{grid-template-columns:minmax(58px,.68fr) minmax(0,4.4fr)}.hud>.remainCell{padding:5px 6px}.hud .hudCell{padding:4px 5px}.hudMini{padding-left:2px;padding-right:2px}.hudMini>span{font-size:.51rem}.hudMini>b{font-size:.76rem}.hudStat .hudValue{font-size:.88rem}.levelHud .subValue{font-size:.56rem}}
+@media(min-width:900px){.hud{height:118px}.hud>.remainCell{padding:9px 10px!important}.hudMini>span{font-size:.62rem}.hudMini>b{font-size:.9rem}.hudStat .hudValue{font-size:1.06rem}}
+/* Give the two-row HUD enough vertical room on phones without compressing its text. */
+@media(max-width:899px){.app{grid-template-rows:48px 82px minmax(150px,1fr) 150px 27px 44px}}
+@media(max-height:650px) and (max-width:899px){.app{grid-template-rows:40px 70px minmax(110px,1fr) 110px 24px 36px}.hud>.remainCell{padding-top:3px;padding-bottom:3px}.hud .hudCell{padding-top:3px;padding-bottom:3px}.hudMini>span{font-size:.48rem}.hudMini>b{font-size:.69rem}.hudStat .hudValue{font-size:.82rem}}
+
+/* Compact action/item lists and clearer shop rows. */
+.itemGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.itemSlot{min-height:52px;padding:6px 8px;justify-content:center}
+.slotTop{align-items:center}.slotName{font-size:.8rem}.slotCount{font-size:.78rem}.slotEffect{font-size:.64rem;line-height:1.22;margin-top:2px}
+.itemSlot[data-item="attack"],.itemSlot[data-item="end"]{border-color:#69788c;background:#26303b}
+.itemSlot[data-item="end"]{border-color:#a58b48;background:#302d22}
+.shopList{width:100%;display:grid;gap:6px}.shopSectionTitle{font-size:.72rem;font-weight:850;color:var(--muted);margin:2px 2px 0}.shopSectionTitle.sell{margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.shopRow{width:100%;border:1px solid #3b4654;background:#202732;color:var(--text);border-radius:10px;padding:8px 10px;text-align:left;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name price" "effect action";column-gap:10px;row-gap:3px;align-items:center;transition:.12s background,.12s border-color,.12s transform,.12s opacity}
+.shopRow:not(:disabled){cursor:pointer}.shopRow:not(:disabled):hover{background:#28313d;border-color:#59687a}.shopRow:not(:disabled):active{transform:scale(.992)}.shopRow:disabled{opacity:.4}
+.shopRowName{grid-area:name;font-size:.8rem;font-weight:850;min-width:0}.shopRowPrice{grid-area:price;font-size:.84rem;font-weight:900;color:#f2d98a;white-space:nowrap}.shopRowPrice.good{color:#8ee6a2}.shopRowPrice.normal{color:#f2d98a}.shopRowPrice.bad{color:#ff9a9a}.shopSellPrice{font-weight:850}.shopSellPrice.good{color:#8ee6a2}.shopSellPrice.normal{color:var(--muted)}.shopSellPrice.bad{color:#ff9a9a}.shopRowEffect{grid-area:effect;color:var(--muted);font-size:.64rem;line-height:1.3;min-width:0}.shopRowAction{grid-area:action;font-size:.68rem;font-weight:850;border:1px solid #566476;background:#2a3440;border-radius:7px;padding:5px 8px;white-space:nowrap}.shopRowAction.sell{border-color:#526a5a;background:#26352b;color:#bfe1c6}.shopRowAction.bought{border-color:#444b55;background:#242a31;color:var(--muted)}
+#choiceOverlay.shopMode #choiceBody{height:auto;display:block;overflow:auto}#choiceOverlay.shopMode .overlayFooterBtn{width:100%;margin-top:8px;position:sticky;bottom:0;background:#242b35}
+@media(min-width:900px){.itemGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.itemSlot{min-height:54px}.shopList{grid-template-columns:1fr 1fr}.shopSectionTitle,.shopSectionTitle.sell{grid-column:1/-1}.shopRow{min-height:66px}#choiceOverlay.shopMode .overlayFooterBtn{grid-column:1/-1}}
+@media(max-width:390px){.itemGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.itemSlot{padding:5px 6px}.slotName{font-size:.72rem}.slotCount{font-size:.7rem}.slotEffect{font-size:.58rem}.shopRow{padding:7px 8px;column-gap:7px}.shopRowName{font-size:.74rem}.shopRowPrice{font-size:.78rem}.shopRowEffect{font-size:.59rem}.shopRowAction{font-size:.62rem;padding:4px 6px}}
+/* Phone top area: keep map space instead of spending height on chrome. */
+@media(max-width:899px){
+  .app{grid-template-rows:42px 64px minmax(150px,1fr) 150px 27px 44px;gap:5px;padding:6px 6px max(6px,env(safe-area-inset-bottom))}
+  .header{padding:4px 7px;border-radius:12px;gap:6px}
+  .brand{gap:4px;min-width:0}.brandName{font-size:.96rem}.header .mainRelicBadge{font-size:.51rem;padding:3px 5px}
+  .headerActions{gap:3px;flex-shrink:0}.headerActions .ghostBtn{font-size:.59rem;padding:5px 6px;border-radius:9px}
+  .hud{grid-template-columns:minmax(52px,.62fr) minmax(0,4.6fr);border-radius:12px}
+  .hud>.remainCell{padding:3px 5px}.hud .hudCell{padding:2px 5px}.hudLabel{font-size:.54rem}.remainCell .hudValue{font-size:.92rem}.turnUnit{font-size:.49rem}
+  .hudStat .hudValue{font-size:.82rem}.hpTop .hudValue{font-size:.9rem}.levelHud .subValue{font-size:.51rem}.bar{height:5px;margin-top:3px}.hpHudBar{height:4px;margin-top:3px}
+  .hudMini{padding:2px}.hudMini>span{font-size:.47rem}.hudMini>b,.goldMini>b{font-size:.7rem}
+}
+@media(max-height:650px) and (max-width:899px){.app{grid-template-rows:38px 58px minmax(105px,1fr) 110px 24px 36px}.header{padding:3px 6px}.headerActions .ghostBtn{padding:4px 5px;font-size:.56rem}}
+.headerActions .ghostBtn:disabled{opacity:.38}
+#mapBtn.mapPeekActive{border-color:#78879a;background:#303a47}
+
+/* Compact top/status layout: keep HP and level equal, with smaller utility cells. */
+.header .helpBtn{min-width:30px;padding-left:8px;padding-right:8px;font-size:.86rem;font-weight:900}
+.itemsHeader{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.itemMiniStats{font-size:.62rem;color:var(--muted);font-weight:700;white-space:nowrap}
+.itemMiniStats b{color:var(--text);font-size:.75rem}
+.hud{display:grid;grid-template-columns:.78fr 1.3fr 1.3fr .62fr 1fr;align-items:stretch;overflow:hidden}
+.hud>.remainCell .hudValue{font-size:1.12rem;font-weight:900}
+.hud>.remainCell .turnUnit{font-size:.54rem}
+.hud>.remainCell,.hud>.hudCell,.hud>.hudMini{grid-column:auto;grid-row:1;min-width:0;border-right:1px solid var(--line);border-bottom:0}
+.hud>.remainCell{padding:5px 6px;align-items:flex-start}
+.hud>.hudCell{padding:4px 6px;display:flex;flex-direction:column;justify-content:center}
+.hud>.hudMini{padding:3px 4px}
+.hud>.hudMini:last-child{border-right:0}
+.hudActionMini{cursor:pointer;background:transparent}
+.hudActionMini:hover{background:#242b35}.hudActionMini:active{background:#2b3440}
+.relicMini>span{font-size:.58rem}.relicMini>b{font-size:.88rem}
+.headerEventState{color:#e7d8a5;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.headerEventState:not([hidden]){display:block}
+@media(max-width:899px){
+  .app{grid-template-rows:42px 50px minmax(164px,1fr) 150px 27px 44px}
+  .header .mainRelicBadge{font-size:.62rem;padding:4px 6px}
+  .hud{grid-template-columns:68px minmax(0,1fr) minmax(0,1fr) 44px 76px}
+  .hud>.remainCell{padding:3px 5px}.hud>.hudCell{padding:3px 5px}.hud>.hudMini{padding:2px 3px}
+  .hudLabel{font-size:.54rem}.hud>.remainCell .hudValue{font-size:1.08rem}.hud>.remainCell .turnUnit{font-size:.49rem}
+  .hpTop .hudValue,.levelHud .hudValue{font-size:.84rem}.levelHud .subValue{font-size:.5rem}
+  .bar{height:4px;margin-top:2px}.hpHudBar{height:4px;margin-top:2px}
+  .hudMini>span{font-size:.49rem}.hudMini>b,.goldMini>b{font-size:.74rem}.relicMini>span{font-size:.52rem}.relicMini>b{font-size:.78rem}
+  .headerEventState{max-width:70px}
+}
+@media(max-width:390px){
+  .brandName{font-size:.9rem}.header .mainRelicBadge{font-size:.6rem;padding:3px 5px}
+  .headerActions .ghostBtn{font-size:.58rem;padding:5px 6px}.header .helpBtn{font-size:.8rem;min-width:28px}
+  .headerEventState{max-width:58px;padding-left:5px!important;padding-right:5px!important}
+  .hud{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr) 42px 72px}
+  .hud>.remainCell{padding-left:5px;padding-right:4px}.hud>.hudCell{padding-left:4px;padding-right:4px}
+  .hud>.remainCell .hudValue{font-size:1.04rem}
+  .itemMiniStats{font-size:.56rem}.itemMiniStats b{font-size:.68rem}
+}
+@media(max-height:650px) and (max-width:899px){.app{grid-template-rows:38px 46px minmax(117px,1fr) 110px 24px 36px}}
+/* Final compact HUD balance. Values sit on the bars to avoid empty HUD space. */
+.hud{grid-template-columns:.76fr 1.05fr 1.05fr .68fr 1.02fr}
+.hud>.remainCell{padding:3px 5px;align-items:center;justify-content:center}
+.hud>.remainCell .remainValueRow{align-items:baseline;gap:2px}
+.hud>.remainCell .hudValue{font-size:.74rem;margin:0;font-weight:850}
+.hud>.remainCell .hudLabel{font-size:.39rem}
+.hud>.remainCell .turnUnit{font-size:.28rem;padding:0}
+.hud>.hudCell{padding:3px 5px}
+.hudInline{display:flex;align-items:center;gap:5px;min-width:0;width:100%}
+.hudInline>.hudLabel{flex:0 0 auto;font-size:.52rem;white-space:nowrap}
+.levelHud .hudInline>.hudLabel{display:flex;align-items:baseline;gap:2px}
+.levelHud .hudInline>.hudLabel .hudValue{font-size:.76rem;margin:0}
+.hpHudBar,.levelHud .bar{position:relative;flex:1 1 auto;width:auto;max-width:none;height:12px;margin:0;background:#252d38;overflow:hidden}
+.hpHudBar>div,.levelHud .bar>div{position:absolute;left:0;top:0;bottom:0;height:100%}
+.barValue{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;font-size:.48rem;font-weight:850;line-height:1;color:#f4f6f8;text-shadow:0 1px 2px #000;white-space:nowrap;pointer-events:none}
+.hudMini{flex-direction:row;gap:3px;align-items:center;justify-content:center;padding:2px 3px}
+.hudMini>span,.relicMini>span{font-size:.5rem}
+.hudMini>b,.goldMini>b,.relicMini>b{font-size:.72rem}
+.goldMini>b{display:flex;align-items:baseline;gap:0}.goldMini .unitSuffix{font-size:.55rem;font-weight:800;color:var(--muted);margin-left:1px}
+@media(max-width:899px){
+  .app{grid-template-rows:42px 42px minmax(172px,1fr) 150px 27px 44px}
+  .hud{grid-template-columns:60px minmax(0,1fr) minmax(0,1fr) 52px 80px}
+  .hud>.remainCell .hudValue{font-size:.7rem}
+  .hud>.remainCell .hudLabel{font-size:.36rem}
+  .hud>.remainCell .turnUnit{font-size:.26rem}
+  .hudInline{gap:4px}.hudInline>.hudLabel{font-size:.48rem}.levelHud .hudInline>.hudLabel .hudValue{font-size:.7rem}
+  .hpHudBar,.levelHud .bar{height:11px}
+  .barValue{font-size:.44rem}
+  .hudMini>span,.relicMini>span{font-size:.47rem}.hudMini>b,.goldMini>b,.relicMini>b{font-size:.69rem}.goldMini .unitSuffix{font-size:.5rem}
+}
+@media(max-width:390px){
+  .hud{grid-template-columns:58px minmax(0,1fr) minmax(0,1fr) 50px 76px}
+  .hud>.hudCell{padding-left:4px;padding-right:4px}
+  .hudInline{gap:3px}.hudInline>.hudLabel{font-size:.45rem}
+  .hpHudBar,.levelHud .bar{height:10px}
+  .barValue{font-size:.41rem}
+  .hud>.remainCell .hudValue{font-size:.66rem}
+}
+
+/* HUD alignment pass: keep labels readable and use the width for information, not long bars. */
+#mapBtn{font-size:.76rem;padding:7px 10px;min-width:56px}
+.hud>.remainCell,.hud>.hudCell,.hud>.hudMini{position:relative}
+.hud>.remainCell{align-items:flex-start;justify-content:flex-end;padding:4px 6px 4px}
+.hud>.remainCell>.hudLabel{position:absolute;left:6px;top:4px;font-size:.64rem}
+.hud>.remainCell .remainValueRow{width:100%;justify-content:center;align-items:baseline;gap:3px}
+.hud>.remainCell .hudValue{font-size:1rem}
+.hud>.remainCell .turnUnit{font-size:.55rem}
+.hpHudCell,.levelHud{justify-content:flex-end!important;padding-top:14px!important;padding-bottom:4px!important}
+.hpHudCell .hudInline,.levelHud .hudInline{display:block;position:relative;height:11px}
+.hpHudCell .hudInline>.hudLabel,.levelHud .hudInline>.hudLabel{position:absolute;left:0;top:-12px;z-index:3;font-size:.64rem}
+.levelHud .hudInline>.hudLabel .hudValue{font-size:.82rem}
+.hpHudCell .hpHudBar,.levelHud .bar{width:100%;height:11px}
+.barValue{font-size:.57rem}
+.goldMini,.relicMini{flex-direction:column!important;justify-content:flex-end!important;align-items:center!important;padding:14px 5px 4px!important}
+.goldMini>span,.relicMini>span{position:absolute;left:6px;top:4px;font-size:.64rem;color:var(--muted)}
+.goldMini>b,.relicMini>b{font-size:.92rem;line-height:1}
+@media(max-width:899px){
+  #mapBtn{font-size:.65rem;padding:6px 8px;min-width:52px}
+  .hud{grid-template-columns:68px minmax(0,1fr) minmax(0,1fr) 78px 68px}
+  .hud>.remainCell{padding:4px 6px}
+  .hud>.remainCell>.hudLabel{left:6px;top:4px;font-size:.62rem}
+  .hud>.remainCell .hudValue{font-size:.98rem}
+  .hud>.remainCell .turnUnit{font-size:.54rem}
+  .hpHudCell,.levelHud{padding-top:14px!important;padding-bottom:4px!important}
+  .hpHudCell .hudInline,.levelHud .hudInline{height:11px}
+  .hpHudCell .hudInline>.hudLabel,.levelHud .hudInline>.hudLabel{top:-12px;font-size:.62rem}
+  .levelHud .hudInline>.hudLabel .hudValue{font-size:.8rem}
+  .barValue{font-size:.55rem}
+  .goldMini>span,.relicMini>span{font-size:.62rem}
+  .goldMini>b,.relicMini>b{font-size:.9rem}
+}
+@media(max-width:390px){
+  .hud{grid-template-columns:66px minmax(0,1fr) minmax(0,1fr) 74px 64px}
+  #mapBtn{min-width:50px;padding-left:7px;padding-right:7px}
+}
+
+.guideCategory{border:1px solid #2f3844;background:#151a21;border-radius:10px;overflow:hidden;margin-top:6px}
+.guideCategory>summary{list-style:none;cursor:pointer;padding:10px 11px;font-size:.8rem;font-weight:850;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.guideCategory>summary::-webkit-details-marker{display:none}.guideCategory>summary::after{content:'＋';color:var(--muted);font-size:.9rem}.guideCategory[open]>summary::after{content:'−'}
+.guideCategory[open]>summary{border-bottom:1px solid #28313c;background:#1a2028}.guideCategoryBody{padding:7px;display:grid;gap:6px}.guideCategoryBody .guideItem{margin:0}.howtoLead.compact{font-size:.74rem;line-height:1.45;margin:8px 0 6px;color:var(--muted)}
+@media(max-width:620px){.guideCategory>summary{padding:9px 10px;font-size:.74rem}.guideCategoryBody{padding:6px}}
+
+/* PC layout update: dedicate the left side to the board and move HUD/items/log to the right. */
+@media(min-width:900px){
+  .app{
+    max-width:1400px;
+    grid-template-columns:minmax(0,3fr) minmax(0,2fr);
+    grid-template-rows:58px 72px minmax(210px,.58fr) minmax(170px,.42fr) 58px;
+    gap:10px;
+    align-items:stretch;
+  }
+  .header{grid-column:1/-1;grid-row:1}
+  .gameFrame{grid-column:1;grid-row:2/6;min-height:0}
+  .hud{grid-column:2;grid-row:2;height:auto;min-height:72px;grid-template-columns:76px minmax(0,1.02fr) minmax(0,1.02fr) 92px 94px;border-radius:14px}
+  .itemsCard{grid-column:2;grid-row:3;align-self:stretch;min-height:0}
+  .logCard,.logCard[open]{grid-column:2;grid-row:4;align-self:stretch;height:100%;min-height:0;position:static;box-shadow:none}
+  .bottomControls{grid-column:2;grid-row:5;align-self:stretch;height:58px}
+
+  .hud>.remainCell,.hud>.hudCell,.hud>.hudMini{padding:7px 9px}
+  .hud>.remainCell{align-items:flex-start;justify-content:center}
+  .hud>.remainCell .hudLabel,
+  .hudInline>.hudLabel,
+  .hudMini>span{font-size:.64rem}
+  .hud>.remainCell .hudValue{font-size:1.04rem}
+  .hud>.remainCell .turnUnit{font-size:.52rem}
+  .levelHud .hudInline>.hudLabel .hudValue,
+  .hudMini>b,.goldMini>b{font-size:.98rem}
+  .hpHudBar,.levelHud .bar{height:11px;max-width:150px}
+  .barValue{font-size:.66rem}
+}
+
+
+/* Final HUD/readability pass. Keep HP/EXP width near current while giving remaining turns more room. */
+.hud{grid-template-columns:20fr 23fr 23fr 19fr 15fr}
+.slotEffect{color:#b6beca}
+.mainRelics .choiceBtn{min-height:108px}
+.hpHudCell .hpHudBar,.levelHud .bar{transform:translateY(-2px)}
+.goldMini,.relicMini{align-items:stretch!important}
+.goldMini>b,.relicMini>b{width:100%;text-align:right;padding-right:2px}
+#choiceOverlay.mainRelicMode.show{display:flex;flex-direction:column}
+#choiceOverlay.mainRelicMode .overlayHead{margin-top:auto}
+#choiceOverlay.mainRelicMode #choiceBody{margin-bottom:auto}
+@media(max-width:899px){
+  .hud{grid-template-columns:20fr 23fr 23fr 19fr 15fr}
+}
+@media(min-width:900px){
+  .hud{grid-template-columns:20fr 23fr 23fr 19fr 15fr}
+}
+
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="card header">
+    <div class="brand"><span class="brandName">ItemHex</span><span class="liteBadge">NORMAL</span></div>
+    <div class="headerActions"><button class="ghostBtn" id="mapBtn">マップ</button><button class="ghostBtn headerEventState" id="eventFlagBtn" type="button" hidden>イベント</button><button class="ghostBtn helpBtn" id="howtoBtn" aria-label="遊び方" title="遊び方">？</button></div>
+  </header>
+
+  <section class="card hud" aria-label="プレイヤー情報">
+    <div class="remainCell"><span class="hudLabel">残り</span><div class="remainValueRow"><b class="hudValue" id="remain">30</b><span class="turnUnit">ターン</span></div></div>
+    <div class="hudCell hpHudCell">
+      <div class="hudInline"><span class="hudLabel">HP</span><div class="bar hpHudBar"><div class="hpFill" id="hpFill"></div><span class="barValue"><span id="hp">40</span>/<span id="maxHp">40</span></span></div></div>
+    </div>
+    <div class="hudCell levelHud">
+      <div class="hudInline"><span class="hudLabel">Lv <b class="hudValue" id="level">1</b></span><div class="bar"><div class="xpFill" id="xpFill"></div><span class="barValue"><span id="xp">0</span>/<span id="xpNeed">4</span></span></div></div>
+    </div>
+    <div class="hudMini goldMini"><span>ゴールド</span><b id="gold">30</b></div>
+    <button class="hudMini hudActionMini relicMini" id="relicBtn" type="button"><span>◆ レリック</span><b id="relicCount">0</b></button>
+  </section>
+
+  <section class="gameFrame" id="gameFrame">
+    <div id="mapViewport"><div id="map"></div></div>
+    <div id="rulerTourFade" aria-hidden="true"></div>
+    <div class="layerBadge" id="layerBadge">第1層</div><div id="moveBar"></div>
+
+    <div class="boardOverlay" id="combatOverlay">
+      <div class="overlayHead"><div class="overlayTitle" id="combatTitle">戦闘</div><div class="overlayHint" id="combatHint">行動を選択</div></div>
+      <div class="enemyList" id="enemyList"></div>
+      <div class="playerCombat">
+        <div class="playerCombatTop"><strong>HP <span id="combatHp">20</span> / <span id="combatMaxHp">20</span></strong><span class="incoming" id="incomingText"></span></div>
+        <div class="playerHpBar"><div class="combatHpCurrent" id="combatHpFill"></div><div class="incomingPreview" id="combatIncomingFill"></div></div>
+        <div class="combatMeta"><span id="combatRound">1ターン目</span>　攻撃力 <span id="combatAtk">2</span>　自然回復 <span id="combatRegen">1</span></div><div class="combatStatusRow" id="playerCombatStatuses"></div>
+      </div>
+    </div>
+
+    <div class="boardOverlay" id="choiceOverlay">
+      <div class="overlayHead"><div class="overlayTitle" id="choiceTitle"></div><div class="overlayHint" id="choiceHint"></div></div>
+      <div id="choiceBody"></div>
+    </div>
+      </section>
+
+  <section class="card itemsCard">
+    <h2 class="sectionTitle itemsHeader"><span id="itemsTitle">アイテム</span><span class="itemMiniStats">攻撃 <b id="atk">4</b>　自然回復 <b id="regen">2</b></span></h2>
+    <div class="itemGrid" id="itemGrid"></div>
+  </section>
+
+  <details class="card logCard">
+    <summary>ログ</summary>
+    <div class="logBody" id="log"></div>
+  </details>
+
+  <section class="card bottomControls">
+    <button id="newSeedBtn">新しく遊ぶ</button>
+    <button class="secondary" id="sameSeedBtn">同じ条件でもう一度</button>
+  </section>
+</main>
+
+<div class="modal" id="howtoModal">
+  <div class="modalCard">
+    <div class="modalTitleRow"><h2>ガイド</h2><button class="closeX" id="howtoClose" aria-label="閉じる">×</button></div>
+    <div class="howtoTabs" role="tablist" aria-label="ガイド">
+      <button class="howtoTab active" type="button" data-help-tab="play" role="tab" aria-selected="true">遊び方</button>
+      <button class="howtoTab" type="button" data-help-tab="items" role="tab" aria-selected="false">アイテム一覧</button>
+      <button class="howtoTab" type="button" data-help-tab="relics" role="tab" aria-selected="false">レリック</button>
+      <button class="howtoTab" type="button" data-help-tab="map" role="tab" aria-selected="false">マス・イベント</button>
+    </div>
+    <div class="howtoPanel" data-help-panel="play">
+      <p class="howtoLead compact">30ターンで準備し、最終ボスを倒せばクリア。</p>
+      <details class="guideCategory"><summary>まず何をする？</summary><div class="guideCategoryBody"><div class="guideItem"><span>探索してアイテム・レリックを集め、敵を倒して成長し、最終ボスに備えます。通常攻撃だけでは厳しいため、アイテムの使い方が重要です。</span></div></div></details>
+      <details class="guideCategory"><summary>探索</summary><div class="guideCategoryBody"><div class="guideItem"><span>移動先のヘクスをタップ。内容が発生するのは最後に止まったマスだけです。通過済みのマスには止まれず、停止済みのマスは原則通れません。外側ほど敵と報酬が強くなり、Lvで視界が広がります。</span></div></div></details>
+      <details class="guideCategory"><summary>戦闘</summary><div class="guideCategoryBody"><div class="guideItem"><span>通常攻撃かアイテムで行動し、生き残った敵が反撃。勝利すると自然回復します。初期レリックによって、1ターンのアイテム使用ルールが変わります。</span></div></div></details>
+      <details class="guideCategory"><summary>成長</summary><div class="guideCategoryBody"><div class="guideItem"><span>EXPでLvアップ。最大HP・現在HP+2、攻撃力+1、自然回復+1。</span></div></div></details>
+      <details class="guideCategory"><summary>ショップ・交易</summary><div class="guideCategoryBody"><div class="guideItem"><span>アイテム・レリックの購入と所持品の売却ができます。つぼは交易専用。見るだけならターン消費なし。取引すると、店を出たときに1ターン進みます。</span></div></div></details>
+      <details class="guideCategory"><summary>地域について</summary><div class="guideCategoryBody" id="helpRegions"></div></details>
+      <details class="detailsBox"><summary>ゲーム番号</summary><div class="seedRow"><input id="seedInput" value="1001" aria-label="ゲーム番号"><button id="seedStartBtn">この番号で開始</button></div></details>
+    </div>
+    <div class="howtoPanel" data-help-panel="items" hidden><div id="helpItems"></div></div>
+    <div class="howtoPanel" data-help-panel="relics" hidden><div id="helpRelics"></div></div>
+    <div class="howtoPanel" data-help-panel="map" hidden><div id="helpMapEvents"></div></div>
+  </div>
+</div>
+
+<div class="modal" id="flowModal" role="dialog" aria-modal="true" aria-labelledby="flowTitle" tabindex="0">
+  <div class="modalCard flowModalCard" id="flowModalCard">
+    <div class="overlayHead"><div class="overlayTitle" id="flowTitle"></div><div class="overlayHint" id="flowHint"></div></div>
+    <div class="flowModalBody" id="flowBody"></div>
+    <div class="flowTapHint" id="flowTapHint" hidden>タップで閉じる</div>
+  </div>
+</div>
+
+<div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle" tabindex="0">
+  <div class="modalCard infoModalCard">
+    <h2 id="infoTitle">案内</h2>
+    <p class="noticeText infoModalText" id="infoText"></p>
+    <div class="infoModalHint">タップで閉じる</div>
+  </div>
+</div>
+
+<div class="modal" id="endModal">
+  <div class="modalCard">
+    <h2 id="endTitle"></h2>
+    <div id="endDesc" class="howtoLead" style="margin-bottom:0"></div>
+    <div class="resultBox" id="endResult"></div>
+    <div class="endButtons"><button id="endSame">同じ条件でもう一度</button><button id="endNew">新しく遊ぶ</button></div>
+  </div>
+</div>
+
+<div class="modal" id="relicModal"><div class="modalCard"><div class="modalTitleRow"><h2>所持レリック</h2><button class="closeX" id="relicClose" aria-label="閉じる">×</button></div><div class="howtoGrid" id="relicBody"></div></div></div>
+<div class="modal" id="eventFlagModal"><div class="modalCard"><div class="modalTitleRow"><h2>イベント状態</h2><button class="closeX" id="eventFlagClose" aria-label="閉じる">×</button></div><div class="howtoGrid" id="eventFlagBody"></div></div></div>
+<!-- Rules source: Drive 1nbpJQKHOzp06pj2le2CfZk7i3dlK3AI-. -->
+<script>
+(()=>{
+const DATA={"CFG":{"turns":30,"map_radius":12,"base_move":1,"player":{"hp":40,"atk":4,"regen":2,"level":1,"xp":0,"gold":30,"start_items":{"heal":1,"single":1,"aoe":1}},"level":{"xp_base":7,"hp":2,"atk":1,"regen":1},"map_layer_counts":{"1":{"normal":34,"event":28,"shop":20,"elite":8,"relic":0},"2":{"normal":71,"event":40,"shop":30,"elite":24,"relic":3,"blocked":8,"station":4},"3":{"normal":77,"event":42,"shop":30,"elite":30,"relic":3,"blocked":12}},"normal_multi_rate":0.45,"regional_normal_rate":0.7,"drop_count":{"normal":1,"elite":2,"ruler":2},"shop_price":30,"shop_item_prices":{"heal":30,"cleanse_heal":40,"single":30,"big":50,"aoe":40,"poison":35,"amplify":50,"buff":40,"defense":30,"confuse":35,"attack_down":40,"move":30,"directional_warp":50},"shop_relic_price":300,"shop_sell_mult":0.95,"pot_prices":[40,60,80,100,130,160,200],"regional_shop_mult":{"1":{"favored":0.9,"neutral":1.0,"weak":1.1},"2":{"favored":0.75,"neutral":1.0,"weak":1.25},"3":{"favored":0.6,"neutral":1.0,"weak":1.5}},"regional_shop_offer_mult":{"1":{"favored":1.25,"neutral":1.0,"weak":0.8},"2":{"favored":1.6,"neutral":1.0,"weak":0.55},"3":{"favored":2.2,"neutral":1.0,"weak":0.3}},"shop_price_variation":[0.9,0.95,1,1.05,1.1],"normal_relic":{"shop_discount":0.15,"xp_bonus":1,"first_guard_ratio":0.2,"first_strike_mult":1.5,"item_save_chance":0.15,"single_splash_ratio":0.25,"event_gold":20,"vision_bonus":1,"max_hp_bonus":10,"regen_bonus":2},"items":{"heal":10,"cleanse_heal":10,"single":10,"aoe":6,"big":12,"poison_damage":4,"poison_turns":3,"amplify":2.0,"buff_atk":4,"defense_ratio":0.6,"confuse_turns":2,"attack_down_ratio":0.3,"attack_down_turns":3,"move_bonus":2,"power_relic_mult":1.6},"bands":[{"max_dist":2,"enemy":{"normalSingle":{"count":1,"hp":[16],"atk":[4]},"normalMulti":{"count":2,"hp":[9,9],"atk":[2,2]},"elite":{"count":1,"hp":[28],"atk":[6]}},"reward":{"normalSingle":{"xp":3,"gold":10},"normalMulti":{"xp":4,"gold":20},"elite":{"xp":6,"gold":40}}},{"max_dist":5,"enemy":{"normalSingle":{"count":1,"hp":[19],"atk":[5]},"normalMulti":{"count":2,"hp":[10,10],"atk":[3,3]},"elite":{"count":1,"hp":[34],"atk":[7]}},"reward":{"normalSingle":{"xp":4,"gold":20},"normalMulti":{"xp":5,"gold":30},"elite":{"xp":8,"gold":60}}},{"max_dist":9,"enemy":{"normalSingle":{"count":1,"hp":[19],"atk":[8]},"normalMulti":{"count":2,"hp":[10,10],"atk":[5,5]},"elite":{"count":2,"hp":[30,34],"atk":[8,8]}},"reward":{"normalSingle":{"xp":6,"gold":30},"normalMulti":{"xp":7,"gold":40},"elite":{"xp":12,"gold":80}}},{"max_dist":12,"enemy":{"normalSingle":{"count":1,"hp":[22],"atk":[10]},"normalMulti":{"count":2,"hp":[11,11],"atk":[6,6]},"elite":{"count":2,"hp":[41,45],"atk":[10,10]}},"reward":{"normalSingle":{"xp":8,"gold":40},"normalMulti":{"xp":9,"gold":50},"elite":{"xp":15,"gold":100}}}],"ruler":{"xp":16,"gold":100,"big_attack":{"hp":[80],"atk":[10],"heavy_damage":34,"cycle":3},"swarm":{"hp":[36,34,34],"atk":[6,5,5]},"attrition":{"hp":[90],"atk":[10],"poison_damage":4,"poison_turns":3,"poison_every":3},"sustained":{"hp":[100],"atk":[14]}},"boss":{"hp":[120,65,80],"atk":[7,3,4],"roles":["body","poison_add","heavy_add"],"body_damage":[7,8,9],"poison_damage":5,"poison_turns":3,"poison_cycle":3,"heavy_damage":26,"heavy_cycle":3}},"ITEM_TYPES":["heal","cleanse_heal","single","big","aoe","poison","amplify","buff","defense","confuse","attack_down","move","directional_warp"],"NORMAL_RELIC_TYPES":["shop_discount","xp_up","first_guard","first_strike","item_saver","single_splash","terrain_ignore","reopen_roads","event_income","vision_up","max_hp_up","regen_up"],"EVENT_TYPES":["supply_find","recovery","force_exchange","scarce_item_buyout","accident","treasure_key","relic_reveal","elite_hunt","cheap_shop"],"EVENT_EXCHANGE_REWARDS":["aoe","poison","buff","defense","confuse","attack_down","move","directional_warp"],"PRICE_REGIONS":["E","W","N","S"],"RULER_TYPES":["big_attack","swarm","attrition","sustained"],"RULER_PRIMARY_COUNTER":{"big_attack":"defense","swarm":"aoe","attrition":"cleanse_heal","sustained":"attack_down"},"TREASURE_FIND_CHANCE":0.2,"TREASURE_GOLD_BY_LAYER":{"1":160,"2":240,"3":320},"RULER_FAVORED_ITEMS":{"big_attack":["defense","amplify"],"swarm":["aoe","confuse"],"attrition":["cleanse_heal","big"],"sustained":["attack_down","heal"]},"OPPOSITE_REGION":{"N":"S","S":"N","E":"W","W":"E"},"RARE_ITEMS":["big","amplify"]};
+/* ItemHex Normal. Rules ported from balance_runner_normal.py (2026-09-25).
+   No bot scoring, auto purchase, target selection or route selection is used. */
+const C=DATA.CFG, TYPES=DATA.ITEM_TYPES, RELICS=DATA.NORMAL_RELIC_TYPES, RARES=DATA.RARE_ITEMS, TREASURE_ONLY=['big'], COMMON=TYPES.filter(t=>!RARES.includes(t)), NORMAL_DROPS=['heal','cleanse_heal','single','poison','defense','confuse'], ELITE_EXCLUDED=['big','amplify'], EVENT_ITEMS=TYPES.filter(t=>!TREASURE_ONLY.includes(t));
+const DIRS=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+const key=(q,r)=>q+','+r, coord=k=>k.split(',').map(Number);
+const dist=(q,r)=>(Math.abs(q)+Math.abs(r)+Math.abs(q+r))/2;
+const layer=(q,r)=>dist(q,r)<=5?1:dist(q,r)<=9?2:3;
+const region=(q,r)=>Math.abs(q+r*.5)>=Math.abs(r)?(q+r*.5>=0?'E':'W'):(-r>=0?'N':'S');
+const rulerDir=(q,r,reg)=>{const x=q+r*.5,y=r;if(reg==='E')return x>0&&Math.abs(y)<=Math.abs(x)*.45;if(reg==='W')return x<0&&Math.abs(y)<=Math.abs(x)*.45;if(reg==='N')return y<0&&Math.abs(x)<=Math.abs(y)*.45;return y>0&&Math.abs(x)<=Math.abs(y)*.45};
+const moveLevel=_=>C.base_move;
+const XP_REQ={1:4,2:6,3:8,4:10,5:11,6:13,7:15,8:17,9:19};
+const xpRequired=l=>XP_REQ[l]??(19+Math.max(0,l-9)*2);
+const visionLevel=l=>l<=2?2:l<=4?3:l<=7?4:l<=10?5:6;
+function hashSeed(str){let h=2166136261>>>0;for(const ch of String(str)){h^=ch.codePointAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function random(seed){let a=hashSeed(seed);const f=()=>{a=(a+0x6D2B79F5)>>>0;let t=Math.imul(a^a>>>15,a|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};f.pick=xs=>xs[Math.floor(f()*xs.length)];f.sample=(xs,n)=>{xs=xs.slice();const out=[];while(out.length<n&&xs.length)out.push(xs.splice(Math.floor(f()*xs.length),1)[0]);return out};return f}
+// Final numeric outcomes are floored only after all multipliers/modifiers are applied.
+const cut=v=>Math.floor(Number(v)+1e-9);
+const pyround=cut;
+const names={heal:'回復',cleanse_heal:'状態回復',single:'単体攻撃',big:'大単体攻撃',aoe:'全体攻撃',poison:'毒',amplify:'増幅',buff:'攻撃強化',defense:'防御',confuse:'混乱',attack_down:'攻撃低下',move:'移動',directional_warp:'方位転移',pot:'つぼ'};
+const relicNames={shop_discount:'購入費削減',xp_up:'経験値アップ',first_guard:'初段防御',first_strike:'初撃強打',item_saver:'アイテム消費なし',single_splash:'単体波及',terrain_ignore:'地形効果無視',reopen_roads:'一度踏んだ道を通れる',event_income:'イベント収入',vision_up:'視界拡大',max_hp_up:'最大HP上昇',regen_up:'自然回復上昇'};
+const archetypes={big_attack:'大技型',swarm:'集団型',attrition:'消耗型',sustained:'継続火力型'};
+const labels={normal:'通常',elite:'エリート',event:'イベント',shop:'ショップ',station:'駅',relic:'レリック',blocked:'侵入不可',ruler:'地域の主',start:'開始'};
+const fmt=n=>Number.isInteger(n)?String(n):String(Number(n.toFixed(4)));
+class NormalGameMapMixin {
+ log(s){this.messages.push(s)}
+ has(r){return this.p.normal.has(r)}
+ band(){return C.bands.find(b=>dist(this.q,this.r)<=b.max_dist)||C.bands.at(-1)}
+ updateKnown(){const b=this.has('vision_up')?C.normal_relic.vision_bonus:0,base=visionLevel(this.p.level);const sources=[[[this.q,this.r],base+b],...[...this.passed,...this.stopped].map(k=>[coord(k),1+b])];for(const[k,t]of this.map)if(!this.known.has(k)&&sources.some(([c,r])=>dist(t.q-c[0],t.r-c[1])<=r))this.known.add(k)}
+ paths(mp=this.mp){const origin=key(this.q,this.r),queue=[{k:origin,cost:0,path:[],seq:0}],best=new Map([[origin,0]]),ends=new Map();let seq=0;
+  while(queue.length){queue.sort((a,b)=>a.cost-b.cost||a.seq-b.seq);const cur=queue.shift();if(cur.cost!==best.get(cur.k))continue;const[q,r]=coord(cur.k);for(const[dq,dr]of DIRS){const nq=q+dq,nr=r+dr,k=key(nq,nr),t=this.map.get(k);if(!t)continue;if(t.kind==='blocked'&&!this.has('terrain_ignore'))continue;if(this.stopped.has(k)&&k!==origin&&t.kind!=='station'&&!this.has('reopen_roads'))continue;const n=cur.cost+1;if(n>mp)continue;const path=[...cur.path,k];if((t.kind==='station'||(!this.passed.has(k)&&!this.stopped.has(k)))&&(!ends.has(k)||n<ends.get(k).cost))ends.set(k,{path,cost:n});if(n<(best.get(k)??Infinity)){best.set(k,n);queue.push({k,cost:n,path,seq:++seq})}}}
+  return ends;
+ }
+ beginTurn(){this.phase='map';this.fieldUsed=0;this.fieldHealCost=false;this.mp=moveLevel(this.p.level);this.checkTrapped()}
+ teleportCandidates(reg){const L=layer(this.q,this.r);return[...this.map].filter(([k,t])=>layer(t.q,t.r)===L&&region(t.q,t.r)===reg&&!this.stopped.has(k)&&!this.passed.has(k)&&t.kind!=='ruler'&&(t.kind!=='blocked'||this.has('terrain_ignore')))}
+ canDirectionalWarp(){return this.p.items.directional_warp>0&&DATA.PRICE_REGIONS.some(reg=>this.teleportCandidates(reg).length)}
+ checkTrapped(){if(this.phase!=='map')return;const slots=Math.max(0,this.fieldLimit()-this.fieldUsed),n=Math.min(slots,this.p.items.move),bonus=this.fieldMoveBonus(1),canWarp=slots>0&&this.canDirectionalWarp();if(!this.paths().size&&!this.paths(this.mp+n*bonus).size&&!canWarp)this.end(false,'行き止まり')}
+ move(k){if(this.phase!=='map')return false;const route=this.paths().get(k);if(!route)return false;const boosted=this.mp>C.base_move;for(const x of route.path.slice(0,-1))if(!this.stopped.has(x)&&this.map.get(x)?.kind!=='station')this.passed.add(x);this.stopped.add(k);this.passed.delete(k);[this.q,this.r]=coord(k);this.path.push(...route.path.map(coord));this.updateKnown();if(boosted)this.mp=moveLevel(this.p.level);const t=this.map.get(k);this.log(`${this.turn}T：第${layer(this.q,this.r)}層・${labels[t.kind]}へ移動（${route.cost}MP）。`);this.resolveTile(t);return true}
+ fieldItem(t){if(this.phase!=='map'||!['heal','cleanse_heal','move','directional_warp'].includes(t)||this.p.items[t]<=0)return false;if(this.fieldUsed>=this.fieldLimit())return false;if(t==='directional_warp'){if(!this.canDirectionalWarp())return false;this.teleportChoice={layer:layer(this.q,this.r)};this.phase='directionTeleport';return true}if(t!=='move'&&!this.fieldHealCost&&this.mp<1)return false;if(['heal','cleanse_heal'].includes(t)&&!this.tipSeen.has('field_recovery'))return this.showTip('field_recovery','探索中の回復','探索中の回復・状態回復は、そのターン最初の使用時だけ移動力を1消費します。','map',()=>this.fieldItem(t));this.p.items[t]--;this.stats.items++;this.fieldUsed++;const usedRecovery=t!=='move';if(t==='move')this.mp+=this.fieldMoveBonus(1);else{this.p.hp=Math.min(this.p.maxHp,this.p.hp+this.itemValue(t,1));if(!this.fieldHealCost){this.mp--;this.fieldHealCost=true}if(t==='cleanse_heal')this.p.poison=0}this.log(`${names[t]}を使用。残り移動力 ${this.mp}。`);if(usedRecovery&&!this.paths().size){this.log('回復でこのターンの移動力を使い切ったため、ターン終了。');this.finishTile();return true}this.checkTrapped();return true}
+ itemValue(t,m=1){const p=this.p;let v=0;if(t==='heal')v=C.items.heal+p.regen;else if(t==='cleanse_heal')v=C.items.cleanse_heal+p.regen;else if(t==='single')v=C.items.single+p.atk;else if(t==='aoe')v=C.items.aoe+p.atk*.5+(p.ruler.has('swarm')?2:0);else if(t==='big')v=C.items.big+p.atk*1.5+(p.ruler.has('big_attack')?6:0);else if(t==='poison')v=C.items.poison_damage+p.regen*.25+(p.ruler.has('attrition')?2:0);return cut(v*m)}
+ addXp(v){const p=this.p;p.xp+=cut(v)+(this.has('xp_up')?C.normal_relic.xp_bonus:0);let leveled=false;while(p.xp>=xpRequired(p.level)){p.xp-=xpRequired(p.level);p.level++;p.maxHp+=C.level.hp;p.hp+=C.level.hp;p.atk+=C.level.atk;p.regen+=C.level.regen;leveled=true;this.log(`レベルアップ Lv${p.level}。`)}if(leveled)this.updateKnown()}
+ giveItems(n,pool=EVENT_ITEMS){const got=[];for(let i=0;i<n;i++){const t=this.rng.pick(pool);this.p.items[t]++;got.push(names[t])}if(got.length)this.log(`獲得：${got.join('・')}`);return got}
+ applyRelic(r){if(this.has(r))return;this.p.normal.add(r);if(r==='max_hp_up'){this.p.maxHp+=C.normal_relic.max_hp_bonus;this.p.hp+=C.normal_relic.max_hp_bonus}else if(r==='regen_up')this.p.regen+=C.normal_relic.regen_bonus;else if(r==='vision_up')this.updateKnown()}
+ grantRelic(){const missing=RELICS.filter(r=>!this.has(r));if(!missing.length)return null;const r=this.rng.pick(missing);this.applyRelic(r);this.log(`レリック：${relicNames[r]}を獲得。`);return r}
+ notice(title,text){this.phase='notice';this.noticeData={title,text}}
+ showTip(key,title,text,returnPhase='map',after=null){if(key)this.tipSeen.add(key);this.tipData={title,text,returnPhase,after};this.phase=returnPhase||this.phase;return true}
+ continueTip(){if(!this.tipData)return false;const d=this.tipData;this.tipData=null;this.phase=d.returnPhase||this.phase;return typeof d.after==='function'?d.after():true}
+ continue(){if(this.phase!=='notice')return false;this.finishTile();return true}
+ finishTile(){this.completed=this.turn;if(this.turn>=C.turns){this.startCombat('boss','none');return}this.turn++;this.beginTurn()}
+ openStation(){const here=key(this.q,this.r),choices=Object.entries(this.stations).filter(([,k])=>k!==here);this.stationData={choices};this.phase='station'}
+ chooseStation(reg){if(this.phase!=='station'||!this.stations[reg])return false;const target=this.stations[reg];if(target===key(this.q,this.r))return false;[this.q,this.r]=coord(target);this.stopped.add(target);this.passed.delete(target);this.path.push([this.q,this.r]);this.updateKnown();const label={E:'東',W:'西',N:'北',S:'南'}[reg];this.log(`駅で${label}の駅へ移動。ターン終了。`);this.stationData=null;this.finishTile();return true}
+ chooseDirectionTeleport(reg){if(this.phase!=='directionTeleport'||!['E','W','N','S'].includes(reg)||this.p.items.directional_warp<=0)return false;const candidates=this.teleportCandidates(reg);if(!candidates.length)return false;this.p.items.directional_warp--;this.stats.items++;this.fieldUsed++;const[k,t]=this.rng.pick(candidates);this.q=t.q;this.r=t.r;this.stopped.add(k);this.passed.delete(k);this.updateKnown();this.path.push([this.q,this.r]);const label={E:'東',W:'西',N:'北',S:'南'}[reg];this.log(`方位転移を使用。${label}地域へ転移。到着マスの内容は発生しません。`);this.teleportChoice=null;this.phase='map';if(!this.paths().size){this.log('転移後に通常移動できるマスがないためターン終了。');this.finishTile()}return true}
+ fieldLimit(){return 1}
+ fieldMoveBonus(mult=1){return cut(C.items.move_bonus*mult)}
+}
+
+class NormalGameEventMixin {
+ event(){const p=this.p,L=layer(this.q,this.r),start=this.messages.length,income=this.has('event_income')?C.normal_relic.event_gold:0;if(income){p.gold+=income;this.log(`イベント収入 +${income}G。`)}if(p.keys>0&&this.rng()<DATA.TREASURE_FIND_CHANCE){p.keys=Math.max(0,p.keys-1);p.items.big+=2;const gold=DATA.TREASURE_GOLD_BY_LAYER[L];p.gold+=gold;this.log(`宝：大単体攻撃 +2 / +${gold}G。`);const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push('大単体攻撃 ×2',`+${gold}G`);this.notice('宝を発見',lines.join('\n'));return}
+  const events=[...DATA.EVENT_TYPES];if(p.keyObtained)events.splice(events.indexOf('treasure_key'),1);if(this.buyoutSeen)events.splice(events.indexOf('scarce_item_buyout'),1);const hiddenRelic=[...this.map].some(([k,t])=>t.kind==='relic'&&!this.stopped.has(k)&&!this.known.has(k));if(!hiddenRelic&&events.includes('relic_reveal'))events.splice(events.indexOf('relic_reveal'),1);const huntTarget=[...this.map].some(([k,t])=>layer(t.q,t.r)===L&&t.kind==='elite'&&!this.stopped.has(k)&&!this.passed.has(k));if((p.eliteHunts.has(L)||!huntTarget)&&events.includes('elite_hunt'))events.splice(events.indexOf('elite_hunt'),1);const e=this.rng.pick(events);
+  if(e==='supply_find'){const got=this.giveItems(1+Math.floor(this.rng()*2));this.eventData={start,got,income};this.phase='eventSupply';return}
+  if(e==='recovery'){this.eventData={start,income};this.phase='eventRecovery';return}
+  if(e==='treasure_key'){p.keys=1;p.keyObtained=true;this.log('宝の鍵を入手。以降のイベントで宝を発見することがあります。');const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push('宝の鍵 ×1','以降のイベントで宝を発見することがあります。');this.notice('宝の鍵',lines.join('\n'));return}
+  if(e==='force_exchange'){const held=TYPES.filter(t=>p.items[t]>0);if(!held.length){const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push('交換できるアイテムがありません。');this.notice('強制交換',lines.join('\n'));return}const counts=[...new Set(held.map(t=>p.items[t]))].sort((a,b)=>a-b),donors=[];for(const n of counts){const group=this.rng.sample(held.filter(t=>p.items[t]===n&&!donors.includes(t)),held.filter(t=>p.items[t]===n&&!donors.includes(t)).length);for(const t of group){donors.push(t);if(donors.length>=2)break}if(donors.length>=2)break}const options=donors.map(donor=>{const pool=DATA.EVENT_EXCHANGE_REWARDS.filter(t=>t!==donor);return{donor,recv:this.rng.pick(pool)}});this.exchange={options,start,income};this.phase='exchange';return}
+  if(e==='scarce_item_buyout'){this.buyoutSeen=true;const held=TYPES.filter(t=>p.items[t]>0);if(!held.length){const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push('買い取り対象のアイテムがありません。');this.notice('高額買取',lines.join('\n'));return}const counts=[...new Set(held.map(t=>p.items[t]))].sort((a,b)=>a-b),ordered=[];for(const n of counts)ordered.push(...this.rng.sample(held.filter(t=>p.items[t]===n),held.filter(t=>p.items[t]===n).length));this.buyout={ordered,start,income};this.phase='buyout';return}
+  if(e==='accident'){const canHp=p.hp>10,canGold=p.gold>=20;if(!canHp&&!canGold){const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push('損失なし');this.notice('事故',lines.join('\n'));return}this.eventData={start,canHp,canGold,income};this.phase='accident';return}
+  if(e==='relic_reveal'){for(const[k,t]of this.map)if(t.kind==='relic'&&!this.stopped.has(k))this.known.add(k);this.log('未取得のレリックマスを全マップで発見。');const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push('未取得のレリックマスを全マップに表示しました。');this.notice('レリック発見',lines.join('\n'));return}
+  if(e==='elite_hunt'){p.eliteHunts.add(L);this.log(`第${L}層のエリート討伐依頼を受注。位置は公開されません。`);const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push(`第${L}層のエリートを倒すと`, '大単体攻撃 ×1', '位置は公開されません。');this.notice('エリート討伐依頼',lines.join('\n'));return}
+  if(e==='cheap_shop'){this.openShop(.5,true);return}
+ }
+ chooseSupply(extra){if(this.phase!=='eventSupply')return false;const initial=this.eventData?.got||[],income=this.eventData?.income||0,lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push(`獲得：${initial.length?initial.join('・'):'なし'}`);if(extra){if(this.p.hp<=10)return false;this.p.hp-=10;this.log('HP -10。');const added=this.giveItems(1+Math.floor(this.rng()*2));lines.push('HP -10',`追加獲得：${added.length?added.join('・'):'なし'}`)}else this.log('追加探索はしない。');this.notice('物資発見',lines.join('\n'));return true}
+ chooseRecovery(moveMore){if(this.phase!=='eventRecovery')return false;const income=this.eventData?.income||0;if(moveMore){if(!this.paths(1).size)return false;this.phase='eventMove';return true}const before=this.p.hp,v=this.itemValue('heal',1);this.p.hp=Math.min(this.p.maxHp,this.p.hp+v);const healed=Math.max(0,this.p.hp-before);this.log(`HPを${fmt(v)}回復。`);const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push(`HP +${fmt(healed)}`);this.notice('回復',lines.join('\n'));return true}
+ eventMove(k){if(this.phase!=='eventMove')return false;const route=this.paths(1).get(k);if(!route)return false;for(const x of route.path.slice(0,-1))if(!this.stopped.has(x)&&this.map.get(x)?.kind!=='station')this.passed.add(x);this.stopped.add(k);this.passed.delete(k);[this.q,this.r]=coord(k);this.path.push(...route.path.map(coord));this.updateKnown();const t=this.map.get(k);this.log(`イベント効果でもう1マス進み、${labels[t.kind]}へ移動。`);this.phase='map';this.resolveTile(t);return true}
+ chooseExchange(i){if(this.phase!=='exchange'||!this.exchange?.options?.[i])return false;const{donor,recv}=this.exchange.options[i],income=this.exchange.income||0;this.p.items[donor]--;this.p.items[recv]+=2;this.log(`${names[donor]} -1 → ${names[recv]} +2。`);const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push(`${names[donor]} ×1 → ${names[recv]} ×2`);this.notice('強制交換',lines.join('\n'));return true}
+ buyoutUnits(qty){const out=[];for(const t of this.buyout?.ordered||[])for(let i=0;i<this.p.items[t]&&out.length<qty;i++)out.push(t);return out}
+ buyoutPreview(qty){const units=this.buyoutUnits(qty),counts={};let gold=0;for(const t of units){counts[t]=(counts[t]||0)+1;gold+=this.itemSellPrice(t)*2}return{units,counts,gold}}
+ acceptBuyout(qty){if(this.phase!=='buyout'||![1,2,3].includes(qty))return false;const pr=this.buyoutPreview(qty),income=this.buyout.income||0;if(pr.units.length!==qty)return false;for(const t of pr.units)this.p.items[t]--;this.p.gold+=pr.gold;const detail=Object.entries(pr.counts).map(([t,n])=>`${names[t]} ×${n}`).join('・');this.log(`${detail}を高額買取で売却。+${fmt(pr.gold)}G。`);const lines=[];if(income)lines.push(`イベント収入 +${income}G`);lines.push(detail,`+${fmt(pr.gold)}G`);this.notice('高額買取',lines.join('\n'));return true}
+ chooseAccident(kind){if(this.phase!=='accident')return false;const income=this.eventData?.income||0,lines=[];if(income)lines.push(`イベント収入 +${income}G`);if(kind==='hp'&&this.p.hp>10){this.p.hp-=10;this.log('事故：HP -10。');lines.push('HP -10')}else if(kind==='gold'&&this.p.gold>=20){this.p.gold-=20;this.log('事故：-20G。');lines.push('-20G')}else return false;this.notice('事故',lines.join('\n'));return true}
+}
+
+class NormalGameShopMixin {
+ shopPriceFactor(t){return random(`${this.seed}|shop-price|${this.q}|${this.r}|${t}`).pick(C.shop_price_variation)}
+ purchasePriceFactor(){return this.has('shop_discount')?1-C.normal_relic.shop_discount:1}
+ sellPriceFactor(){return this.has('shop_discount')?1-C.normal_relic.shop_discount:C.shop_sell_mult}
+ itemMarketPrice(t,m=1){const profile=this.market[region(this.q,this.r)],role=profile.favored.includes(t)?'favored':profile.weak.includes(t)?'weak':'neutral',base=C.shop_item_prices[t]??C.shop_price;return base*C.regional_shop_mult[layer(this.q,this.r)][role]*this.shopPriceFactor(t)*m}
+ itemRawPrice(t,m=1){return this.itemMarketPrice(t,m)*this.purchasePriceFactor()}
+ itemPrice(t,m=1){return cut(this.itemRawPrice(t,m))}
+ itemSellPrice(t,m=1){return cut(this.itemMarketPrice(t,m)*this.sellPriceFactor())}
+ offerFactor(t){const profile=this.market[region(this.q,this.r)],role=profile.favored.includes(t)?'favored':profile.weak.includes(t)?'weak':'neutral';return C.regional_shop_offer_mult[layer(this.q,this.r)][role]}
+ shopPool(){const profile=this.market[region(this.q,this.r)];return TYPES.filter(t=>!TREASURE_ONLY.includes(t)&&(!RARES.includes(t)||profile.favored.includes(t)))}
+ weightedOfferPick(seq,rng=this.rng){const pool=[...seq],ws=pool.map(t=>this.offerFactor(t)),total=ws.reduce((a,b)=>a+b,0);let x=rng()*total;for(let i=0;i<pool.length;i++){x-=ws[i];if(x<0)return pool[i]}return pool[pool.length-1]}
+ weightedOfferSample(seq,n,rng=this.rng){const pool=[...seq],out=[];for(let i=0;i<n&&pool.length;i++){const t=this.weightedOfferPick(pool,rng);out.push(t);pool.splice(pool.indexOf(t),1)}return out}
+ potQuote(){const n=C.pot_prices.length,shift=hashSeed(`${this.seed}|pot-grid`)%n,idx=((shift+3*this.q+5*this.r)%n+n)%n;return C.pot_prices[idx]}
+ potMarketPrice(m=1){return this.potQuote()*m}
+ potRawPrice(m=1){return this.potMarketPrice(m)*this.purchasePriceFactor()}
+ potPrice(m=1){return cut(this.potRawPrice(m))}
+ potSellPrice(m=1){return cut(this.potMarketPrice(m)*this.sellPriceFactor())}
+ potReferencePrice(){return C.pot_prices[Math.floor(C.pot_prices.length/2)]}
+ openShop(mult=1,eventShop=false){const pool=this.shopPool(),recovery=['heal','cleanse_heal'].filter(t=>pool.includes(t));let offers=[],signature='';for(let attempt=0;attempt<8;attempt++){const srng=random(`${this.seed}|shop-offers|${this.q}|${this.r}|${attempt}`),first=recovery.length&&srng()<.6?this.weightedOfferPick(recovery,srng):this.weightedOfferPick(pool,srng),remaining=pool.filter(t=>t!==first),singleBias=Math.min(1,.6*this.offerFactor('single')),second=remaining.includes('single')&&srng()<singleBias?'single':this.weightedOfferPick(remaining,srng),rest=remaining.filter(t=>t!==second);offers=[first,second,...this.weightedOfferSample(rest,4,srng)];signature=[...offers].sort().join('|');if(!this.shopOfferSignatures.has(signature))break}this.shopOfferSignatures.add(signature);const missing=RELICS.filter(r=>!this.has(r));
+  // Runner draws once for the bot's reserve estimate, then again for the actual sale.
+  if(missing.length)this.rng.pick(missing);const relic=missing.length?this.rng.pick(missing):null;
+  this.shop={mult,offers,relic,boughtRelic:false,actionUsed:false,eventShop};if(!eventShop&&!this.tipSeen.has('shop'))this.showTip('shop','ショップ','見るだけならターン消費なし。\n購入・売却すると、店を出たときに1ターン進みます。','shop');else this.phase='shop';
+ }
+ relicPrice(){return cut(C.shop_relic_price*this.shop.mult*this.purchasePriceFactor())}
+ trade(t,buy){if(this.phase!=='shop')return false;const s=this.shop,p=this.p;if(buy&&t!=='pot'&&!s.offers.includes(t))return false;if(![...TYPES,'pot'].includes(t))return false;const v=buy?(t==='pot'?this.potPrice(s.mult):this.itemPrice(t,s.mult)):(t==='pot'?this.potSellPrice(s.mult):this.itemSellPrice(t,s.mult));if(buy){if(p.gold+1e-9<v)return false;p.gold=Math.max(0,p.gold-v);p.items[t]++}else{if(p.items[t]<=0)return false;p.items[t]--;p.gold+=v}s.actionUsed=true;this.log(`${names[t]}を${fmt(v)}Gで${buy?'購入':'売却'}。`);return true}
+ buyRelic(){if(this.phase!=='shop'||!this.shop.relic||this.shop.boughtRelic)return false;const s=this.shop,r=s.relic,v=this.relicPrice();if(this.p.gold+1e-9<v||this.has(r))return false;this.p.gold=Math.max(0,this.p.gold-v);this.applyRelic(r);s.boughtRelic=true;s.actionUsed=true;this.log(`${relicNames[r]}を${fmt(v)}Gで購入。`);if(r==='terrain_ignore')return this.showTip('terrain_ignore','地形効果無視',relicDesc[r],'shop');return true}
+ closeShop(){if(this.phase!=='shop')return false;const s=this.shop;this.shop=null;if(s.eventShop||s.actionUsed){this.finishTile()}else{this.phase='map';this.log('ショップを見るだけで出た。ターンは消費しない。');this.checkTrapped()}return true}
+}
+
+class NormalGameCombatMixin {
+ regionalSpec(type){const b=this.band(),single=b.enemy.normalSingle,multi=b.enemy.normalMulti,H=single.hp[0],A=single.atk[0];if(type==='big_attack')return{hp:[cut(H)],atk:[Math.max(1,cut(A*.65))],heavy_damage:cut(Math.max(A+4,A*2.4)),cycle:3};if(type==='swarm')return{hp:Array(3).fill(cut(multi.hp.reduce((a,b)=>a+b)/3)),atk:Array(3).fill(cut(multi.atk.reduce((a,b)=>a+b)*1.05/3))};if(type==='attrition')return{hp:[cut(H*1.05)],atk:[Math.max(1,cut(A*.7))],poison_damage:Math.max(2,cut(A*.3)),poison_turns:3,poison_every:3};return{hp:[cut(H*1.05)],atk:[cut(A*1.15)]}}
+ startCombat(kind,reward,ruler=null,regional=null,hpRatio=1){const spec=kind==='boss'?C.boss:kind==='ruler'?C.ruler[ruler]:regional?this.regionalSpec(regional):this.band().enemy[kind];this.combat={kind,reward,ruler,regional,spec,round:1,used:0,baseAtk:this.p.atk,amp:1,defense:0,firstGuard:this.has('first_guard'),firstAttack:true,enemies:spec.hp.map((h,i)=>({hp:hpRatio<1?Math.max(1,cut(h*hpRatio)):h,maxHp:h,atk:spec.atk[i],role:kind==='boss'?(spec.roles?.[i]||''):'',poison:0,poisonMult:1,confuse:0,down:0,downRatio:0}))};this.phase='combat';this.log(kind==='boss'?'30ターン終了：最終ボス戦。':'戦闘開始。')}
+ alive(){return this.combat.enemies.filter(e=>e.hp>0)}
+ effectMult(){return this.mainRelic==='power_item'?C.items.power_relic_mult:1}
+ double(){return this.mainRelic==='double_items'}
+ consume(t){this.stats.items++;if(!(this.has('item_saver')&&this.rng()<C.normal_relic.item_save_chance))this.p.items[t]--;else this.log('アイテム消費なしが発動。')}
+ act(t,index=0){if(this.phase!=='combat'||this.p.hp<=0)return false;const c=this.combat,p=this.p,e=c.enemies[index],targeted=['attack','single','big'].includes(t);if(targeted&&(!e||e.hp<=0))return false;if(t==='attack'&&c.used>0)return false;if(t!=='attack'&&(!TYPES.includes(t)||t==='move'||p.items[t]<=0||c.used>=(this.double()?2:1)))return false;
+  const power=this.effectMult(),amp=c.amp,mult=power*amp;
+  const splash=(e,v)=>{if(this.has('single_splash')){const s=cut(v*C.normal_relic.single_splash_ratio);for(const other of this.alive())if(other!==e)other.hp-=s}};
+  if(t==='attack'){const v=cut(p.atk*(c.firstAttack&&this.has('first_strike')?C.normal_relic.first_strike_mult:1));e.hp-=v;splash(e,v);c.firstAttack=false;this.log(`通常攻撃 ${fmt(v)}。`)}
+  else{if(t==='heal'||t==='cleanse_heal'){p.hp=Math.min(p.maxHp,p.hp+this.itemValue(t,mult));if(t==='cleanse_heal')p.poison=0}
+   else if(t==='single'){const v=this.itemValue(t,mult);e.hp-=v;splash(e,v)}else if(t==='big')e.hp-=this.itemValue(t,mult);else if(t==='aoe')for(const enemy of this.alive())enemy.hp-=this.itemValue(t,mult);
+   else if(t==='poison'){for(const enemy of this.alive()){enemy.poison=Math.max(enemy.poison,C.items.poison_turns);enemy.poisonMult=Math.max(enemy.poisonMult,mult)}}
+   else if(t==='amplify')c.amp=Math.max(c.amp,C.items.amplify*power);
+   else if(t==='buff')p.atk+=cut((C.items.buff_atk+(p.ruler.has('sustained')?1:0))*mult);
+   else if(t==='defense')c.defense=Math.max(c.defense,1-Math.pow(Math.max(0,1-C.items.defense_ratio),mult));
+   else if(t==='confuse'){const d=Math.max(1,cut(C.items.confuse_turns*amp));for(const enemy of this.alive())enemy.confuse=Math.max(enemy.confuse,d)}
+   else if(t==='attack_down'){const d=Math.max(1,cut(C.items.attack_down_turns*amp)),ratio=Math.min(1,C.items.attack_down_ratio*power);for(const enemy of this.alive()){enemy.down=Math.max(enemy.down,d);enemy.downRatio=Math.max(enemy.downRatio,ratio)}}
+   this.consume(t);if(t!=='amplify')c.amp=1;c.used++;this.log(`${names[t]}を使用。`);
+  }
+  if(!this.alive().length){this.winCombat();return true}if(t==='attack'||!this.double()||c.used>=2)this.retaliate();return true;
+ }
+ endItems(){if(this.phase!=='combat'||this.combat.used!==1||!this.double())return false;this.retaliate();return true}
+ bossPhase(){const c=this.combat,body=c?.enemies.find(e=>e.role==='body');if(!body||body.maxHp<=0)return 2;const ratio=Math.max(0,body.hp)/body.maxHp;return ratio<=.35?2:ratio<=.70?1:0}
+ enemyDamage(e){const c=this.combat,type=c.ruler||c.regional,down=e.down>0?(e.downRatio||C.items.attack_down_ratio):0;if(c.kind==='boss'){const role=e.role,pos=(c.round-1)%(role==='poison_add'?c.spec.poison_cycle:c.spec.heavy_cycle||1);if(role==='body')return cut(c.spec.body_damage[this.bossPhase()]*(1-down));if(role==='poison_add')return pos===0?0:cut(e.atk*(1-down));if(role==='heavy_add')return pos===1?0:pos===2?cut(c.spec.heavy_damage*(1-down)):cut(e.atk*(1-down));return cut(e.atk*(1-down))}if(type==='big_attack'){const phase=(c.round-1)%c.spec.cycle;return phase===0?cut(e.atk*(1-down)):phase===1?0:cut(c.spec.heavy_damage*(1-down))}return cut(e.atk*(1-down))}
+ retaliate(){const c=this.combat,p=this.p,type=c.ruler||c.regional,alive=this.alive().slice();let total=0;
+  const hit=e=>{const damage=this.enemyDamage(e);if(damage<=0)return;if(e.confuse>0){const target=this.rng.pick(['player',...this.alive()]);if(target==='player')total+=damage;else target.hp-=damage}else total+=damage};
+  if(c.kind==='boss'){for(const e of alive)if(e.hp>0){if(e.role==='poison_add'&&(c.round-1)%c.spec.poison_cycle===0){if(e.confuse<=0)p.poison=Math.max(p.poison,c.spec.poison_turns)}else hit(e)}}
+  else if(type==='big_attack'&&alive.length)hit(alive[0]);else{for(const e of alive)if(e.hp>0)hit(e);if(type==='attrition'&&alive.length&&(c.round-1)%c.spec.poison_every===0&&alive[0].confuse<=0)p.poison=Math.max(p.poison,c.spec.poison_turns)}
+  if(total>0&&c.defense>0){total*=Math.max(0,1-c.defense);c.defense=0}if(total>0&&c.firstGuard){total*=1-C.normal_relic.first_guard_ratio;c.firstGuard=false}total=cut(total);p.hp-=total;this.log(`敵反撃 ${fmt(total)}。`);
+  if(p.poison>0){const dmg=c.kind==='boss'?c.spec.poison_damage:type==='attrition'?c.spec.poison_damage:0;p.hp-=dmg;p.poison--;this.log(`毒ダメージ ${fmt(dmg)}。`)}
+  for(const e of this.alive()){if(e.poison>0){e.hp-=this.itemValue('poison',e.poisonMult);e.poison--;if(!e.poison)e.poisonMult=1}if(e.confuse>0)e.confuse--;if(e.down>0){e.down--;if(!e.down)e.downRatio=0}}
+  if(p.hp<=0){p.atk=c.baseAtk;p.poison=0;this.end(false,c.kind==='boss'?'最終ボスに敗北':'戦闘で敗北');return}
+  // The runner terminates its loop at 80 rounds and proceeds through victory handling.
+  if(!this.alive().length||c.round>=80){this.winCombat();return}c.round++;c.used=0;
+ }
+ winCombat(){const c=this.combat,p=this.p,hpBefore=p.hp,levelBefore=p.level,itemBefore={...p.items};p.atk=c.baseAtk;p.poison=0;p.hp=Math.min(p.maxHp,p.hp+p.regen);const recovered=Math.max(0,p.hp-hpBefore),start=this.messages.length;this.log(`戦闘勝利：自然回復 ${fmt(p.regen)}。`);let rewardXp=0,rewardGold=0;
+  if(['normal','elite'].includes(c.reward)){const rw=this.band().reward[c.kind];rewardGold=rw.gold;rewardXp=cut(rw.xp)+(this.has('xp_up')?C.normal_relic.xp_bonus:0);p.gold+=rw.gold;this.addXp(rw.xp);this.log(`+${rw.gold}G / EXP +${rw.xp}`);if(c.reward==='elite'){const normalPool=TYPES.filter(t=>!ELITE_EXCLUDED.includes(t)&&(C.shop_item_prices[t]??C.shop_price)<40),rarePool=TYPES.filter(t=>!ELITE_EXCLUDED.includes(t)&&(C.shop_item_prices[t]??C.shop_price)>=40);this.giveItems(1,normalPool);this.giveItems(1,rarePool);const L=layer(this.q,this.r);if(p.eliteHunts.has(L)){p.eliteHunts.delete(L);this.giveItems(1,['big']);this.log(`第${L}層のエリート討伐依頼を達成。`)}}else this.giveItems(C.drop_count[c.reward],NORMAL_DROPS)}
+  else if(c.reward==='ruler'){rewardGold=C.ruler.gold;rewardXp=cut(C.ruler.xp)+(this.has('xp_up')?C.normal_relic.xp_bonus:0);p.gold+=C.ruler.gold;this.addXp(C.ruler.xp);this.giveItems(C.drop_count.ruler,COMMON);p.ruler.add(c.ruler);this.defeated.add(region(this.q,this.r));this.log(`${archetypes[c.ruler]}の主レリックを獲得。`)}
+  const gained=Object.entries(p.items).filter(([t,n])=>n>(itemBefore[t]??0)).map(([t,n])=>`${names[t]} ×${n-(itemBefore[t]??0)}`),lines=[];if(recovered>0)lines.push(`HP +${fmt(recovered)}`);if(rewardXp||rewardGold)lines.push(`EXP +${fmt(rewardXp)} / +${fmt(rewardGold)}G`);if(p.level>levelBefore)lines.push(`Lv ${levelBefore} → ${p.level}`);if(gained.length)lines.push(`獲得：${gained.join('・')}`);if(c.reward==='ruler')lines.push(`主レリック：${archetypes[c.ruler]}`);
+  this.combat=null;
+  if(c.kind==='boss'){this.end(true,'最終ボス撃破');return}
+  this.notice('戦闘勝利',lines.join('\n'));
+ }}
+
+class NormalGame {
+ constructor(seed){
+  this.seed=String(seed);this.rng=random(this.seed);this.q=0;this.r=0;this.turn=1;this.completed=0;this.phase='map';this.mainRelic=null;this.fieldUsed=0;this.fieldHealCost=false;
+  const start=C.player;this.p={hp:start.hp,maxHp:start.hp,atk:start.atk,regen:start.regen,level:start.level,xp:start.xp,gold:start.gold,items:Object.fromEntries([...TYPES,'pot'].map(t=>[t,start.start_items[t]??0])),normal:new Set(),ruler:new Set(),keys:0,keyObtained:false,eliteHunts:new Set(),poison:0};
+  this.map=new Map();this.stopped=new Set(['0,0']);this.passed=new Set();this.known=new Set();this.defeated=new Set();this.rulers={};this.stations={};this.shopOfferSignatures=new Set();this.path=[[0,0]];this.messages=[];this.tipSeen=new Set();this.tipData=null;this.buyoutSeen=false;this.eventData=null;this.buyout=null;this.exchange=null;this.stationData=null;this.result=null;this.stats={normal:0,elite:0,event:0,shop:0,station:0,ruler:0,items:0};
+  const rr=random(this.seed+'|ruler-types'),types=rr.sample(DATA.RULER_TYPES,4);this.regionTypes=Object.fromEntries(DATA.PRICE_REGIONS.map((r,i)=>[r,types[i]]));
+  this.market={};for(const reg of DATA.PRICE_REGIONS){const favored=[...DATA.RULER_FAVORED_ITEMS[this.regionTypes[reg]]],opp=DATA.OPPOSITE_REGION[reg],weak=[...DATA.RULER_FAVORED_ITEMS[this.regionTypes[opp]]];this.market[reg]={favored,weak}}
+  const layout=random(this.seed+'|map-layout'),R=C.map_radius,byLayer={1:[],2:[],3:[]};
+  for(let q=-R;q<=R;q++)for(let r=-R;r<=R;r++)if(dist(q,r)<=R&&(q||r))byLayer[layer(q,r)].push({q,r});
+  const rulerCells=new Set();
+  for(const reg of DATA.PRICE_REGIONS){const candidates=byLayer[3].filter(t=>rulerDir(t.q,t.r,reg)&&!rulerCells.has(key(t.q,t.r)));const t=layout.pick(candidates);rulerCells.add(key(t.q,t.r));this.rulers[reg]=key(t.q,t.r)}
+  this.map.set('0,0',{q:0,r:0,kind:'start'});
+  const stationCells=new Set();for(const reg of DATA.PRICE_REGIONS){const candidates=byLayer[2].filter(t=>region(t.q,t.r)===reg&&!stationCells.has(key(t.q,t.r)));const t=layout.pick(candidates),k=key(t.q,t.r);stationCells.add(k);this.stations[reg]=k}
+  for(const L of [1,2,3]){const coords=byLayer[L].filter(t=>!rulerCells.has(key(t.q,t.r))&&!stationCells.has(key(t.q,t.r))),kinds=[];for(const[k,n]of Object.entries(C.map_layer_counts[L]))if(k!=='station')for(let i=0;i<n;i++)kinds.push(k);const shuffled=layout.sample(coords,coords.length);if(kinds.length!==shuffled.length)throw new Error(`map layer ${L} count mismatch`);for(let i=0;i<shuffled.length;i++){const t=shuffled[i];this.map.set(key(t.q,t.r),{q:t.q,r:t.r,kind:kinds[i]})}}
+  for(const reg of DATA.PRICE_REGIONS){const k=this.stations[reg],[q,r]=coord(k);this.map.set(k,{q,r,kind:'station',stationRegion:reg})}
+  for(const reg of DATA.PRICE_REGIONS){const k=this.rulers[reg],[q,r]=coord(k);this.map.set(k,{q,r,kind:'ruler',rulerRegion:reg,rulerType:this.regionTypes[reg]})}
+  this.updateKnown();for(const k of Object.values(this.rulers))this.known.add(k);this.beginTurn();this.phase='mainRelic';this.log(`開始：回復・単体攻撃・全体攻撃を各1個、${C.player.gold}G所持。初期レリックを選択。`);this.showTip(null,'ゲーム開始','30ターン後に災厄がやってきます。\n探索してアイテムやレリックを集め、準備しましょう。\n詳しいルールは右上の「？」から確認できます。','mainRelic');
+ }
+ resolveTile(t){if(t.kind in this.stats)this.stats[t.kind]++;if(t.kind==='normal'){let regional=null;if(layer(this.q,this.r)>=2&&this.rng()<C.regional_normal_rate)regional=this.regionTypes[region(this.q,this.r)];const kind=regional?(regional==='swarm'?'normalMulti':'normalSingle'):(this.rng()<C.normal_multi_rate?'normalMulti':'normalSingle');this.startCombat(kind,'normal',null,regional)}
+  else if(t.kind==='elite')this.startCombat('elite','elite');else if(t.kind==='station')this.openStation();else if(t.kind==='ruler')this.startCombat('ruler','ruler',t.rulerType);else if(t.kind==='shop')this.openShop(1,false);else if(t.kind==='relic'){const r=this.grantRelic();this.notice('レリック獲得',r?`${relicNames[r]}\n${relicDesc[r]}`:'すべてのレリックを所持しています。')}else if(t.kind==='event')this.event();else if(t.kind==='blocked'&&this.has('terrain_ignore')){this.phase='map';this.log('侵入不可マス：地形効果無視によりターン消費なし。');this.checkTrapped()}else this.finishTile();
+ }
+ chooseMain(r){if(this.phase!=='mainRelic'||!['double_items','power_item'].includes(r))return false;this.mainRelic=r;this.log(`初期レリック：${r==='double_items'?'最大2アイテム':`1個強化 ×${C.items.power_relic_mult}`}。`);this.phase='map';this.checkTrapped();return true}
+ end(win,reason){if(this.phase==='combat')this.completed=this.turn;this.phase='end';this.result={win,reason};this.log(reason)}
+}
+
+function applyGameMixin(target,source){for(const name of Object.getOwnPropertyNames(source.prototype)){if(name==='constructor')continue;Object.defineProperty(target.prototype,name,Object.getOwnPropertyDescriptor(source.prototype,name))}}
+for(const mixin of [NormalGameMapMixin,NormalGameEventMixin,NormalGameShopMixin,NormalGameCombatMixin])applyGameMixin(NormalGame,mixin);
+if(typeof module!=='undefined')module.exports={NormalGame,C,DATA,random,key,coord,dist,layer,region,moveLevel,pyround};
+const $=id=>document.getElementById(id);
+let game,pendingAction=null,logged=0,rulerTourToken=0,mapPeek=false;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const relicDesc={shop_discount:'買値が15%安くなる。売値はその店の相場の85%。',xp_up:'戦闘で得るEXPが1増える。',first_guard:'戦闘で最初に受けるダメージを20%軽減。',first_strike:'戦闘で最初の通常攻撃が1.5倍。',item_saver:'戦闘でアイテムを使ったとき、15%の確率で減らない。',single_splash:'通常攻撃・単体攻撃のダメージの25%をほかの敵にも与える。大単体攻撃には効かない。',terrain_ignore:'侵入不可マスにも入れる。侵入不可マスに止まってもターンは経過せず、そのまま移動を続けられる。',reopen_roads:'一度止まったマスも通り抜けられる。もう一度止まることはできない。',event_income:'イベントに入るたび20Gを得る。',vision_up:'見える範囲が1マス広がる。',max_hp_up:'最大HPと現在HPが10増える。',regen_up:'自然回復が2増える。回復・状態回復・毒も強くなる。'};
+const rulerDesc={big_attack:'大単体攻撃のダメージ+6。',swarm:'全体攻撃のダメージ+2。',attrition:'毒の1回あたりダメージ+2。',sustained:'攻撃強化で上がる攻撃力+1。'};
+const itemGuide={
+ heal:['回復','戦闘・探索',`HPを「${C.items.heal}＋自然回復」回復。探索では、そのターン最初の回復系アイテム使用時に移動力を1使う。`],
+ cleanse_heal:['回復','戦闘・探索',`HPを「${C.items.cleanse_heal}＋自然回復」回復し、状態異常を解除。探索では、そのターン最初の回復系アイテム使用時に移動力を1使う。`],
+ single:['攻撃','戦闘',`敵1体に「${C.items.single}＋攻撃力」ダメージ。`],
+ big:['攻撃','戦闘',`敵1体に「${C.items.big}＋攻撃力×1.5」ダメージ。宝などで入手する強力な単体攻撃。`],
+ aoe:['攻撃','戦闘',`敵全体に「${C.items.aoe}＋攻撃力×0.5」ダメージ。`],
+ poison:['攻撃','戦闘',`敵全体に毒を付与。${C.items.poison_turns}ターン、毎ターンダメージを与える。`],
+ amplify:['補助','戦闘',`次に使う戦闘アイテムを強化する。`],
+ buff:['補助','戦闘',`その戦闘中、自分の攻撃力を上げる。`],
+ defense:['補助','戦闘',`次に受ける敵の反撃ダメージを軽減する。`],
+ confuse:['補助','戦闘',`${C.items.confuse_turns}ターン、敵全体の攻撃先をランダムにする。`],
+ attack_down:['補助','戦闘',`${C.items.attack_down_turns}ターン、敵全体の攻撃力を下げる。`],
+ move:['探索','探索',`そのターンの移動力を+${C.items.move_bonus}する。`],
+ directional_warp:['探索','探索','東西南北から1方向を選び、同じ層のその地域へランダム転移。到着マスの内容は発生せず、その後に通常移動できる。'],
+ pot:['交易','ショップ','戦闘・探索の効果はない交易専用アイテム。店ごとの価格差を利用して売買する。']
+};
+const mapGuide=[
+ ['通常','戦闘','通常敵と戦う。勝利するとEXP・G・アイテムを獲得。'],
+ ['エリート','戦闘','通常より強い敵。勝利するとEXP・Gに加えてアイテムを2個獲得。討伐依頼中なら追加報酬もある。'],
+ ['イベント','出来事','ランダムなイベントが発生する。'],
+ ['ショップ','売買','アイテム・レリックの購入、所持品の売却ができる。見るだけならターンを消費しない。'],
+ ['レリック','強化','未所持の通常レリックを1つ獲得する。'],
+ ['駅','移動','第2層の東西南北に1つずつある。他の3駅のどれかへ移動し、そのターンを終了する。'],
+ ['地域の主','強敵','第3層に4体いる任意ボス。止まると戦闘になり、倒すとその主専用のレリックを獲得する。'],
+ ['侵入不可','地形','通常は入れない。地形効果無視レリックがあれば通行・停止でき、止まってもターンは経過しない。']
+];
+const eventGuide=[
+ ['物資発見','利益','ランダムアイテムを1〜2個獲得。HP10を払うと、さらに1〜2個探せる。'],
+ ['回復','選択','HPを回復するか、隣接する移動可能マスへもう1マス進む。'],
+ ['強制交換','交換','提示された所持アイテム1個を渡し、別のアイテム2個を受け取る。'],
+ ['高額買取','売却','提示された対象から1〜3個を高値で売る。1回のゲームで一度だけ発生する。'],
+ ['事故','損失','HP10か20Gの、支払える方を失う。両方払える場合は選べる。'],
+ ['宝の鍵','継続','鍵を1個入手。以降のイベントで宝を発見することがあり、宝を見つけると鍵を消費する。'],
+ ['レリック発見','情報','まだ取得していないレリックマスを全マップで発見する。'],
+ ['エリート討伐依頼','継続','同じ層のエリートを倒すと大単体攻撃を1個獲得。エリートの位置は公開されない。'],
+ ['激安ショップ','売買','価格が通常の半分になったイベントショップが開く。イベントなので、店を閉じるとターン終了。'],
+ ['宝','鍵イベント','鍵を持っているとイベント時に発見することがある。鍵を1個使い、大単体攻撃×2と層に応じたGを獲得する。']
+];
+function itemText(t,combat=false){const p=game.p,c=game.combat,m=combat?game.effectMult()*(c?.amp||1):1,amp=combat?(c?.amp||1):1,power=combat?game.effectMult():1;
+ if(['heal','cleanse_heal'].includes(t))return`HP ${fmt(game.itemValue(t,m))}回復${t==='cleanse_heal'?'・状態異常解除':''}${combat?'':game.fieldHealCost?' / このターン移動消費済み':' / このターン初回のみ移動力−1'}`;
+ if(['single','big','aoe'].includes(t))return`${t==='aoe'?'全体':'単体'} ${fmt(game.itemValue(t,m))}ダメージ`;
+ if(t==='poison')return`敵全体に毎ターン ${fmt(game.itemValue('poison',power*amp))}ダメージ（${C.items.poison_turns}ターン）`;
+ if(t==='amplify')return combat?`次の戦闘アイテムを強化（×${fmt(C.items.amplify*power)}）`:'戦闘専用：次の戦闘アイテムを強化';
+ if(t==='buff')return`この戦闘中 攻撃力 +${fmt(cut((C.items.buff_atk+(p.ruler.has('sustained')?1:0))*m))}`;
+ if(t==='defense'){const r=1-Math.pow(Math.max(0,1-C.items.defense_ratio),m);return`次の反撃ダメージを${cut(r*100)}%軽減`};
+ if(t==='confuse')return`${pyround(C.items.confuse_turns*amp)}ターンの間、敵全体の攻撃先がランダムになる`;
+ if(t==='attack_down')return`敵全体の攻撃力を${cut(Math.min(1,C.items.attack_down_ratio*power)*100)}%下げる（${pyround(C.items.attack_down_turns*amp)}ターン）`;
+ if(t==='move')return`今ターンの移動力 +${game.fieldMoveBonus()}`;if(t==='directional_warp')return'東西南北から1方向を選んで同層へ転移・転移後も通常移動可';return'交易用。戦闘・探索の効果なし。';
+}
+function act(fn){mapPeek=false;const old=game.phase,q=game.q,r=game.r;fn();pendingAction=null;render();if(q!==game.q||r!==game.r||old!==game.phase)requestAnimationFrame(centerCurrent)}
+function button(label,fn,cls='overlayFooterBtn',disabled=false){const b=document.createElement('button');b.className=cls;b.innerHTML=label;b.disabled=disabled;b.onclick=fn;return b}
+function newGame(seed){rulerTourToken++;mapPeek=false;clearRulerTourView();$('rulerTourFade').classList.remove('show');game=new NormalGame(String(seed));pendingAction=null;logged=0;$('log').replaceChildren();$('endModal').classList.remove('show');$('howtoModal').classList.remove('show');$('relicModal').classList.remove('show');$('eventFlagModal').classList.remove('show');$('seedInput').value=game.seed;render();requestAnimationFrame(centerCurrent)}
+function render(){renderHud();renderEventFlag();renderMap();renderItems();renderBoard();renderFlowModal();renderInfoModal();while(logged<game.messages.length){const d=document.createElement('div');d.className='logline';d.textContent=game.messages[logged++];$('log').prepend(d)}if(game.phase==='end')renderEnd();}
+function renderHud(){const p=game.p,remain=Math.max(0,C.turns-game.completed);$('remain').textContent=remain;$('remain').closest('.remainCell')?.classList.toggle('danger',remain<=3);for(const[id,v]of Object.entries({hp:Math.max(0,p.hp),maxHp:p.maxHp,level:p.level,xp:p.xp,atk:p.atk,regen:p.regen,gold:p.gold}))$(id).textContent=fmt(v);$('xpNeed').textContent=xpRequired(p.level);$('relicCount').textContent=p.normal.size+p.ruler.size+(game.mainRelic?1:0);$('hpFill').style.width=Math.max(0,p.hp/p.maxHp*100)+'%';$('xpFill').style.width=p.xp/xpRequired(p.level)*100+'%';$('layerBadge').textContent=`第${layer(game.q,game.r)}層`}
+function mapGeom(q,r){const R=C.map_radius,W=74,H=64,sx=58,sy=50,mapW=Math.ceil(2*(sx*R+W/2)+80),mapH=Math.ceil(2*(sy*R+H/2)+80);return{mapW,mapH,cx:mapW/2,cy:mapH/2,x:mapW/2+sx*q+sx*.5*r-W/2,y:mapH/2+sy*r-H/2}}
+function centerCurrent(){const v=$('mapViewport'),p=mapGeom(game.q,game.r);v.scrollLeft=Math.max(0,p.x+37-v.clientWidth/2);v.scrollTop=Math.max(0,p.y+32-v.clientHeight/2)}
+function clearRulerTourView(){const v=$('mapViewport'),el=$('map');v.classList.remove('rulerTourMode');el.style.zoom='';for(const h of el.querySelectorAll('.rulerTourFocus'))h.classList.remove('rulerTourFocus')}
+function rulerTourFrame(reg){const v=$('mapViewport'),el=$('map'),current=mapGeom(game.q,game.r),targetKey=game.rulers[reg],targetTile=game.map.get(targetKey),target=mapGeom(targetTile.q,targetTile.r),ax=current.x+37,ay=current.y+32,bx=target.x+37,by=target.y+32,pad=28,spanX=Math.abs(ax-bx)+74+pad*2,spanY=Math.abs(ay-by)+64+pad*2,scale=Math.max(.38,Math.min(1,v.clientWidth/spanX,v.clientHeight/spanY));for(const h of el.querySelectorAll('.rulerTourFocus'))h.classList.remove('rulerTourFocus');const hex=[...el.querySelectorAll('.hex')].find(h=>h.dataset.key===targetKey);hex?.classList.add('rulerTourFocus');el.style.zoom=String(scale);v.scrollLeft=Math.max(0,(ax+bx)*scale/2-v.clientWidth/2);v.scrollTop=Math.max(0,(ay+by)*scale/2-v.clientHeight/2)}
+const rulerTourSleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function rulerTourFade(show){const f=$('rulerTourFade');f.classList.toggle('show',show);await rulerTourSleep(140)}
+async function chooseMainAndTour(r){const token=++rulerTourToken,v=$('mapViewport');await rulerTourFade(true);if(token!==rulerTourToken)return;game.chooseMain(r);pendingAction=null;render();if(game.phase!=='map'){await rulerTourFade(false);return}v.classList.add('rulerTourMode');rulerTourFrame('N');await rulerTourFade(false);if(token!==rulerTourToken)return;await rulerTourSleep(500);for(const reg of ['E','S','W']){if(token!==rulerTourToken)return;await rulerTourFade(true);if(token!==rulerTourToken)return;rulerTourFrame(reg);await rulerTourFade(false);if(token!==rulerTourToken)return;await rulerTourSleep(500)}if(token!==rulerTourToken)return;await rulerTourFade(true);if(token!==rulerTourToken)return;clearRulerTourView();centerCurrent();await rulerTourFade(false)}
+function renderMap(){const el=$('map'),g=mapGeom(0,0);el.replaceChildren();el.style.width=g.mapW+'px';el.style.height=g.mapH+'px';const mapPhase=game.phase==='map'||game.phase==='eventMove',paths=game.phase==='eventMove'?game.paths(1):game.phase==='map'?game.paths():new Map();
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('width',g.mapW);svg.setAttribute('height',g.mapH);svg.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:5';
+ const poly=document.createElementNS(svg.namespaceURI,'polygon'),R=C.map_radius,cx=g.cx,cy=g.cy;poly.setAttribute('points',[[cx+58*R+37,cy],[cx+29*R+18.5,cy-50*R-32],[cx-29*R-18.5,cy-50*R-32],[cx-58*R-37,cy],[cx-29*R-18.5,cy+50*R+32],[cx+29*R+18.5,cy+50*R+32]].map(p=>p.join(',')).join(' '));poly.setAttribute('fill','none');poly.setAttribute('stroke','#8a94a3');poly.setAttribute('stroke-width','4');svg.appendChild(poly);
+ const draw=(points,color,opacity)=>{if(points.length<2)return;const line=document.createElementNS(svg.namespaceURI,'polyline');line.setAttribute('points',points.map(([q,r])=>{const p=mapGeom(q,r);return`${p.x+37},${p.y+32}`}).join(' '));line.setAttribute('fill','none');line.setAttribute('stroke',color);line.setAttribute('stroke-width','8');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');line.setAttribute('opacity',opacity);svg.appendChild(line)};
+ draw(game.path,'#dfe6f1','.34');el.appendChild(svg);
+ for(const[k,t]of game.map){const boostReveal=game.phase==='map'&&game.mp>C.base_move&&paths.has(k),vis=game.known.has(k)||boostReveal,current=k===key(game.q,game.r),p=mapGeom(t.q,t.r),seen=game.stopped.has(k)||game.passed.has(k),blocked=t.kind==='blocked',b=document.createElement('button');b.className='hex '+(vis?`visible ${t.kind} layer${layer(t.q,t.r)}`:'unknown')+(vis&&blocked?' terrainBlocked':'')+(seen?' visited':'')+(current?' current':'')+(paths.has(k)?' moveable':'');b.style.left=p.x+'px';b.style.top=p.y+'px';b.dataset.key=k;b.disabled=!paths.has(k);b.innerHTML=vis?`<span>${current?'現在地':blocked?'侵入不可':game.passed.has(k)?'通過済':t.kind==='ruler'?archetypes[t.rulerType]+'の主':labels[t.kind]}</span><span class="tileLayer">${t.kind==='ruler'?'':(blocked?(game.has('terrain_ignore')?'地形無視可':'壁'):layer(t.q,t.r)>1?layer(t.q,t.r)+'層':'')}</span>`:'？';b.setAttribute('aria-label',`${vis?(blocked?'侵入不可':t.kind==='ruler'?archetypes[t.rulerType]+'の主':labels[t.kind]):'未探索'} (${t.q},${t.r})`);b.onclick=()=>act(()=>game.phase==='eventMove'?game.eventMove(k):game.move(k));el.appendChild(b)}
+ const bar=$('moveBar');bar.replaceChildren();bar.hidden=!mapPhase;if(mapPhase){const hint=document.createElement('span');const boosted=game.phase==='map'&&game.mp>C.base_move?`（移動力 ${game.mp}）`:'';hint.textContent=game.phase==='eventMove'?'もう1マス進む：移動先をタップ':`移動先をタップ${boosted}`;bar.append(hint);}}
+const buyPriceTone=(actual,ref)=>actual<ref?'good':actual>ref?'bad':'normal';
+const sellPriceTone=(actual,ref)=>actual<ref?'good':actual>ref?'bad':'normal';
+function renderItems(){const grid=$('itemGrid'),combat=game.phase==='combat',shop=game.phase==='shop'&&!mapPeek,p=game.p;grid.replaceChildren();$('itemsTitle').textContent=combat?'行動':shop?'所持アイテム（タップで売却）':`アイテム${p.keys?` / 鍵 ${p.keys}`:''}`;
+ const add=(t,name,effect,count,enabled,fn)=>{const b=button(`<div class="slotTop"><span class="slotName">${name}</span><span class="slotCount">${count}</span></div><div class="slotEffect">${effect}</div>`,fn,'itemSlot'+(enabled?' clickable':' disabled')+(pendingAction===t?' selected':''),!enabled);b.dataset.item=t;grid.appendChild(b)};
+ if(combat){
+  if(game.double()&&game.combat.used===1)add('end','行動終了','1個目で終了して敵の反撃へ','',true,()=>act(()=>game.endItems()));
+  else add('attack','通常攻撃',`攻撃力 ${fmt(p.atk)} / 敵1体`,'',game.combat.used===0,()=>selectAction('attack'));
+ }
+ const itemTypes=[...TYPES,'pot'].filter(t=>shop?p.items[t]>0:combat?!['move','directional_warp','pot'].includes(t)&&(p.items[t]>0||['heal','single','aoe'].includes(t)):(p.items[t]>0||['heal','single','aoe'].includes(t)));
+ for(const t of itemTypes){
+  if(shop){const base=t==='pot'?game.potReferencePrice():(C.shop_item_prices[t]??C.shop_price),ref=cut(base*game.purchasePriceFactor()),price=t==='pot'?game.potSellPrice(game.shop.mult):game.itemSellPrice(t,game.shop.mult),tone=sellPriceTone(price,ref);add(t,names[t],`${itemText(t)} / 売値 <span class="shopSellPrice ${tone}">${fmt(price)}G</span>`,`×${p.items[t]}`,true,()=>act(()=>game.trade(t,false)));continue}
+  const fieldSlot=game.phase==='map'&&game.fieldUsed<game.fieldLimit(),enabled=p.items[t]>0&&(combat?!['move','directional_warp','pot'].includes(t):fieldSlot&&(['heal','cleanse_heal'].includes(t)?(game.fieldHealCost||game.mp>=1)&&(p.hp<p.maxHp||(t==='cleanse_heal'&&p.poison>0)):t==='move'||(t==='directional_warp'&&game.canDirectionalWarp())));add(t,names[t],itemText(t,combat),`×${p.items[t]}`,enabled,()=>combat?selectAction(t):act(()=>game.fieldItem(t)))}
+}
+function selectAction(t){if(['attack','single','big'].includes(t)){const alive=game.alive();if(alive.length===1){act(()=>game.act(t,game.combat.enemies.indexOf(alive[0])));return}pendingAction=pendingAction===t?null:t;renderBoard();renderItems()}else act(()=>game.act(t))}
+function renderBoard(){const combat=game.phase==='combat',shop=game.phase==='shop';$('combatOverlay').classList.toggle('show',combat);if(!shop)mapPeek=false;$('choiceOverlay').classList.toggle('show',shop&&!mapPeek);$('choiceOverlay').classList.toggle('shopMode',shop);$('choiceOverlay').classList.remove('mainRelicMode');const mb=$('mapBtn');mb.disabled=['mainRelic','combat','end'].includes(game.phase);mb.textContent=mapPeek?'戻る':'マップ';mb.classList.toggle('mapPeekActive',mapPeek);mb.setAttribute('aria-pressed',mapPeek?'true':'false');if(combat)renderCombat();if(shop)renderChoice()}
+function toggleMapPeek(){if(['mainRelic','combat','end'].includes(game.phase))return;if(game.phase==='shop'){mapPeek=!mapPeek;renderItems();renderBoard();requestAnimationFrame(centerCurrent)}else{mapPeek=false;requestAnimationFrame(centerCurrent)}}
+function combatTitle(c){return c.kind==='boss'?'最終ボス戦':c.ruler?`${archetypes[c.ruler]}の主`:c.regional?archetypes[c.regional]:c.kind==='elite'?'エリート':'通常戦闘'}
+function pendingTargetDamage(t){if(!t||!['attack','single','big'].includes(t))return null;const c=game.combat,p=game.p;if(t==='attack')return cut(p.atk*(c.firstAttack&&game.has('first_strike')?C.normal_relic.first_strike_mult:1));const mult=game.effectMult()*(c.amp||1);return game.itemValue(t,mult)}
+function combatEnemyView(c,e,i,title,dmg){const statuses=[];if(e.poison>0)statuses.push({kind:'poison',text:`毒 ${fmt(game.itemValue('poison',e.poisonMult))}×${e.poison}`});if(e.down>0)statuses.push({kind:'debuff',text:`攻↓${cut((e.downRatio||C.items.attack_down_ratio)*100)}%×${e.down}`});if(e.confuse>0)statuses.push({kind:'debuff',text:`混乱×${e.confuse}`});let intent,label=title+(c.enemies.length>1?' '+(i+1):'');if(c.kind==='boss'){label=e.role==='body'?'最終ボス本体':e.role==='poison_add'?'毒役の取り巻き':'大技役の取り巻き';if(e.role==='poison_add')intent=(c.round-1)%c.spec.poison_cycle===0?'毒付与':`攻撃 ${fmt(dmg)}`;else if(e.role==='heavy_add'){const pos=(c.round-1)%c.spec.heavy_cycle;intent=pos===1?'準備（次は大技）':pos===2?`大技 ${fmt(dmg)}`:`攻撃 ${fmt(dmg)}`}else intent=`攻撃 ${fmt(dmg)}`}else{intent=(c.ruler||c.regional)==='big_attack'?((c.round-1)%3===1?'準備（次は大技）':(c.round-1)%3===2?`大技 ${fmt(dmg)}`:`攻撃 ${fmt(dmg)}`):`攻撃 ${fmt(dmg)}`;if((c.ruler||c.regional)==='attrition'&&(c.round-1)%c.spec.poison_every===0)intent+='＋毒'}return{label,intent,statuses}}
+function renderCombatEnemies(c,title){const list=$('enemyList');list.replaceChildren();let incoming=0,uncertain=false;c.enemies.forEach((e,i)=>{const dmg=game.enemyDamage(e);if(e.hp>0){incoming+=dmg;uncertain||=e.confuse>0}const{label,intent,statuses}=combatEnemyView(c,e,i,title,dmg),previewDamage=e.hp>0?pendingTargetDamage(pendingAction):null,previewHp=previewDamage==null?null:Math.max(0,e.hp-previewDamage),hpText=previewHp==null?`HP ${fmt(Math.max(0,e.hp))} / ${fmt(e.maxHp)}`:`HP ${fmt(Math.max(0,e.hp))} / ${fmt(e.maxHp)} → <span class="enemyHpPreview">${fmt(previewHp)}</span>${previewHp<=0?'<span class="enemyKillPreview">撃破</span>':''}`;const b=button(`<div class="enemyTop"><strong>${label}</strong><span class="enemyAtk">${intent}</span></div><div class="enemyHp">${hpText}</div><div class="enemyBar"><div style="width:${Math.max(0,e.hp/e.maxHp*100)}%"></div></div><div class="combatStatusRow">${statuses.map(s=>`<span class="statusBadge ${s.kind}">${s.text}</span>`).join('')}</div>`,()=>act(()=>game.act(pendingAction,i)),'enemy'+(e.hp<=0?' dead':'')+(pendingAction&&e.hp>0?' selectable':''),!pendingAction||e.hp<=0);list.append(b)});return{incoming,uncertain}}
+function combatPoisonIncoming(c,p){if(c.kind==='boss'){const source=c.enemies.find(e=>e.hp>0&&e.role==='poison_add'),willApply=source&&(c.round-1)%c.spec.poison_cycle===0&&source.confuse<=0;return p.poison>0||willApply?c.spec.poison_damage:0}if((c.ruler||c.regional)==='attrition'){const source=c.enemies.find(e=>e.hp>0),willApply=source&&(c.round-1)%c.spec.poison_every===0&&source.confuse<=0;return p.poison>0||willApply?c.spec.poison_damage:0}return 0}
+function playerPoisonTick(c){if(c.kind==='boss')return c.spec.poison_damage;if((c.ruler||c.regional)==='attrition')return c.spec.poison_damage;return 0}
+function renderCombatStatus(c,p,incoming,uncertain,poisonIncoming){incoming*=1-c.defense;if(c.firstGuard)incoming*=1-C.normal_relic.first_guard_ratio;incoming=cut(incoming)+poisonIncoming;$('combatHp').textContent=fmt(Math.max(0,p.hp));$('combatMaxHp').textContent=fmt(p.maxHp);$('combatHpFill').style.width=Math.max(0,p.hp/p.maxHp*100)+'%';const loss=Math.min(Math.max(0,p.hp),incoming);$('combatIncomingFill').style.left=Math.max(0,(p.hp-loss)/p.maxHp*100)+'%';$('combatIncomingFill').style.width=loss/p.maxHp*100+'%';$('incomingText').textContent=`反撃${uncertain?' 最大':''} ${fmt(incoming)}${poisonIncoming>0?'（毒含む）':''}`;$('combatAtk').textContent=fmt(p.atk);$('combatRegen').textContent=fmt(p.regen);$('combatRound').textContent=`${c.round}ターン目`;const statuses=[];if(c.amp>1)statuses.push({kind:'buff',text:`増幅×${fmt(c.amp)}`});if(c.defense>0)statuses.push({kind:'buff',text:`防御${cut(c.defense*100)}%`});if(p.poison>0)statuses.push({kind:'poison',text:`毒 ${fmt(playerPoisonTick(c))}×${p.poison}`});$('playerCombatStatuses').innerHTML=statuses.map(s=>`<span class="statusBadge ${s.kind}">${s.text}</span>`).join('')}
+function renderCombat(){const c=game.combat,p=game.p,title=combatTitle(c);$('combatTitle').textContent=title;$('combatHint').textContent=pendingAction?'対象を選択':game.double()?`アイテム ${c.used}/2 または通常攻撃`:'行動を選択';const{incoming,uncertain}=renderCombatEnemies(c,title),poisonIncoming=combatPoisonIncoming(c,p);renderCombatStatus(c,p,incoming,uncertain,poisonIncoming)}
+const FLOW_PHASES=new Set(['notice','mainRelic','eventSupply','eventRecovery','exchange','buyout','accident','station','directionTeleport']);
+function flowButton(label,fn,cls='choiceBtn',disabled=false){const b=button(label,e=>{},cls,disabled);b.onclick=e=>{e.stopPropagation();fn()};return b}
+function setFlowHead(title,hint=''){$('flowTitle').textContent=title;$('flowHint').textContent=hint}
+function renderNoticeFlow(body){setFlowHead(game.noticeData.title);const p=document.createElement('p');p.className='noticeText';p.textContent=game.noticeData.text;body.append(p)}
+function renderInfoModal(){const show=!!game.tipData;$('infoModal').classList.toggle('show',show);if(!show)return;$('infoTitle').textContent=game.tipData.title||'案内';$('infoText').textContent=game.tipData.text||''}
+function renderMainRelicFlow(body){setFlowHead('初期レリックを選択');const row=document.createElement('div');row.className='overlayChoiceGrid mainRelics';row.append(flowButton('<strong>最大2アイテム</strong><small>戦闘中、1ターンに2個まで。通常攻撃とは併用不可。</small>',()=>chooseMainAndTour('double_items')),flowButton(`<strong>1個強化</strong><small>戦闘中、アイテム効果×${C.items.power_relic_mult}。1ターン1個。</small>`,()=>chooseMainAndTour('power_item')));body.append(row)}
+function renderSupplyFlow(body){setFlowHead('物資発見','追加探索する？');const p=document.createElement('p');p.className='noticeText';const got=game.eventData?.got||[];p.textContent=`獲得：${got.length?got.join('・'):'なし'}`;const row=document.createElement('div');row.className='overlayChoiceGrid';row.append(flowButton('<strong>HP10で追加探索</strong><small>ランダム1〜2個</small>',()=>act(()=>game.chooseSupply(true)),'choiceBtn',game.p.hp<=10),flowButton('<strong>終了</strong><small>追加探索しない</small>',()=>act(()=>game.chooseSupply(false))));body.append(p,row)}
+function renderRecoveryFlow(body){setFlowHead('回復');const v=game.itemValue('heal',1),row=document.createElement('div');row.className='overlayChoiceGrid';row.append(flowButton(`<strong>回復する</strong><small>HP ${fmt(v)}回復</small>`,()=>act(()=>game.chooseRecovery(false))),flowButton('<strong>もう1マス進む</strong><small>隣接する移動可能マスへ進む</small>',()=>act(()=>game.chooseRecovery(true)),'choiceBtn',!game.paths(1).size));body.append(row)}
+function renderExchangeFlow(body){setFlowHead('強制交換');const row=document.createElement('div');row.className='overlayChoiceGrid';game.exchange.options.forEach((o,i)=>row.append(flowButton(`<strong>${names[o.donor]} ×1を渡す</strong><small>${names[o.recv]} ×2を受け取る</small>`,()=>act(()=>game.chooseExchange(i)))));body.append(row)}
+function renderBuyoutFlow(body){setFlowHead('高額買取','売る個数を選択');const total=(game.buyout?.ordered||[]).reduce((a,t)=>a+game.p.items[t],0),row=document.createElement('div');row.className='overlayChoiceGrid';for(const qty of [1,2,3]){const pr=game.buyoutPreview(qty),detail=Object.entries(pr.counts).map(([t,n])=>`${names[t]}×${n}`).join('・')||'対象なし';row.append(flowButton(`<strong>${qty}個売る</strong><small>${detail}<br>+${fmt(pr.gold)}G</small>`,()=>act(()=>game.acceptBuyout(qty)),'choiceBtn',qty>total))}body.append(row)}
+function renderAccidentFlow(body){setFlowHead('事故','失うものを選択');const row=document.createElement('div');row.className='overlayChoiceGrid';row.append(flowButton('<strong>HPを失う</strong><small>HP -10</small>',()=>act(()=>game.chooseAccident('hp')),'choiceBtn',game.p.hp<=10),flowButton('<strong>Gを失う</strong><small>-20G</small>',()=>act(()=>game.chooseAccident('gold')),'choiceBtn',game.p.gold<20));body.append(row)}
+function renderStationFlow(body){setFlowHead('駅','移動先を選択するとターン終了');const row=document.createElement('div');row.className='overlayChoiceGrid';for(const [reg,label] of [['N','北'],['E','東'],['S','南'],['W','西']])if(game.stations[reg]!==key(game.q,game.r))row.append(flowButton(`<strong>${label}の駅</strong><small>${label}地域へ移動</small>`,()=>act(()=>game.chooseStation(reg))));body.append(row)}
+function renderDirectionTeleportFlow(body){setFlowHead('方位転移','方向を選択');const p=document.createElement('p');p.className='noticeText';p.textContent='同じ層の選んだ地域へランダム転移。到着マスの内容は発生せず、その後も移動できます。';const row=document.createElement('div');row.className='overlayChoiceGrid';for(const [reg,label] of [['N','北'],['E','東'],['S','南'],['W','西']]){const ok=game.teleportCandidates(reg).length>0;row.append(flowButton(`<strong>${label}</strong><small>${label}地域へ転移</small>`,()=>act(()=>game.chooseDirectionTeleport(reg)),'choiceBtn',!ok))}body.append(p,row)}
+const flowRenderers={notice:renderNoticeFlow,mainRelic:renderMainRelicFlow,eventSupply:renderSupplyFlow,eventRecovery:renderRecoveryFlow,exchange:renderExchangeFlow,buyout:renderBuyoutFlow,accident:renderAccidentFlow,station:renderStationFlow,directionTeleport:renderDirectionTeleportFlow};
+function renderFlowModal(){const show=FLOW_PHASES.has(game.phase)&&!game.tipData,modal=$('flowModal'),card=$('flowModalCard'),body=$('flowBody'),result=show&&game.phase==='notice';modal.classList.toggle('show',show);card.classList.toggle('resultMode',result);$('flowTapHint').hidden=!result;if(!show)return;body.replaceChildren();$('flowHint').textContent='';flowRenderers[game.phase]?.(body)}
+function renderShopChoice(body){const s=game.shop,p=game.p;$('choiceTitle').textContent=s.mult===.5?'激安ショップ':'ショップ';$('choiceHint').textContent=s.eventShop?`所持 ${fmt(p.gold)}G｜イベント終了で1ターン`:`所持 ${fmt(p.gold)}G｜見るだけならターン消費なし・取引すると1ターン`;const list=document.createElement('div');list.className='shopList';const section=(label,cls='')=>{const h=document.createElement('div');h.className='shopSectionTitle'+(cls?` ${cls}`:'');h.textContent=label;list.appendChild(h)};const refFactor=()=>game.purchasePriceFactor(),refItem=t=>cut((C.shop_item_prices[t]??C.shop_price)*refFactor()),refPot=()=>cut(game.potReferencePrice()*refFactor());const row=(name,effect,price,meta,action,fn,disabled=false,kind='',priceKind='normal')=>{const actionClass=kind==='sell'?' sell':kind==='bought'?' bought':'';const b=button(`<div class="shopRowName">${name}</div><div class="shopRowPrice ${priceKind}">${price}</div><div class="shopRowEffect">${effect}<br>${meta}</div><div class="shopRowAction${actionClass}">${action}</div>`,fn,'shopRow',disabled);list.appendChild(b)};section('購入');for(const t of [...s.offers,'pot']){const price=t==='pot'?game.potPrice(s.mult):game.itemPrice(t,s.mult),ref=t==='pot'?refPot():refItem(t);row(names[t],itemText(t),`${fmt(price)}G`,`所持 ×${p.items[t]}`,'購入',()=>act(()=>game.trade(t,true)),p.gold+1e-9<price,'',buyPriceTone(price,ref))}if(s.relic){const price=game.relicPrice(),done=s.boughtRelic;row(relicNames[s.relic],relicDesc[s.relic],done?'購入済み':`${fmt(price)}G`,'レリック',done?'購入済み':'購入',()=>act(()=>game.buyRelic()),done||p.gold+1e-9<price,done?'bought':'',done?'normal':buyPriceTone(price,cut(C.shop_relic_price*refFactor())))}body.append(list,button(s.eventShop||s.actionUsed?'取引を終えてターン終了':'ショップを出る（ターン消費なし）',()=>act(()=>game.closeShop()),'overlayFooterBtn'))}
+const choiceRenderers={shop:renderShopChoice};
+function renderChoice(){const body=$('choiceBody');body.replaceChildren();$('choiceHint').textContent='';choiceRenderers[game.phase]?.(body)}
+function activeEventFlags(){const out=[];if(game.p.keys>0)out.push({short:'鍵',title:'宝の鍵',desc:'イベントで宝を発見すると消費します。'});for(const L of [...game.p.eliteHunts].sort((a,b)=>a-b))out.push({short:`依頼${L}層`,title:`第${L}層 エリート討伐依頼`,desc:'同じ層のエリートを倒すと、大単体攻撃を1個獲得します。位置は公開されません。'});return out}
+function renderEventFlag(){const flags=activeEventFlags(),b=$('eventFlagBtn');b.hidden=!flags.length;b.textContent=flags.map(f=>f.short).join('・');b.setAttribute('aria-label',flags.length?'イベント状態：'+flags.map(f=>f.title).join('、'):'イベント状態なし')}
+function showEventFlags(){const body=$('eventFlagBody');body.replaceChildren();for(const f of activeEventFlags()){const d=document.createElement('div');d.className='howtoItem';d.innerHTML=`<b>${f.title}</b><span>${f.desc}</span>`;body.append(d)}if(!body.children.length){const d=document.createElement('div');d.className='howtoItem';d.innerHTML='<b>なし</b><span>現在続いているイベント効果はありません。</span>';body.append(d)}$('eventFlagModal').classList.add('show')}
+function showRelics(){const body=$('relicBody');body.replaceChildren();const add=(title,desc)=>{const d=document.createElement('div');d.className='howtoItem';d.innerHTML=`<b>${title}</b><span>${desc}</span>`;body.append(d)};if(game.mainRelic)add(game.mainRelic==='double_items'?'最大2アイテム':'1個強化',game.mainRelic==='double_items'?'戦闘中のみ1ターンに最大2個。通常攻撃とは一緒に使えません。':`戦闘中のみアイテムの効果量×${C.items.power_relic_mult}。効果時間はそのままです。`);for(const r of game.p.normal)add(relicNames[r],relicDesc[r]);for(const r of game.p.ruler)add(archetypes[r]+'の主レリック',rulerDesc[r]);if(!body.children.length)add('未所持','レリックマス・ショップなどで入手できます。');$('relicModal').classList.add('show')}
+function helpGuideSection(title,items){const section=document.createElement('details');section.className='guideCategory';const h=document.createElement('summary');h.textContent=title;const grid=document.createElement('div');grid.className='guideCategoryBody';for(const [name,meta,desc] of items){const d=document.createElement('div');d.className='guideItem';d.innerHTML=`<div class="guideItemTop"><span class="guideItemName">${esc(name)}</span><span class="guideItemMeta">${esc(meta)}</span></div><span class="guideItemDesc">${esc(desc)}</span>`;grid.append(d)}section.append(h,grid);return section}
+function renderHelpReference(){const regionBody=$('helpRegions');regionBody?.replaceChildren();if(regionBody){const dirLabels={N:'北',E:'東',S:'南',W:'西'};for(const reg of ['N','E','S','W']){const profile=game.market[reg],type=game.regionTypes[reg],d=document.createElement('div');d.className='guideItem';d.innerHTML=`<div class="guideItemTop"><span class="guideItemName">${dirLabels[reg]}地域</span><span class="guideItemMeta">${archetypes[type]}の主</span></div><span class="guideItemDesc">出やすく・安い：${profile.favored.map(t=>names[t]).join('・')}<br>出にくく・高い：${profile.weak.map(t=>names[t]).join('・')}<br>第2・第3層では通常敵にも地域ごとの傾向があります。</span>`;regionBody.append(d)}}const itemBody=$('helpItems');itemBody.replaceChildren();const categoryLabels={attack:'攻撃',support:'補助',heal:'回復',explore:'探索',trade:'交易'};for(const [key,title] of Object.entries(categoryLabels)){const items=Object.entries(itemGuide).filter(([,v])=>({攻撃:'attack',補助:'support',回復:'heal',探索:'explore',交易:'trade'}[v[0]]===key)).map(([t,v])=>[names[t],v[1],v[2]]);if(items.length)itemBody.append(helpGuideSection(title,items))}
+ const relicBody=$('helpRelics');relicBody.replaceChildren();relicBody.append(helpGuideSection('初期レリック',[
+  ['最大2アイテム','開始時に選択','戦闘中、1ターンにアイテムを最大2個使える。通常攻撃とは併用できない。'],
+  ['1個強化','開始時に選択',`戦闘中、1ターンに使えるアイテムは1個。数値効果が×${C.items.power_relic_mult}になる。効果時間はそのまま。`]
+ ]));relicBody.append(helpGuideSection('通常レリック',RELICS.map(r=>[relicNames[r],'永続',relicDesc[r]])));relicBody.append(helpGuideSection('地域の主レリック',DATA.RULER_TYPES.map(r=>[archetypes[r]+'の主レリック','主を撃破',rulerDesc[r]])));
+ const mapBody=$('helpMapEvents');mapBody.replaceChildren();mapBody.append(helpGuideSection('マス',mapGuide),helpGuideSection('イベント',eventGuide));
+}
+function setHelpTab(tab){for(const b of document.querySelectorAll('.howtoTab')){const active=b.dataset.helpTab===tab;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')}for(const p of document.querySelectorAll('.howtoPanel'))p.hidden=p.dataset.helpPanel!==tab}
+function showHelp(tab='play'){renderHelpReference();setHelpTab(tab);$('howtoModal').classList.add('show')}
+function renderEnd(){const p=game.p;$('endModal').classList.add('show');$('endTitle').textContent=game.result.win?'クリア':'ゲーム終了';$('endDesc').textContent=game.result.reason;$('endResult').innerHTML=`ゲーム番号 <strong>${esc(game.seed)}</strong><br>探索 ${game.completed}ターン / Lv${p.level}<br>HP ${fmt(Math.max(0,p.hp))}/${fmt(p.maxHp)} / ${fmt(p.gold)}G<br>レリック ${p.normal.size+(game.mainRelic?1:0)} / 地域の主 ${p.ruler.size}<br>使用アイテム ${game.stats.items}個`}
+const closeFlowNotice=()=>{if(game.phase==='notice'&&!game.tipData)act(()=>game.continue())};$('flowModal').onclick=closeFlowNotice;$('flowModal').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&game.phase==='notice'&&!game.tipData){e.preventDefault();closeFlowNotice()}};const closeInfoTip=()=>{if(game.tipData)act(()=>game.continueTip())};$('infoModal').onclick=closeInfoTip;$('infoModal').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();closeInfoTip()}};$('howtoBtn').onclick=()=>showHelp('play');$('howtoClose').onclick=()=>$('howtoModal').classList.remove('show');for(const b of document.querySelectorAll('.howtoTab'))b.onclick=()=>setHelpTab(b.dataset.helpTab);$('relicBtn').onclick=showRelics;$('mapBtn').onclick=toggleMapPeek;$('relicClose').onclick=()=>$('relicModal').classList.remove('show');$('eventFlagBtn').onclick=showEventFlags;$('eventFlagClose').onclick=()=>$('eventFlagModal').classList.remove('show');
+for(const id of ['howtoModal','relicModal','eventFlagModal'])$(id).onclick=e=>{if(e.target===$(id))$(id).classList.remove('show')};
+$('seedStartBtn').onclick=()=>newGame($('seedInput').value||'1001');$('newSeedBtn').onclick=()=>newGame(String(Math.floor(Math.random()*999999)));$('sameSeedBtn').onclick=()=>newGame(game.seed);$('endSame').onclick=()=>newGame(game.seed);$('endNew').onclick=()=>newGame(String(Math.floor(Math.random()*999999)));window.addEventListener('resize',()=>requestAnimationFrame(centerCurrent),{passive:true});
+// Read-only diagnostics are deliberately gated behind an explicit local test URL.
+if(new URLSearchParams(location.search).has('test'))window.itemHexTest={get game(){return game},render,newGame,act,NormalGame};
+newGame('1001');
+
+})();
+</script>
+</body>
+</html>
